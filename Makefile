@@ -40,4 +40,4 @@ DIRs:
 clean:
 	rm -rf ${BUILDDIR} 
 	rm -rf ${OUTDIR}
-	rm -rf *.md
+	rm -rf out.md

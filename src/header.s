@@ -134,20 +134,20 @@
 | unused 27
     .ascii "SEGA MEGA DRIVE " 
 | console ID
-    .ascii "(C)SEGA 1991.APR" 
+    .ascii "@RETRODEVDISCORD" 
 | sonic
-    .ascii "SONIC THE               HEDGEHOG                " 
+    .ascii "TEST ROM                                        " 
 | Domestic name
-    .ascii "SONIC THE               HEDGEHOG                " 
+    .ascii "TEST ROM                                        " 
 | International name
-    .ascii "GM 00001009-00"   
+    .ascii "GM 00000000-00"   
 | Serial/version number (Rev 0)
     .dc.w 0x0
     .ascii "J               " 
 | I/O support
-    .dc.l 0x1000		
+    .dc.l 0x200		
 | Start address of ROM
-    .dc.l 0x1000-1		
+    .dc.l 0x1ffff
 | End address of ROM
     .dc.l 0xFF0000		
 | Start address of RAM
