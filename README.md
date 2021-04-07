@@ -2,7 +2,9 @@
 
 Be sure you are on a brand new install of Raspbian if you can, fully updated
 
-try to build m68k-elf-gcc from kentosama's repo:
+built from m68k-elf-gcc by kentosama:
 https://github.com/kentosama/m68k-elf-gcc
 
-`-nostdlib` is required or building will fail 
+`-nostdlib` is required or building your games will fail! 
+
+### http://barelyconsciousgames.com/m68k-toolchain-rpi.tar.gz
