@@ -1,7 +1,7 @@
 # Makefile for MD / Genesis ROM
 # @RetroDevDiscord
 #==============================
-CC=m68k-elf-gcc -nostdlib
+CC=m68k-elf-gcc -nostdlib -std=gnu11
 OBJCOPY=m68k-elf-objcopy
 OBJDUMP=m68k-elf-objdump
 MKDIR=mkdir 

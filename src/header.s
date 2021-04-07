@@ -2,10 +2,11 @@
     .file   "header.s"
     .text
     .align 2
+|    .globl _start 
 
     .dc.l 0xfffffe00     
 |stack pointer start location, usually $FFFFFE00
-    .dc.l 0               
+    .dc.l 0x00000200              
 |program start location
     .dc.l 0               
 |bus error
