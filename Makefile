@@ -1,3 +1,6 @@
+# Makefile for MD / Genesis ROM
+# @RetroDevDiscord
+#==============================
 CC=m68k-elf-gcc -nostdlib
 OBJCOPY=m68k-elf-objcopy
 OBJDUMP=m68k-elf-objdump
@@ -6,6 +9,7 @@ BUILDDIR=build
 SHOWELF=0
 SRCDIR=src
 OUTDIR=out
+PYTHON=python3
 
 %.bin: %.elf
 	${OBJCOPY} -O binary ${BUILDDIR}/$< ${OUTDIR}/$@
@@ -17,13 +21,14 @@ OUTDIR=out
 %.s: ${SRCDIR}/%.c
 	${CC} -S -o ${BUILDDIR}/$@ $<
 
-# Create the main binary, listing, and ROM header
+# Create the main rom and pad it
 main: header main.bin 
-	@echo $^ created successfully.
+	cat ${OUTDIR}/header.bin ${OUTDIR}/main.bin > ./out.md 
+	${PYTHON} tools/padrom.py	
 
 # Assemble the header from byte listing
 header: DIRs
-	${CC} -o ${BUILDDIR}/header.elf src/header.s
+	${CC} -o ${BUILDDIR}/header.elf ${SRCDIR}/header.s
 	@echo --But it's the header, so it's ok!
 	${OBJCOPY} -O binary ${BUILDDIR}/header.elf ${OUTDIR}/header.bin
 
@@ -35,4 +40,4 @@ DIRs:
 clean:
 	rm -rf ${BUILDDIR} 
 	rm -rf ${OUTDIR}
-	rm -rf *.bin 
+	rm -rf *.md
