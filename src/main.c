@@ -16,7 +16,8 @@ typedef unsigned char u8;
 void _start();
 void main();
 
-void _start() { 
+void _start() {
+    asm("movea.l #0xfffffe00, %a7"); 
     main(); 
 }
 
@@ -54,6 +55,10 @@ void WaitVBlank()
     : \
     :"d0");
 
+
+volatile u16* VDP_DATAPORT;// = (volatile u16*)0xc00004;
+
+
 void SetVDPAddress(u16 address)
 {
     u32 loc = 0x40000000 + ((address & 0x3fff) << 16) + ((address & 0xc000) >> 14);
@@ -86,6 +91,8 @@ void SetVDPPlaneAddress(u8 plane, u16 addr)
     :);
 }
 
+u8 frameCounter;
+
 void main()
 {
     WriteVDPRegister((u32)WRITE|REG(0)|0);
@@ -98,7 +105,7 @@ void main()
     while(1)
     { 
         WaitVBlank();
+        frameCounter++;
         // Loop
     }
 }
-
