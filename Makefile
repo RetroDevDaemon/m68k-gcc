@@ -29,7 +29,7 @@ main: header main.bin
 	${PYTHON} tools/padrom.py	
 
 # Assemble the header from byte listing
-header: DIRs rom.ld 
+header: DIRs
 	${CC} -o ${BUILDDIR}/header.elf ${SRCDIR}/header.s
 	@echo --But it's the header, so it's ok!
 	${OBJCOPY} -O binary ${BUILDDIR}/header.elf ${OUTDIR}/header.bin
