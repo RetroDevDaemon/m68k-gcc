@@ -1,17 +1,17 @@
 # Makefile for MD / Genesis ROM
 # @RetroDevDiscord
 #==============================
-#CC=m68k-elf-gcc 
-CC=m68k-apple-macos-gcc
+CC=m68k-elf-gcc 
+#CC=m68k-apple-macos-gcc
 CFLAGS=-nostdlib -std=gnu11 -fno-pie -no-pie -fno-use-linker-plugin
-#AS=m68k-elf-as
-AS=m68k-apple-macos-as
-#OBJCOPY=m68k-elf-objcopy
-OBJCOPY=m68k-apple-macos-objcopy
-#LD=m68k-elf-ld 
-LD=m68k-apple-macos-ld
-#OBJDUMP=m68k-elf-objdump
-OBJDUMP=m68k-apple-macos-objdump
+AS=m68k-elf-as
+#AS=m68k-apple-macos-as
+OBJCOPY=m68k-elf-objcopy
+#OBJCOPY=m68k-apple-macos-objcopy
+LD=m68k-elf-ld 
+#LD=m68k-apple-macos-ld
+OBJDUMP=m68k-elf-objdump
+#OBJDUMP=m68k-apple-macos-objdump
 MKDIR=mkdir 
 BUILDDIR=build
 SHOWELF=1
