@@ -1,20 +1,19 @@
 |Vector Table - start of ROM
     .file   "header.s"
-    .text
+    .globl header 
     .align 2
-|    .globl _start 
-
+    .org 0
     .dc.l 0xfffffe00     
 |stack pointer start location, usually $FFFFFE00
-    .dc.l 0x00000200            
+    .dc.l 0x206
 |program start location
-    .dc.l 0               
+    .dc.l catch               
 |bus error
-    .dc.l 0               
+    .dc.l catch               
 |address error
-    .dc.l 0               
+    .dc.l catch               
 |illegal instruction
-    .dc.l 0               
+    .dc.l catch               
 |divide by zero
     .dc.l 0               
 | CHK exception
@@ -60,11 +59,11 @@
 | IRQ level 2
     .dc.l 0               
 | IRQ level 3
-    .dc.l 0               
+    .dc.l catch               
 | IRQ level 4 (HBLank)
     .dc.l 0               
 | IRQ level 5
-    .dc.l 0               
+    .dc.l catch               
 | IRQ level 6 (VBlank)
     .dc.l 0               
 | IRQ level 7
@@ -134,20 +133,20 @@
 | unused 27
     .ascii "SEGA MEGA DRIVE " 
 | console ID
-    .ascii "@RETRODEVDISCORD" 
+    .ascii " RETRODEVDISCORD" 
 | sonic
     .ascii "TEST ROM                                        " 
 | Domestic name
     .ascii "TEST ROM                                        " 
 | International name
-    .ascii "GM 00000000-00"   
+    .ascii "GM 00155123-00"   
 | Serial/version number (Rev 0)
     .dc.w 0x0
     .ascii "J               " 
 | I/O support
-    .dc.l 0x200		
+    .dc.l 0x0	
 | Start address of ROM
-    .dc.l 0x1ffff
+    .dc.l ENDOFROM-1
 | End address of ROM
     .dc.l 0xFF0000		
 | Start address of RAM
@@ -167,3 +166,4 @@
     .ascii "JUE             " 
 | Region (Country code)
 | (0x1ff)
+.org 0x200

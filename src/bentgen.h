@@ -15,6 +15,9 @@ typedef unsigned char u8;
 void _start();
 void main();
 
+#define BREAKPOINT asm("BRK%=:\n\t""jra BRK%=":::);
+
+
 void _start() {
     // Test RESET
     asm("tst.w 0x00A10008\n\t"  
@@ -66,14 +69,13 @@ void _start() {
     ".word 0x8f01\n\t"
     :::"d0", "a0", "a1");
     // Init PSG
+    const u16 PSGData[2] = { 0x9fbf, 0xdfff };
     asm("__InitPSG:\n\t"
-    "move.l _PSGData, %%a0\n\t"
+    "move.l %0, %%a0\n\t"
     "move.l #3, %%d0\n\t"
     "__copypsgp: move.b (%%a0)+, 0x00c00011\n\t"
-    "dbra %%d0, __copypsgp\n\tjra __doneinitpsg\n\t"
-    "_PSGData: .word 0x9fbf\n\t.word 0xdfff\n\t"
-    "__doneinitpsg:"
-    :::"a0","d0");
+    "dbra %%d0, __copypsgp"
+    ::"g"(&PSGData):"a0","d0");
     //Init VDP
     asm("move.l __vdpreginitdata, %%a0\n\t"
     "move.l #0x18, %%d0\n\t"
@@ -83,19 +85,22 @@ void _start() {
     "add.w #0x0100, %%d1\n\t"
     "dbra %%d0, _vdprcpy\n\t"
     "jra __donevdpinit\n\t"
-    "__vdpreginitdata: .byte 0x20\n\t.byte 0x74\n\t"
-    ".byte 0x30\n\t.byte 0x40\n\t"
-    ".byte 0x05\n\t.byte 0x70\n\t" //4-5
-    ".byte 0x00\n\t.byte 0x00\n\t"
-    ".byte 0x00\n\t.byte 0x00\n\t"
-    ".byte 0x00\n\t.byte 0x08\n\t" //10-11
-    ".byte 0x81\n\t.byte 0x34\n\t"
-    ".byte 0x00\n\t.byte 0x00\n\t"
-    ".byte 0x01\n\t.byte 0x00\n\t" //16-17
-    ".byte 0x00\n\t.byte 0x00\n\t"
-    ".byte 0x00\n\t.byte 0x00\n\t"
-    ".byte 0x00\n\t.byte 0x00\n\t" //22-23
+    "__vdpreginitdata: \n\t"
+    ".byte 4\n\t.byte 0x74\n\t" // mode 1/2
+    ".byte (0xc000>>10)\n\t.byte (0xf000>>10)\n\t" // scroll A / window
+    ".byte (0xe000>>13)\n\t.byte (0xd800>>9)\n\t" // scroll B / srpites
+    ".byte 0x00\n\t.byte 0x02\n\t" //unused, bg color
+    ".byte 0x00\n\t.byte 0x00\n\t" // unused
+    ".byte 0x01\n\t.byte 0x00\n\t" //h-int, mode 3
+    ".byte 0x81\n\t.byte (0xdc00>>10)\n\t" // mode 4, hscrl
+    ".byte 0x00\n\t.byte 0x02\n\t" //unused, auto-inc
+    ".byte 0x01\n\t.byte 0x00\n\t" //scr size, win-h
+    ".byte 0x00\n\t.byte 0x00\n\t" //win v, dma lo
+    ".byte 0x00\n\t.byte 0x00\n\t" // dma ctr hi, src low
+    ".byte 0x00\n\t.byte 0x00\n\t" //22-23 dma mid hi
     "__donevdpinit:":::"d0","a0","d1");
+    
+    
     // Init Controller ports 
     asm("move.b #0, 0x000a10009\n\t"
     "move.b #0, 0x000a1000b\n\t"
@@ -105,7 +110,7 @@ void _start() {
     "movem.l (%%a0), %%d0-%%d7/%%a1-%%a7\n\t"
     "move #0x2700, %%SR\n\t":::"a0", "d0", "d7", "a1", "sp");
     //sp
-    asm("movea.l #0xfffffe00, %a7"); 
+    //asm("movea.l #0xfffffe00, %a7"); 
     main(); 
 }
 

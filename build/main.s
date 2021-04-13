@@ -5,17 +5,17 @@
 	.globl	_start
 	.type	_start, @function
 _start:
-	link.w %fp,#0
+	link.w %fp,#-4
 	move.l %d7,-(%sp)
 #APP
-| 20 "src/bentgen.h" 1
+| 23 "src/bentgen.h" 1
 	tst.w 0x00A10008
 	bne __resetOK
 	tst.w 0x00A1000C
 	bne __resetOK
 	__resetOK:
 | 0 "" 2
-| 26 "src/bentgen.h" 1
+| 29 "src/bentgen.h" 1
 	move.l #0x00000000, %d0
 	move.l #0x00000000, %a0
 	move.l #0x00003FFF, %d1
@@ -23,14 +23,14 @@ _start:
 	move.l %d0, -(%a0)
 	dbra %d1, __Clearram
 | 0 "" 2
-| 34 "src/bentgen.h" 1
+| 37 "src/bentgen.h" 1
 	move.b 0x00A10001, %d0
 	andi.b #0x0f, %d0
 	beq __Skiptmss
 	move.l #0x53454741, 0x00A14000
 	__Skiptmss:
 | 0 "" 2
-| 41 "src/bentgen.h" 1
+| 44 "src/bentgen.h" 1
 	move.w #0x0100, 0x00a11100
 	move.w #0x0100, 0x00a11200
 	__initwait:
@@ -69,18 +69,20 @@ _start:
 	.word 0x8f01
 	
 | 0 "" 2
-| 69 "src/bentgen.h" 1
+#NO_APP
+	move.w #-24641,-4(%fp)
+	move.w #-8193,-2(%fp)
+	move.l %fp,%d1
+	subq.l #4,%d1
+#APP
+| 73 "src/bentgen.h" 1
 	__InitPSG:
-	move.l _PSGData, %a0
+	move.l %d1, %a0
 	move.l #3, %d0
 	__copypsgp: move.b (%a0)+, 0x00c00011
 	dbra %d0, __copypsgp
-	jra __doneinitpsg
-	_PSGData: .word 0x9fbf
-	.word 0xdfff
-	__doneinitpsg:
 | 0 "" 2
-| 78 "src/bentgen.h" 1
+| 80 "src/bentgen.h" 1
 	move.l __vdpreginitdata, %a0
 	move.l #0x18, %d0
 	move.l #0x00008000, %d1
@@ -89,22 +91,23 @@ _start:
 	add.w #0x0100, %d1
 	dbra %d0, _vdprcpy
 	jra __donevdpinit
-	__vdpreginitdata: .byte 0x20
+	__vdpreginitdata: 
+	.byte 4
 	.byte 0x74
-	.byte 0x30
-	.byte 0x40
-	.byte 0x05
-	.byte 0x70
+	.byte (0xc000>>10)
+	.byte (0xf000>>10)
+	.byte (0xe000>>13)
+	.byte (0xd800>>9)
+	.byte 0x00
+	.byte 0x02
 	.byte 0x00
 	.byte 0x00
+	.byte 0x01
 	.byte 0x00
-	.byte 0x00
-	.byte 0x00
-	.byte 0x08
 	.byte 0x81
-	.byte 0x34
+	.byte (0xdc00>>10)
 	.byte 0x00
-	.byte 0x00
+	.byte 0x02
 	.byte 0x01
 	.byte 0x00
 	.byte 0x00
@@ -115,24 +118,21 @@ _start:
 	.byte 0x00
 	__donevdpinit:
 | 0 "" 2
-| 100 "src/bentgen.h" 1
+| 105 "src/bentgen.h" 1
 	move.b #0, 0x000a10009
 	move.b #0, 0x000a1000b
 	move.b #0, 0x000a1000d
 | 0 "" 2
-| 104 "src/bentgen.h" 1
+| 109 "src/bentgen.h" 1
 	move.l #0, %a0
 	movem.l (%a0), %d0-%d7/%a1-%a7
 	move #0x2700, %SR
 	
 | 0 "" 2
-| 108 "src/bentgen.h" 1
-	movea.l #0xfffffe00, %a7
-| 0 "" 2
 #NO_APP
 	jsr main
 	nop
-	move.l -4(%fp),%d7
+	move.l -8(%fp),%d7
 	unlk %fp
 	rts
 	.size	_start, .-_start
@@ -167,7 +167,7 @@ SetVDPAddress:
 	add.l %d1,%d0
 	move.l %d0,8(%sp)
 #APP
-| 171 "src/bentgen.h" 1
+| 176 "src/bentgen.h" 1
 	move.l 8(%sp),(0xc00004).l
 | 0 "" 2
 #NO_APP
@@ -243,7 +243,7 @@ SetVDPPlaneAddress:
 	nop
 .L4:
 #APP
-| 194 "src/bentgen.h" 1
+| 199 "src/bentgen.h" 1
 	move.w 4(%sp),(0xC00004).l
 | 0 "" 2
 #NO_APP
@@ -273,43 +273,81 @@ VDP_CTRLREG:
 	.type	palette, @object
 	.size	palette, 32
 palette:
-	.word	0
-	.word	14
-	.word	224
-	.word	3584
-	.word	0
 	.word	3822
-	.word	238
-	.word	142
-	.word	3598
-	.word	2056
-	.word	1092
-	.word	2184
-	.word	3808
-	.word	10
-	.word	1536
-	.word	96
+	.word	3822
+	.word	3822
+	.word	3822
+	.word	3822
+	.word	3822
+	.word	3822
+	.word	3822
+	.word	3822
+	.word	3822
+	.word	3822
+	.word	3822
+	.word	3822
+	.word	3822
+	.word	3822
+	.word	3822
 	.text
+	.align	2
+	.globl	catch
+	.type	catch, @function
+catch:
+	nop
+	rte
+	.size	catch, .-catch
 	.align	2
 	.globl	main
 	.type	main, @function
 main:
+	subq.l #4,%sp
 #APP
-| 43 "src/main.c" 1
+| 47 "src/main.c" 1
 	move.w #36610,(0xC00004).l
 | 0 "" 2
-| 44 "src/main.c" 1
-	move.l #0xc0000003, 0x00c00004
+| 49 "src/main.c" 1
+	move.l #0xf0000000, (0xc00004).l
 	lea palette, %a0
 	move.l #0x07, %d0
-	mvploop: move.l (%a0)+, 0x00c00000
+	mvploop: move.l (%a0)+, (0xc00000).l
 	dbra %d0, mvploop
 | 0 "" 2
-| 50 "src/main.c" 1
+| 55 "src/main.c" 1
 	move.w #34568,(0xC00004).l
 | 0 "" 2
 #NO_APP
-.L11:
-	jra .L11
+.L13:
+	moveq #0,%d0
+	move.b 3(%sp),%d0
+	or.w #34560,%d0
+#APP
+| 59 "src/main.c" 1
+	move.w %d0,(0xC00004).l
+| 0 "" 2
+#NO_APP
+	move.b 3(%sp),%d0
+	move.b %d0,%d1
+	addq.b #1,%d1
+	move.b %d1,3(%sp)
+#APP
+| 61 "src/main.c" 1
+	VB181: move.w (0xc00004).l,%d0
+	btst #3,%d0
+	beq VB181
+| 0 "" 2
+| 61 "src/main.c" 1
+	VB182: move.w (0xc00004).l,%d0
+	btst #3,%d0
+	bne VB182
+| 0 "" 2
+#NO_APP
+	jra .L13
 	.size	main, .-main
+	.globl	ENDOFROM
+	.section	.bss
+	.type	ENDOFROM, @object
+	.size	ENDOFROM, 1
+ENDOFROM:
+	.zero	1
 	.ident	"GCC: (GNU) 6.3.0"
