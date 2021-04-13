@@ -3,7 +3,7 @@
 #==============================
 CC=m68k-elf-gcc 
 #CC=m68k-apple-macos-gcc
-CFLAGS=-nostdlib -std=gnu11 -fno-pie -no-pie -fno-use-linker-plugin
+CFLAGS=-nostdlib -std=gnu11 -fno-pie -no-pie -fno-use-linker-plugin -fomit-frame-pointer
 AS=m68k-elf-as
 #AS=m68k-apple-macos-as
 OBJCOPY=m68k-elf-objcopy

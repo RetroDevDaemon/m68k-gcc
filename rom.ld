@@ -13,8 +13,9 @@ SECTIONS
   .bss : { 
     *(.bss) 
   } > RAM
-  .data : AT (ADDR(.text) + SIZEOF(.text)){ 
-    *(.data) 
-  } > RAM
+  .data : AT (ADDR(.text) + SIZEOF(.text) + SIZEOF(.bss)){ 
+    *(.data)
+    *(.rodata) 
+  } > RAM 
 }
 OUTPUT_FORMAT(binary)
