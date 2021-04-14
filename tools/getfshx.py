@@ -1,2 +1,7 @@
+#use python3 
 import os
-print(hex(os.path.getsize('out/header2.bin'))[:-1])
+st = hex(os.path.getsize('out/header.bin'))
+if (st[len(st)-1:] != 'L'):
+    print(st)
+else:
+    print(st[:-1])
