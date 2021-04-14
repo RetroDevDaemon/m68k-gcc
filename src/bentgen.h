@@ -12,146 +12,68 @@ typedef unsigned char u8;
 #define REG(n) (n << 8)
 #define bit(n) (1 << n)
 
-void _start();
-void main();
+#define BG_A 0 
+#define BG_B 1 
+#define SPRITE 2 
+#define WINDOW 3
+#define WRITE_PAL0 (u32)(0xc0000000)
+#define WRITE_PAL1 (u32)(0xc0200000)
+#define WRITE_PAL2 (u32)(0xc0400000)
+#define WRITE_PAL3 (u32)(0xc0600000)
+
+#define WRITE_CTRLREG(n) asm("move.l %0,(0xc00004).l"::"g"(n))
+#define WRITE_DATAREG8(n) asm("move.b %0,(0xC00000).l"::"g"(n))
+#define WRITE_DATAREG16(n) asm("move.w %0,(0xc00000).l"::"g"(n))
+#define WRITE_DATAREG32(n) asm("move.l %0,(0xc00000).l"::"g"(n))
 
 #define BREAKPOINT asm("BRK%=:\n\t""jra BRK%=":::);
 
 
+void _start();
+void main();
+
+void __attribute__((optimize("Os"))) LoadPalette(u8 palNo, u16* p);
+
+
+#define LOADPAL(pal) asm("move.l %1, (0xc00004).l\n\t"\
+    "lea %0, %%a0\n\t"\
+    "move.l #0x07, %%d0\n\t"\
+    "clrlewp:\n\t"\
+    "move.l (%%a0)+,(0xc00000).l\n\t"\
+    "dbra %%d0, clrlewp"\
+    :\
+    :"m"(pal),"g"(CRAM_ADDR)\
+    :"a0","d0");
+
+
+void __attribute__((interrupt)) catch()
+{
+    //asm("rts");
+    return;
+}
+
 void _start() {
-    // Test RESET
-    asm("tst.w 0x00A10008\n\t"  
-    "bne __resetOK\n\t"          
-    "tst.w 0x00A1000C\n\t"  
-    "bne __resetOK\n\t"         
-    "__resetOK:":::); 
-    // CLEAR RAM
-    asm("move.l #0x00000000, %%d0\n\t"
-    "move.l #0x00000000, %%a0\n\t"
-    "move.l #0x00003FFF, %%d1\n\t"
-    "__Clearram:\n\t"
-    "move.l %%d0, -(%%a0)\n\t"      
-    "dbra %%d1, __Clearram"
-    :::"d0", "d1", "a0"); 
-    // SEGA TMSS
-    asm("move.b 0x00A10001, %%d0\n\t"      
-    "andi.b #0x0f, %%d0\n\t"           
-    "beq __Skiptmss\n\t"                  
-    "move.l #0x53454741, 0x00A14000\n\t" 
-    "__Skiptmss:"
-    :::"d0");
-    // INIT Z80
-    asm("move.w #0x0100, 0x00a11100\n\t" //req acc to z80 bus
-    "move.w #0x0100, 0x00a11200\n\t" // hold in reset
-    "__initwait:\n\t"
-    "btst #0, 0x00a11100\n\t" //68k has control?
-    "bne __initwait\n\t"
-    "move.l __Z80Data, %%a0\n\t"
-    "move.l #0x00a00000, %%a1\n\t"
-    "move.l #0x29, %%d0\n\t"
-    "__copyz80init:\n\t"
-    "move.b (%%a0)+,(%%a1)+\n\t"
-    "dbra %%d0, __copyz80init\n\t"
-    "move.w #0, 0x00a11200\n\t"
-    "move.w #0, 0x00a11100\n\t"
-    "jra __InitPSG\n\t"
-    "__Z80Data:\n\t"
-    ".word 0xaf01\n\t.word 0xd91f\n\t"
-    ".word 0x1127\n\t.word 0x0021\n\t"
-    ".word 0x2600\n\t.word 0xf977\n\t"
-    ".word 0xedb0\n\t.word 0xdde1\n\t"
-    ".word 0xfde1\n\t.word 0xed47\n\t"
-    ".word 0xed4f\n\t.word 0xd1e1\n\t"
-    ".word 0xf108\n\t.word 0xd9c1\n\t"
-    ".word 0xd1e1\n\t.word 0xf1f9\n\t"
-    ".word 0xf3ed\n\t.word 0x5636\n\t"
-    ".word 0xe9e9\n\t.word 0x8104\n\t"
-    ".word 0x8f01\n\t"
-    :::"d0", "a0", "a1");
-    // Init PSG
-    const u16 PSGData[2] = { 0x9fbf, 0xdfff };
-    asm("__InitPSG:\n\t"
-    "move.l %0, %%a0\n\t"
-    "move.l #3, %%d0\n\t"
-    "__copypsgp: move.b (%%a0)+, 0x00c00011\n\t"
-    "dbra %%d0, __copypsgp"
-    ::"g"(&PSGData):"a0","d0");
-    //Init VDP
-    asm("move.l __vdpreginitdata, %%a0\n\t"
-    "move.l #0x18, %%d0\n\t"
-    "move.l #0x00008000, %%d1\n\t"
-    "_vdprcpy: move.b (%%a0)+,%%d1\n\t"
-    "move.w %%d1, 0x00c00004\n\t"
-    "add.w #0x0100, %%d1\n\t"
-    "dbra %%d0, _vdprcpy\n\t"
-    "jra __donevdpinit\n\t"
-    "__vdpreginitdata: \n\t"
-    ".byte 4\n\t.byte 0x74\n\t" // mode 1/2
-    ".byte (0xc000>>10)\n\t.byte (0xf000>>10)\n\t" // scroll A / window
-    ".byte (0xe000>>13)\n\t.byte (0xd800>>9)\n\t" // scroll B / srpites
-    ".byte 0x00\n\t.byte 0x02\n\t" //unused, bg color
-    ".byte 0x00\n\t.byte 0x00\n\t" // unused
-    ".byte 0x01\n\t.byte 0x00\n\t" //h-int, mode 3
-    ".byte 0x81\n\t.byte (0xdc00>>10)\n\t" // mode 4, hscrl
-    ".byte 0x00\n\t.byte 0x02\n\t" //unused, auto-inc
-    ".byte 0x01\n\t.byte 0x00\n\t" //scr size, win-h
-    ".byte 0x00\n\t.byte 0x00\n\t" //win v, dma lo
-    ".byte 0x00\n\t.byte 0x00\n\t" // dma ctr hi, src low
-    ".byte 0x00\n\t.byte 0x00\n\t" //22-23 dma mid hi
-    "__donevdpinit:":::"d0","a0","d1");
     
-    
-    // Init Controller ports 
-    asm("move.b #0, 0x000a10009\n\t"
-    "move.b #0, 0x000a1000b\n\t"
-    "move.b #0, 0x000a1000d":::);
-    // Clear and go
-    asm("move.l #0, %%a0\n\t"
-    "movem.l (%%a0), %%d0-%%d7/%%a1-%%a7\n\t"
-    "move #0x2700, %%SR\n\t":::"a0", "d0", "d7", "a1", "sp");
-    //sp
-    //asm("movea.l #0xfffffe00, %a7"); 
     main(); 
 }
 
 void SetVDPPlaneAddress(u8 plane, u16 addr);
 void SetVDPAddress(u16 address);
-/*
-void WaitVBlank();
-void WaitVBlank()
-{
-    asm volatile("VB%=: move.w (0xc00004).l,%%d0\n\t"
-        "btst #3,%%d0\n\t"
-        "beq VB%=\n\t"
-    :
-    :
-    :"d0");
-    asm volatile("VB%=: move.w (0xc00004).l,%%d0\n\t"
-        "btst #3,%%d0\n\t"
-        "bne VB%=\n\t"
-    :
-    :
-    :"d0");
-}
-*/
 
-#define WriteVDPRegister(v) asm("move.w %0,(0xC00004).l"::"g"(v):)
+#define WriteVDPRegister(v) asm("move.w %0,(0xC00004).l"::"g"(v))
 
 #define VDPStatus_u16(var) \
     asm("move.w (0xc00004).l,%0":"=g"(var)::)
-#define WaitVBlank() \
-    asm volatile("VB%=: move.w (0xc00004).l,%%d0\n\t" \
+#define WaitVBlank() asm volatile("VB%=: move.w (0xc00004).l,%%d0\n\t" \
         "btst #3,%%d0\n\t" \
-        "beq VB%=" \
-    : \
-    : \
-    :"d0"); \
-    asm volatile("VB%=: move.w (0xc00004).l,%%d0\n\t" \
-        "btst #3,%%d0\n\t" \
-        "bne VB%=" \
+        "beq VB%=\n\t" \
+        "VBB%=: move.w (0xc00004).l,%%d0\n\t"\
+        "btst #3,%%d0\n\t"\
+        "bne VBB%="\
     : \
     : \
     :"d0")
+    
 #define WaitHBlank() \
     asm volatile("VB%=: move.w (0xc00004).l,%%d0\n\t" \
         "btst #2,%%d0\n\t" \
@@ -167,16 +89,13 @@ void WaitVBlank()
     :"d0")
 
 
-volatile u32* VDP_STATUSREG = (volatile u32*)0xc00004;
-
 
 void SetVDPAddress(u16 address)
 {
     u32 loc = 0x40000000 + ((address & 0x3fff) << 16) + ((address & 0xc000) >> 14);
     asm("move.l %0,(0xc00004).l"
     :
-    :"g"(loc)
-    :);
+    :"g"(loc));
 }
 
 void SetVDPPlaneAddress(u8 plane, u16 addr)
@@ -198,6 +117,28 @@ void SetVDPPlaneAddress(u8 plane, u16 addr)
     }
     asm("move.w %0,(0xC00004).l"
     :
-    : "g"(f)
-    :);
+    : "g"(f));
+}
+
+// 
+void LoadPalette(u8 palNo, u16* p)
+{
+    // Auto-inc to Word
+    WriteVDPRegister((u32)WRITE|REG(0xf)|2);
+    switch(palNo) {
+        case(0):
+            WRITE_CTRLREG(WRITE_PAL0); 
+            break;
+        case(1):
+            WRITE_CTRLREG(WRITE_PAL1); 
+            break;
+        case(2):
+            WRITE_CTRLREG(WRITE_PAL2); 
+            break;
+        case(3):
+            WRITE_CTRLREG(WRITE_PAL3); 
+            break;
+    }
+    u8 i;
+    for(i = 0; i < 16; i++) WRITE_DATAREG16(p[i]);   
 }

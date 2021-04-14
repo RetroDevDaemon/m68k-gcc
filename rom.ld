@@ -5,22 +5,19 @@ MEMORY
 }
 SECTIONS
 {
-  header 0x0 :
-   {
-     *(.header)
-   }
-  . = 0x200;
+
   .text : {
     *(.text)
-  } > ROM 
-  
-  . = 0xFF0000;
-  .bss : { 
-    *(.bss) 
-  } > RAM
-  .data : AT (ADDR(.text) + SIZEOF(.text) + SIZEOF(.bss)){ 
-    *(.data)
     *(.rodata) 
-  } > RAM 
+  } > ROM 
+  . = 0xFF0000;
+  .data : AT (ADDR(.text) + SIZEOF(.text)){
+    *(.data)
+  } > RAM
+  .bss : { 
+    *(.bss)
+    *(COMMON)
+  } > RAM
+     
 }
 OUTPUT_FORMAT(binary)

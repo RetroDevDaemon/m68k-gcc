@@ -23,22 +23,23 @@ LINKSCR=rom.ld
 %.bin: %.o
 	${LD} -s -T${LINKSCR} -o ${OUTDIR}/$@ ${BUILDDIR}/$< 
 
-%.o: %.s
-	${CC} ${CFLAGS} -v -Wl,-Ttext=0x0 -o ${BUILDDIR}/$@ src/header.s ${BUILDDIR}/$<
+%.o: %.s header2.bin
+	${CC} ${CFLAGS} -Wl,-Ttext=$(shell python ./tools/getfshx.py) -o ${BUILDDIR}/$@ ${BUILDDIR}/$<
 	@if [ ${SHOWELF} -eq 1 ]; then ${OBJDUMP} -dS build/$@ > build/$@txt; fi
 
 %.s: ${SRCDIR}/%.c
-	${CC} ${CFLAGS} -S -c -o ${BUILDDIR}/$@ $<
+	${CC} ${CFLAGS} -O2 -S -c -o ${BUILDDIR}/$@ $<
 
 # Create the main rom and pad it
-main: DIRs main.bin 
-#	cat ${OUTDIR}/header.bin ${OUTDIR}/main.bin > ./out.md 
+main: DIRs main.bin header2.bin
+	cat ${OUTDIR}/header2.bin ${OUTDIR}/main.bin > ./out.md 
 	${PYTHON} tools/padrom.py	
 
+	
 # Assemble the header from byte listing
-#header: DIRs rom.ld 
-#	${AS} -o ${BUILDDIR}/header.o ${SRCDIR}/header.s
-#	${OBJCOPY} -O binary -j .text ${BUILDDIR}/header.o ${OUTDIR}/header.bin
+header2.bin: 
+	${AS} -o ${BUILDDIR}/header2.o -march=68000 --register-prefix-optional ${SRCDIR}/header2.s
+	${LD} -s -T${LINKSCR} -o ${OUTDIR}/header2.bin ${BUILDDIR}/header2.o
 
 # Create build directory	
 DIRs:
