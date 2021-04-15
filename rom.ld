@@ -7,16 +7,27 @@ SECTIONS
 {
 
   .text : {
+    . = ALIGN(2);
+    _stext = .;
     *(.text)
-    *(.rodata) 
+    . = ALIGN(2);
+    *(.rodata)
+    . = ALIGN(2); 
   } > ROM 
+  _end_rom = .;
   . = 0xFF0000;
   .data : AT (ADDR(.text) + SIZEOF(.text)){
+    . = ALIGN(2);
+    _sdata = .;
     *(.data)
+    . = ALIGN(2);
   } > RAM
   .bss : { 
+    . = ALIGN(2);
     *(.bss)
+    . = ALIGN(2);
     *(COMMON)
+    . = ALIGN(2);
   } > RAM
      
 }

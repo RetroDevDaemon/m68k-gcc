@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 # padrom.py
+import sys  
 ALIGN = 131072
-f = open('out.md', 'rb')
+f = open(sys.argv[1], 'rb')
 by = f.read()
 f.close()
 fsiz = len(by)
