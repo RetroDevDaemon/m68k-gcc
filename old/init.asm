@@ -67,14 +67,14 @@
 	dc.l   Exception       ; Unused (reserved)
 
 	dc.b "SEGA GENESIS    "									; Console name
-	dc.b "(C)BENT 2021.APR"									; Copyrght holder and release date
-	dc.b "STARTHRALL                                      "	; Domestic name
-	dc.b "STARTHRALL                                      "	; International name
+	dc.b "(C)SEGA 1992.SEP"									; Copyrght holder and release date
+	dc.b "YOUR GAME HERE                                  "	; Domestic name
+	dc.b "YOUR GAME HERE                                  "	; International name
 	dc.b "GM XXXXXXXX-XX"									; Version number
 	dc.w 0x0000												; Checksum
 	dc.b "J               "									; I/O support
 	dc.l 0x00000000											; Start address of ROM
-	dc.l 0x003fffff												; End address of ROM
+	dc.l _end_rom										; End address of ROM
 	dc.l 0x00FF0000											; Start address of RAM
 	dc.l 0x00FFFFFF											; End address of RAM
 	dc.l 0x00000000											; SRAM enabled
@@ -92,9 +92,9 @@ EntryPoint:           ; Entry point address set in ROM header
 ; Test reset button
 ; ************************************
 	tst.w 0x00A10008  ; Test mystery reset (expansion port reset?)
-	bne Main          ; Branch if Not Equal (to zero) - to Main
+	bne main          ; Branch if Not Equal (to zero) - to Main
 	tst.w 0x00A1000C  ; Test reset button
-	bne Main          ; Branch if Not Equal (to zero) - to Main
+	bne main          ; Branch if Not Equal (to zero) - to Main
 
 ; ************************************
 ; Clear RAM
@@ -177,8 +177,8 @@ EntryPoint:           ; Entry point address set in ROM header
 ; ************************************
 ; Main
 ; ************************************
-Main:
-	jmp _end_init ; Begin external main
+_Main:
+	jmp main ; Begin external main
 
 HBlankInterrupt:
 VBlankInterrupt:
@@ -229,4 +229,9 @@ VDPRegisters:
    dc.b 0x00 ; 22: DMA source address mid byte
    dc.b 0x00 ; 23: DMA source address hi byte, memory-to-VRAM mode (bits 6-7)
 
-_end_init:
+_endinit:
+    ; bra _endinit
+
+	.include "build/main.asm"
+
+_end_rom:

@@ -58,7 +58,7 @@ void _start() {
 }
 
 void SetVDPPlaneAddress(u8 plane, u16 addr);
-void SetVDPAddress(u16 address);
+void SetVRAMWriteAddress(u16 address);
 
 #define WriteVDPRegister(v) asm("move.w %0,(0xC00004).l"::"g"(v))
 
@@ -90,7 +90,7 @@ void SetVDPAddress(u16 address);
 
 
 
-void SetVDPAddress(u16 address)
+void SetVRAMWriteAddress(u16 address)
 {
     u32 loc = 0x40000000 + ((address & 0x3fff) << 16) + ((address & 0xc000) >> 14);
     asm("move.l %0,(0xc00004).l"
