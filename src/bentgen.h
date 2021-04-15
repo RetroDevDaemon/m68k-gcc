@@ -1,3 +1,7 @@
+//bentgen.h
+#ifndef BENTGEN
+#define BENTGEN 
+
 typedef unsigned long u32;
 typedef unsigned short u16;
 typedef unsigned char u8;
@@ -28,11 +32,56 @@ typedef unsigned char u8;
 
 #define BREAKPOINT asm("BRK%=:\n\t""jra BRK%=":::);
 
+//; 68k memory map
+#define CTRL_1_DATA 0x00A10003
+#define CTRL_2_DATA 0x00A10005
+#define CTRL_X_DATA 0x00A10007
+#define CTRL_1_CONTROL 0x00A10009
+#define CTRL_2_CONTROL 0x00A1000B
+#define CTRL_X_control 0x00A1000D
+#define REG_HWVERSION 0x00A10001
+#define REG_TMS 0x00A14000
+#define PSG_INPUT 0x00C00011
+#define RAM_START 0x00FF0000
+#define VDP_DATA 0x00C00000
+#define VDP_CONTROL 0x00C00004
+#define VDP_COUNTER 0x00C00008
+#define Z80_ADDRESS_SPACE 0x00A10000
+#define Z80_BUS 0x00A11100
+#define Z80_RESET 0x00A11200
+//; VDP access modes
+#define VDP_CRAM_READ 0x20000000
+#define VDP_CRAM_WRITE WRITE_PAL0
+#define VDP_VRAM_READ 0x00000000
+#define VDP_VRAM_WRITE 0x40000000
+#define VDP_VSRAM_READ 0x10000000
+#define VDP_VSRAM_WRITE 0x14000000
+//; buttons
+#define BUTTON_UP_PRESSED 0x01
+#define BUTTON_DOWN_PRESSED 0x02
+#define BUTTON_LEFT_PRESSED 0x04
+#define BUTTON_RIGHT_PRESSED 0x08
+#define BUTTON_B_PRESSED 0x10
+#define BUTTON_C_PRESSED 0x20
+#define BUTTON_A_PRESSED 0x40
+#define BUTTON_START_PRESSED 0x80
+
+// standard vram map:
+// 0000 - C000 : pattern defs
+// C000 - D800 : BG_A
+// D800 - E000 : SAT
+// e000 - f000 : BG_B
+// f000 - fc00 : window map
+// fc00 +      : hscroll table 
 
 void _start();
 void main();
-
-void __attribute__((optimize("Os"))) LoadPalette(u8 palNo, u16* p);
+void __attribute__((interrupt)) catch();
+void __attribute__((interrupt)) HBlank();
+void __attribute__((interrupt)) VBlank();
+void __attribute__((optimize("Os"))) LoadPalette(u8 palNo, const u16* p);
+void SetVDPPlaneAddress(u8 plane, u16 addr);
+void SetVRAMWriteAddress(u16 address);
 
 
 #define LOADPAL(pal) asm("move.l %1, (0xc00004).l\n\t"\
@@ -44,21 +93,6 @@ void __attribute__((optimize("Os"))) LoadPalette(u8 palNo, u16* p);
     :\
     :"m"(pal),"g"(CRAM_ADDR)\
     :"a0","d0");
-
-
-void __attribute__((interrupt)) catch()
-{
-    //asm("rts");
-    return;
-}
-
-void _start() {
-    
-    main(); 
-}
-
-void SetVDPPlaneAddress(u8 plane, u16 addr);
-void SetVRAMWriteAddress(u16 address);
 
 #define WriteVDPRegister(v) asm("move.w %0,(0xC00004).l"::"g"(v))
 
@@ -88,7 +122,33 @@ void SetVRAMWriteAddress(u16 address);
     : \
     :"d0")
 
+#define EnableIRQLevel(n) asm("move.w %0,sr"::"g"((n<<8)|0x20))
 
+
+void catch()
+{
+    asm("jsr exceptionDump");
+    return;
+}
+
+// Horizontal blank requires EnableIRQLevel(3) and VDP reg 0 set
+void HBlank()
+{
+    return;
+}
+
+// Vertical blank requires EnableIRQLevel(5) and VDP reg 1 set
+void VBlank()
+{
+    GAME_DRAW();
+    return;
+}
+
+void _start() {
+    // enable VBL IRQ
+    EnableIRQLevel(5);
+    main(); 
+}
 
 void SetVRAMWriteAddress(u16 address)
 {
@@ -121,7 +181,7 @@ void SetVDPPlaneAddress(u8 plane, u16 addr)
 }
 
 // 
-void LoadPalette(u8 palNo, u16* p)
+void LoadPalette(u8 palNo, const u16* p)
 {
     // Auto-inc to Word
     WriteVDPRegister((u32)WRITE|REG(0xf)|2);
@@ -142,3 +202,6 @@ void LoadPalette(u8 palNo, u16* p)
     u8 i;
     for(i = 0; i < 16; i++) WRITE_DATAREG16(p[i]);   
 }
+
+
+#endif

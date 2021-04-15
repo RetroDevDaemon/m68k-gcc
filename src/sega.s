@@ -29,13 +29,13 @@ _Vectors_68K:
         dc.l    _Trace
         dc.l    _Line_1010_Emulation
         dc.l    _Line_1111_Emulation
-        dc.l     _Error_Exception, _Error_Exception, _Error_Exception, _Error_Exception
-        dc.l     _Error_Exception, _Error_Exception, _Error_Exception, _Error_Exception
-        dc.l     _Error_Exception, _Error_Exception, _Error_Exception, _Error_Exception
-        dc.l    _Error_Exception, _INT, _EXTINT, _INT
-        dc.l    _HINT
+        dc.l     catch, catch, catch, catch
+        dc.l     catch, catch, catch, catch
+        dc.l     catch, catch, catch, catch
+        dc.l    catch, _INT, _EXTINT, _INT
+        dc.l    HBlank                                                  /* LEVEL4 */
         dc.l    _INT
-        dc.l    _VINT
+        dc.l    VBlank                                                  /* LEVEL6 */
         dc.l    _INT
         dc.l    _Reset,_INT,_INT,_INT,_INT,_INT,_INT,_INT
         dc.l    _INT,_INT,_INT,_INT,_INT,_INT,_INT,_INT
@@ -58,7 +58,7 @@ _Vectors_68K:
 	.ascii	"JUE             "					/* Country Support (16) */
 
 _Entry_Point:
-        move    #0x2700,%sr
+        move    #0x2700,%sr                                             /* Disable interrupts 7 and below */ 
 	tst.l   0xa10008
         bne.s   SkipJoyDetect
         tst.w   0xa1000c

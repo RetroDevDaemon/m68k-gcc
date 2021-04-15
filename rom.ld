@@ -5,7 +5,6 @@ MEMORY
 }
 SECTIONS
 {
-
   .text : {
     . = ALIGN(2);
     _stext = .;
@@ -29,6 +28,5 @@ SECTIONS
     *(COMMON)
     . = ALIGN(2);
   } > RAM
-     
 }
 OUTPUT_FORMAT(binary)
