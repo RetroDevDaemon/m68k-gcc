@@ -15,7 +15,7 @@ SECTIONS
   } > ROM 
   _end_rom = .;
   . = 0xFF0000;
-  .data : AT (ADDR(.text) + SIZEOF(.text)){
+  .data : AT (ADDR(.text) + SIZEOF(.text) + SIZEOF(.rodata)){
     . = ALIGN(2);
     _sdata = .;
     *(.data)

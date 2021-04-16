@@ -5,6 +5,7 @@
 typedef unsigned long u32;
 typedef unsigned short u16;
 typedef unsigned char u8;
+typedef const char String[];
 
 #define FALSE 0 
 #define TRUE 1
@@ -29,7 +30,7 @@ typedef unsigned char u8;
 #define WRITE_DATAREG8(n) asm("move.b %0,(0xC00000).l"::"g"(n))
 #define WRITE_DATAREG16(n) asm("move.w %0,(0xc00000).l"::"g"(n))
 #define WRITE_DATAREG32(n) asm("move.l %0,(0xc00000).l"::"g"(n))
-
+#define READ_DATAREG32(n) asm("move.l (0xc00000).l,%0":"=g"(n):)
 #define BREAKPOINT asm("BRK%=:\n\t""jra BRK%=":::);
 
 //; 68k memory map
@@ -74,6 +75,15 @@ typedef unsigned char u8;
 // f000 - fc00 : window map
 // fc00 +      : hscroll table 
 
+// Tilemap format:
+// LPPVHTTT TTTTTTTT
+// bits 0-10: tile num 0-1024
+// bit 11: Hflip
+// bit 12: Vflip
+// bits 13-14: palette no (0-3)
+// bit 15: layer priority
+#define pal_no(n) (n<<13)
+
 void _start();
 void main();
 void __attribute__((interrupt)) catch();
@@ -82,6 +92,7 @@ void __attribute__((interrupt)) VBlank();
 void __attribute__((optimize("Os"))) LoadPalette(u8 palNo, const u16* p);
 void SetVDPPlaneAddress(u8 plane, u16 addr);
 void SetVRAMWriteAddress(u16 address);
+void SetVRAMReadAddress(u16 address);
 
 
 #define LOADPAL(pal) asm("move.l %1, (0xc00004).l\n\t"\
@@ -157,6 +168,15 @@ void SetVRAMWriteAddress(u16 address)
     :
     :"g"(loc));
 }
+
+void SetVRAMReadAddress(u16 address)
+{
+    u32 loc = 0x00000000 + ((address & 0x3fff) << 16) + ((address & 0xc000) >> 14);
+    asm("move.l %0,(0xc00004).l"
+    :
+    :"g"(loc));
+}
+
 
 void SetVDPPlaneAddress(u8 plane, u16 addr)
 {

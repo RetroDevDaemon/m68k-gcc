@@ -11,7 +11,7 @@
 *    of using this software, even if they result from defects in it.
 *
 *------------------------------------------------
-
+.align 2
 ldiv:
         move.l  4(%a7),%d0
         bpl     ld1
