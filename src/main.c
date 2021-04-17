@@ -6,7 +6,7 @@
 #define BG_WIDTH 64
 #define BG_HEIGHT 32
 
-inline void GAME_DRAW();
+inline void __attribute__((optimize("O3"))) GAME_DRAW();
 
 #include "bentgen.h"
 
@@ -19,7 +19,7 @@ inline void GAME_DRAW();
 #include "playership_pal.h"
 
 // game function defs 
-
+void __attribute__((optimize("Os"))) main();
 inline void GAME_INPUT();
 Sprite* AddSprite(u16 ypos, u8 size, u16 attr, u16 xpos);
 u16 strsize(String* s);
@@ -58,8 +58,8 @@ Sprite* AddSprite(u16 ypos, u8 size, u16 attr, u16 xpos)
 
 void main()
 {   
-    LoadPalette(1, &playership_pal);
-    LoadPalette(0, &palette);
+    LoadPalette(1, (u16*)&playership_pal);
+    LoadPalette(0, (u16*)&palette);
     
     u8 i = 0;
     u16 c = 0; 
@@ -72,7 +72,7 @@ void main()
     // Tile number 32 (start of ascii table) * 32 bytes per tile = 1024 = $400
     SetVRAMWriteAddress(0x400);
     for(c = 0; c < 0x300; c++) {
-        cr = &font_0;
+        cr = (u32*)&font_0;
         cr += c;
         WRITE_DATAREG32(*cr);
     }
@@ -81,7 +81,7 @@ void main()
     // Copy in ship
     SetVRAMWriteAddress(0x1000);
     for(c = 0; c < (12*8); c++) {
-        cr = &player1_0;
+        cr = (u32*)&player1_0;
         cr += c;
         WRITE_DATAREG32(*cr);
     }
@@ -114,13 +114,13 @@ void main()
 }
 
 // Called during VBlank
-void __attribute__((optimize("O3"))) GAME_DRAW()
+void GAME_DRAW()
 {   
     GAME_INPUT();
     // TODO: Convert this to DMA
-    u32* spr = &activeSprites[0];
+    u32* spr = (u32*)&activeSprites[0];
     SetVRAMWriteAddress(VRAM_SAT);
-    for(u8 sl = 0; sl < 2 * NUM_SPRITES; sl++) WRITE_DATAREG32(*spr++);
+    for(u8 sl = 0; sl < (2 * 80); sl++) WRITE_DATAREG32(*spr++);
 }
 
 void GAME_INPUT()

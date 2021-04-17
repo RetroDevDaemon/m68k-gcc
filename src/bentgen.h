@@ -111,7 +111,7 @@ void main();
 void __attribute__((interrupt)) catch();
 void __attribute__((interrupt)) HBlank();
 void __attribute__((interrupt)) VBlank();
-void __attribute__((optimize("Os"))) LoadPalette(u8 palNo, const u16* p);
+void __attribute__((optimize("Os"))) LoadPalette(u8 palNo, u16* p);
 void SetVDPPlaneAddress(u8 plane, u16 addr);
 void SetVRAMWriteAddress(u16 address);
 void SetVRAMReadAddress(u16 address);
@@ -157,11 +157,10 @@ void print(u8 plane, u8 x, u8 y, String str);
         "rol.w #8,%%d0              | shift to upper\n\t"\
         "move.b #0,(0xa10003).l     | TH to 0\n\t"\
         "nop\n\tnop                 | (sync!)\n\t"\
-        "move.b (0xa10003).l,%%d0   | read byte 2\n\t"\ 
-        "move.w %%d0,%0             | copy to output"\        
+        "move.b (0xa10003).l,%%d0   | read byte 2\n\t"\
+        "move.w %%d0,%0             | copy to output"\
         :"=g"(n)::"d0"); n ^= 0xffff; // OR result
 
-#endif
 
 void catch()
 {
@@ -227,7 +226,7 @@ void SetVDPPlaneAddress(u8 plane, u16 addr)
 }
 
 // 
-void LoadPalette(u8 palNo, const u16* p)
+void LoadPalette(u8 palNo, u16* p)
 {
     // Auto-inc to Word
     WriteVDPRegister((u32)WRITE|REG(0xf)|2);
