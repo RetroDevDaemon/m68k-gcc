@@ -25,6 +25,8 @@ typedef const char String[];
 #define WRITE_PAL1 (u32)(0xc0200000)
 #define WRITE_PAL2 (u32)(0xc0400000)
 #define WRITE_PAL3 (u32)(0xc0600000)
+#define SPRSIZE(x,y) (u8)(((x-1)<<2)|(y-1))
+    
 
 #define WRITE_CTRLREG(n) asm("move.l %0,(0xc00004).l"::"g"(n))
 #define WRITE_DATAREG8(n) asm("move.b %0,(0xC00000).l"::"g"(n))
@@ -84,6 +86,22 @@ typedef const char String[];
 // bit 15: layer priority
 #define pal_no(n) (n<<13)
 
+
+// 0-1: Y position (9 bits, 0-511, or 0-1023 in double mode)
+// 2: 'next' sprite. final sprite = 0
+// 3: bits 0-1 Y size, bits 2-3 X size.
+//    0xE => X=4 Y=3
+// 4-5: tile number(10 bits, 0-2047) | hf(1<<11) | vf(1<<12) | pal(2<<13) | priority(1<<15)
+// 6-7: X position (8 bits, 0-511)
+struct SpriteAttribute { 
+    u16 y_pos;
+    u8 size;
+    u8 next;
+    u16 spr_attr;
+    u16 x_pos;
+};
+#define SPR_ATTR(tileno, hf, vf, pal, pri) (u16)(tileno|(hf<<11)|(vf<<12)|(pal<<13)|(pri<<15))
+
 void _start();
 void main();
 void __attribute__((interrupt)) catch();
@@ -93,6 +111,7 @@ void __attribute__((optimize("Os"))) LoadPalette(u8 palNo, const u16* p);
 void SetVDPPlaneAddress(u8 plane, u16 addr);
 void SetVRAMWriteAddress(u16 address);
 void SetVRAMReadAddress(u16 address);
+void print(u8 plane, u8 x, u8 y, String str);
 
 
 #define LOADPAL(pal) asm("move.l %1, (0xc00004).l\n\t"\
@@ -223,5 +242,24 @@ void LoadPalette(u8 palNo, const u16* p)
     for(i = 0; i < 16; i++) WRITE_DATAREG16(p[i]);   
 }
 
+void print(u8 plane, u8 x, u8 y, String str)
+{
+    // 2 bytes per character, 64 chars per plane row * 2 = 128 or $80 for newline
+    switch(plane){
+        case(BG_A):    // BG_A
+            // page $c0 + 2*((BG_WIDTH * y) + x)
+            SetVRAMWriteAddress( VRAM_BG_A + (2 * ((BG_WIDTH * y) + x)) );
+            break;
+        case(BG_B):    // BG_B
+            SetVRAMWriteAddress( VRAM_BG_B + (2 * ((BG_WIDTH * y) + x)) );
+            break;
+    }
+    u8 i = 0;
+    while (str[i] != '\00')
+    {
+        WRITE_DATAREG16(str[i]);
+        i++;
+    }
+}
 
 #endif
