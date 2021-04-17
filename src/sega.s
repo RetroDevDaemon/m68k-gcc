@@ -73,7 +73,7 @@ SkipJoyDetect:
         andi.b  #0x0f,%d0
         beq.s   WrongVersion
 * Sega Security Code (SEGA)
-        move.l  #0x53454741,0x2f00(%a1)
+        move.l  #0x53454741,(0xa14000).l
 WrongVersion:
         move.w  (%a4),%d0
         moveq   #0x00,%d0

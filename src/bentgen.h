@@ -64,12 +64,12 @@ typedef const char String[];
 //; buttons
 #define BTN_UP_PRESSED bit(0)
 #define BTN_DOWN_PRESSED bit(1)
-#define BTN_LEFT_PRESSED bit(2)
-#define BTN_RIGHT_PRESSED bit(3)
-#define BTN_B_PRESSED bit(4)
-#define BTN_C_PRESSED bit(5)
-#define BTN_A_PRESSED bit(12)
-#define BTN_START_PRESSED bit(13)
+#define BTN_LEFT_PRESSED bit(10)
+#define BTN_RIGHT_PRESSED bit(11)
+#define BTN_B_PRESSED bit(12)
+#define BTN_C_PRESSED bit(13)
+#define BTN_A_PRESSED bit(4)
+#define BTN_START_PRESSED bit(5)
 
 // standard vram map:
 // 0000 - C000 : pattern defs
@@ -132,7 +132,7 @@ void print(u8 plane, u8 x, u8 y, String str);
 #define VDPStatus_u16(var) asm("move.w (0xc00004).l,%0":"=g"(var)::)
 #define EnableIRQLevel(n) asm("move.w %0,sr"::"g"((n<<8)|0x20))
 
-#ifndef __INTELLISENSE__
+
 #define WaitVBlank() asm volatile("VB%=: move.w (0xc00004).l,%%d0\n\t" \
         "btst #3,%%d0\n\t" \
         "beq VB%=\n\t" \
@@ -147,21 +147,20 @@ void print(u8 plane, u8 x, u8 y, String str);
         "btst #2,%%d0\n\t" \
         "bne VB%=":::"d0")
 
-#define GETJOYSTATE1(n) asm("move.b (0xa10003).l, %%d0  | Read byte A\n\t"\
-        "rol.w #8, %%d0             | Shift to upper bits\n\t"\
-        "move.b #0x40, (0xa10003).l | Send bit 6 to trigger byte B\n\t"\
-        "move.b (0xa10003).l, %%d0  | Read again \n\t"\
-        "move.b #0, (0xa10003).l    | Send 0 to reset\n\t"\
-        "move.w %%d0, %0            | Move into variable ":\
-        "=g"(n)::"d0"); n = ~n;
+#define GETJOYSTATE1(n) asm(\
+        "move.l #0,%%d0             | clear d0\n\t"\
+        "moveq #0x40,%%d0           | set bit 6\n\t"\
+        "move.b %%d0,(0xa10009).l   | set TH pin to 'write'\n\t"\
+        "move.b %%d0,(0xa10003).l   | TH to 1\n\t"\
+        "nop\n\tnop                 | (sync!)\n\t"\
+        "move.b (0xa10003).l,%%d0   | read byte 1\n\t"\
+        "rol.w #8,%%d0              | shift to upper\n\t"\
+        "move.b #0,(0xa10003).l     | TH to 0\n\t"\
+        "nop\n\tnop                 | (sync!)\n\t"\
+        "move.b (0xa10003).l,%%d0   | read byte 2\n\t"\ 
+        "move.w %%d0,%0             | copy to output"\        
+        :"=g"(n)::"d0"); n ^= 0xffff; // OR result
 
-#define GETJOYSTATE2(n) asm("move.b (0xa10005).l, %%d0\n\t"\
-        "rol.w #8, %%d0\n\t"\
-        "move.b #0x40, (0xa10005).l\n\t"\
-        "move.b (0xa10005).l, %%d0\n\t"\
-        "move.b #0, (0xa10005).l\n\t"\
-        "move.w %%d0, %0":\
-        "=g"(n)::"d0"); n = ~n;
 #endif
 
 void catch()

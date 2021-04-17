@@ -28,6 +28,5 @@ SECTIONS
     *(COMMON)
     . = ALIGN(2);
   } > RAM
-  . = 0xff500;
 }
 OUTPUT_FORMAT(binary)
