@@ -26,8 +26,8 @@ String hw = "Hello World!";
 String hw2 = "Lemme GeT DaT SWETET SWEEt";
 String hw3 = "BLasT PROceSSIN!!!@@";
 
-static struct SpriteAttribute p1t;
-static struct SpriteAttribute p2t;
+static SpriteAttribute p1t;
+static SpriteAttribute p2t;
 
 void GAME_DRAW();
 

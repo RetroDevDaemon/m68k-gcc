@@ -93,13 +93,13 @@ typedef const char String[];
 //    0xE => X=4 Y=3
 // 4-5: tile number(10 bits, 0-2047) | hf(1<<11) | vf(1<<12) | pal(2<<13) | priority(1<<15)
 // 6-7: X position (8 bits, 0-511)
-struct SpriteAttribute { 
+typedef struct spriteAttribute { 
     u16 y_pos;
     u8 size;
     u8 next;
     u16 spr_attr;
     u16 x_pos;
-};
+} SpriteAttribute;
 #define SPR_ATTR(tileno, hf, vf, pal, pri) (u16)(tileno|(hf<<11)|(vf<<12)|(pal<<13)|(pri<<15))
 
 void _start();
