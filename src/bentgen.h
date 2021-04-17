@@ -7,6 +7,8 @@ typedef unsigned short u16;
 typedef unsigned char u8;
 typedef const char String[];
 
+#define NULL 0 
+#define null NULL 
 #define FALSE 0 
 #define TRUE 1
 #define true TRUE 
@@ -60,14 +62,14 @@ typedef const char String[];
 #define VDP_VSRAM_READ 0x10000000
 #define VDP_VSRAM_WRITE 0x14000000
 //; buttons
-#define BUTTON_UP_PRESSED 0x01
-#define BUTTON_DOWN_PRESSED 0x02
-#define BUTTON_LEFT_PRESSED 0x04
-#define BUTTON_RIGHT_PRESSED 0x08
-#define BUTTON_B_PRESSED 0x10
-#define BUTTON_C_PRESSED 0x20
-#define BUTTON_A_PRESSED 0x40
-#define BUTTON_START_PRESSED 0x80
+#define BTN_UP_PRESSED bit(0)
+#define BTN_DOWN_PRESSED bit(1)
+#define BTN_LEFT_PRESSED bit(2)
+#define BTN_RIGHT_PRESSED bit(3)
+#define BTN_B_PRESSED bit(4)
+#define BTN_C_PRESSED bit(5)
+#define BTN_A_PRESSED bit(12)
+#define BTN_START_PRESSED bit(13)
 
 // standard vram map:
 // 0000 - C000 : pattern defs
@@ -100,7 +102,9 @@ typedef struct spriteAttribute {
     u16 spr_attr;
     u16 x_pos;
 } SpriteAttribute;
-#define SPR_ATTR(tileno, hf, vf, pal, pri) (u16)(tileno|(hf<<11)|(vf<<12)|(pal<<13)|(pri<<15))
+
+#define SPR_ATTR(tileno, hf, vf, pal, pri) \
+    (u16)(tileno|(hf<<11)|(vf<<12)|(pal<<13)|(pri<<15))
 
 void _start();
 void main();
@@ -125,35 +129,40 @@ void print(u8 plane, u8 x, u8 y, String str);
     :"a0","d0");
 
 #define WriteVDPRegister(v) asm("move.w %0,(0xC00004).l"::"g"(v))
+#define VDPStatus_u16(var) asm("move.w (0xc00004).l,%0":"=g"(var)::)
+#define EnableIRQLevel(n) asm("move.w %0,sr"::"g"((n<<8)|0x20))
 
-#define VDPStatus_u16(var) \
-    asm("move.w (0xc00004).l,%0":"=g"(var)::)
+#ifndef __INTELLISENSE__
 #define WaitVBlank() asm volatile("VB%=: move.w (0xc00004).l,%%d0\n\t" \
         "btst #3,%%d0\n\t" \
         "beq VB%=\n\t" \
         "VBB%=: move.w (0xc00004).l,%%d0\n\t"\
         "btst #3,%%d0\n\t"\
-        "bne VBB%="\
-    : \
-    : \
-    :"d0")
+        "bne VBB%=":::"d0");
     
-#define WaitHBlank() \
+#define WaitHBlank() asm volatile("VB%=: move.w (0xc00004).l,%%d0\n\t" \
+        "btst #2,%%d0\n\t" \
+        "beq VB%=":::"d0");\
     asm volatile("VB%=: move.w (0xc00004).l,%%d0\n\t" \
         "btst #2,%%d0\n\t" \
-        "beq VB%=" \
-    : \
-    : \
-    :"d0"); \
-    asm volatile("VB%=: move.w (0xc00004).l,%%d0\n\t" \
-        "btst #2,%%d0\n\t" \
-        "bne VB%=" \
-    : \
-    : \
-    :"d0")
+        "bne VB%=":::"d0")
 
-#define EnableIRQLevel(n) asm("move.w %0,sr"::"g"((n<<8)|0x20))
+#define GETJOYSTATE1(n) asm("move.b (0xa10003).l, %%d0  | Read byte A\n\t"\
+        "rol.w #8, %%d0             | Shift to upper bits\n\t"\
+        "move.b #0x40, (0xa10003).l | Send bit 6 to trigger byte B\n\t"\
+        "move.b (0xa10003).l, %%d0  | Read again \n\t"\
+        "move.b #0, (0xa10003).l    | Send 0 to reset\n\t"\
+        "move.w %%d0, %0            | Move into variable ":\
+        "=g"(n)::"d0"); n = ~n;
 
+#define GETJOYSTATE2(n) asm("move.b (0xa10005).l, %%d0\n\t"\
+        "rol.w #8, %%d0\n\t"\
+        "move.b #0x40, (0xa10005).l\n\t"\
+        "move.b (0xa10005).l, %%d0\n\t"\
+        "move.b #0, (0xa10005).l\n\t"\
+        "move.w %%d0, %0":\
+        "=g"(n)::"d0"); n = ~n;
+#endif
 
 void catch()
 {
@@ -195,7 +204,6 @@ void SetVRAMReadAddress(u16 address)
     :
     :"g"(loc));
 }
-
 
 void SetVDPPlaneAddress(u8 plane, u16 addr)
 {

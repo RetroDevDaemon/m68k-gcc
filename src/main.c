@@ -19,18 +19,19 @@
 // MUST BE STATIC CONST POINTER! idk why
 //static u16* pals[4];
 u8 fq;
+u8 pSpeed;
 u32 frameCounter;
 u16 vdpstat;
 u32 hcount;
 String hw = "Hello World!";
 String hw2 = "Lemme GeT DaT SWETET SWEEt";
 String hw3 = "BLasT PROceSSIN!!!@@";
+String kb = "UDLR Ss ABC";
 
 static SpriteAttribute p1t;
 static SpriteAttribute p2t;
 
 void GAME_DRAW();
-
 
 void main()
 {   
@@ -38,7 +39,7 @@ void main()
     LoadPalette(1, &playership_pal);
     LoadPalette(0, &palette);
     
-    u8 i;
+    u8 i = 0;
     u16 c = 0; 
     u32* cr;
     // Copy in our font!
@@ -87,7 +88,9 @@ void main()
         
     // Enable VBlank on VDP 
     WriteVDPRegister(WRITE|REG(1)|0x64);
+    pSpeed = 3;
 
+    u16 joyState = 0;    
     while(1)
     { 
         /* Do nothing!!
@@ -96,8 +99,17 @@ void main()
         VDPStatus_u16(vdpstat);
         hcount++;
         */
-        p1t.y_pos++;
-        p1t.x_pos += 2;
+        joyState = null;
+        GETJOYSTATE1(joyState);
+        //joyState ^= 0x000f;
+        String aff = "A";
+
+        if(joyState & BTN_UP_PRESSED) p1t.y_pos -= pSpeed;
+        if(joyState & BTN_DOWN_PRESSED) p1t.y_pos += pSpeed;
+        if(joyState & BTN_LEFT_PRESSED) p1t.x_pos -= pSpeed;
+        if(joyState & BTN_RIGHT_PRESSED) p1t.x_pos += pSpeed;
+        if(joyState & BTN_A_PRESSED) p1t.x_pos += pSpeed;
+
         WaitVBlank();
     }
 }
@@ -109,7 +121,6 @@ void GAME_DRAW()
     SetVRAMWriteAddress(VRAM_SAT);
     WRITE_DATAREG32(*spr++);
     WRITE_DATAREG32(*spr++);
-    
 }
 
 u16 strsize(String* s)
@@ -118,5 +129,3 @@ u16 strsize(String* s)
     while(*s != '\00') sz++;
     return sz;
 }
-
-
