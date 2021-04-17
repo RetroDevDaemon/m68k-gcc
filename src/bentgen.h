@@ -101,7 +101,7 @@ typedef struct spriteAttribute {
     u8 next;
     u16 spr_attr;
     u16 x_pos;
-} SpriteAttribute;
+} Sprite;
 
 #define SPR_ATTR(tileno, hf, vf, pal, pri) \
     (u16)(tileno|(hf<<11)|(vf<<12)|(pal<<13)|(pri<<15))

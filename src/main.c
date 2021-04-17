@@ -28,13 +28,32 @@ String hw2 = "Lemme GeT DaT SWETET SWEEt";
 String hw3 = "BLasT PROceSSIN!!!@@";
 String kb = "UDLR Ss ABC";
 
-static SpriteAttribute p1t;
-static SpriteAttribute p2t;
+Sprite* p1ship;
+Sprite* test;
+u8 NUM_SPRITES;
+u32* spriteRamPtr;
+#define SPRITE_RAM_BASE 0xfff500
+
+static Sprite activeSprites[80];
 
 void GAME_DRAW();
 
+Sprite* AddSprite(u16 ypos, u8 size, u16 attr, u16 xpos)
+{
+    activeSprites[NUM_SPRITES].y_pos = ypos;
+    activeSprites[NUM_SPRITES].size = size; // use macro 
+    activeSprites[NUM_SPRITES-1].next = NUM_SPRITES;
+    activeSprites[NUM_SPRITES].next = 0;
+    activeSprites[NUM_SPRITES].spr_attr = attr;
+    activeSprites[NUM_SPRITES].x_pos = xpos;
+    NUM_SPRITES++;
+    return &activeSprites[NUM_SPRITES-1];
+}
+
 void main()
 {   
+    NUM_SPRITES = 0;
+    spriteRamPtr = SPRITE_RAM_BASE; // 2560, or 0xa00
     //LoadPalette(0, &playership_pal);
     LoadPalette(1, &playership_pal);
     LoadPalette(0, &palette);
@@ -63,24 +82,9 @@ void main()
     u8 r = 0;
     // set ship as 4x3 sprite
     // size: E. 8 bytes
-    p1t.y_pos = 200;
-    p1t.size = SPRSIZE(4,3);
-    p1t.next = 0;
-    p1t.spr_attr = SPR_ATTR(128, 0, 0, 1, 0);
-    p1t.x_pos = 200;
-    // Write it in
-    u32* mp = 0xff2000;
-    u32* loadptr = &p1t;
-    SetVRAMWriteAddress(VRAM_SAT);
-    WRITE_DATAREG32(*loadptr++);
-    WRITE_DATAREG32(*loadptr++);
+    p1ship = AddSprite(200, SPRSIZE(4,3), SPR_ATTR(128, 0, 0, 1, 0), 200);
+    test = AddSprite(250, SPRSIZE(4,3), SPR_ATTR(128, 0, 0, 0, 0), 250);
     
-    // test - read SAT #0 from vram and write to ram
-    SetVRAMReadAddress(VRAM_SAT);
-    READ_DATAREG32(*mp++);
-    SetVRAMReadAddress(VRAM_SAT + 4);
-    READ_DATAREG32(*mp++);
-
     // BG plane A
     print(BG_A, 0, 0, hw);
     print(BG_A, 1, 1, hw2);
@@ -101,14 +105,36 @@ void main()
         */
         joyState = null;
         GETJOYSTATE1(joyState);
-        //joyState ^= 0x000f;
         String aff = "A";
 
-        if(joyState & BTN_UP_PRESSED) p1t.y_pos -= pSpeed;
-        if(joyState & BTN_DOWN_PRESSED) p1t.y_pos += pSpeed;
-        if(joyState & BTN_LEFT_PRESSED) p1t.x_pos -= pSpeed;
-        if(joyState & BTN_RIGHT_PRESSED) p1t.x_pos += pSpeed;
-        if(joyState & BTN_A_PRESSED) p1t.x_pos += pSpeed;
+        if(joyState & BTN_UP_PRESSED) 
+        {
+            p1ship->y_pos -= pSpeed;
+            test->y_pos -= pSpeed;
+        }
+        if(joyState & BTN_DOWN_PRESSED) 
+        {
+            p1ship->y_pos += pSpeed;
+            test->y_pos += pSpeed;
+        }
+        if(joyState & BTN_LEFT_PRESSED) 
+        {
+            p1ship->x_pos -= pSpeed;
+            test->x_pos -= pSpeed;
+        }
+        if(joyState & BTN_RIGHT_PRESSED) 
+        {
+            p1ship->x_pos += pSpeed;
+            test->x_pos += pSpeed;
+        }
+        //if(joyState & BTN_A_PRESSED) p1t.x_pos += pSpeed;
+
+        // copy sprites into the DMA buffer
+        spriteRamPtr = SPRITE_RAM_BASE;
+        u32* loadptr = &activeSprites[0];
+        for(u8 e = 0; e < NUM_SPRITES; e++) 
+            for(r = 0; r < 2 * NUM_SPRITES; r++) 
+                *spriteRamPtr++ = loadptr[r];
 
         WaitVBlank();
     }
@@ -117,10 +143,10 @@ void main()
 // Called during VBlank
 void GAME_DRAW()
 {   
-    u32* spr = &p1t;
+    // TODO: Convert this to DMA
+    u32* spr = SPRITE_RAM_BASE;
     SetVRAMWriteAddress(VRAM_SAT);
-    WRITE_DATAREG32(*spr++);
-    WRITE_DATAREG32(*spr++);
+    for(u8 sl = 0; sl < 80; sl++) WRITE_DATAREG32(*spr++);
 }
 
 u16 strsize(String* s)
