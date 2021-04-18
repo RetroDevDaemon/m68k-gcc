@@ -5,6 +5,7 @@
 typedef unsigned long u32;
 typedef unsigned short u16;
 typedef unsigned char u8;
+typedef u8 bool;
 typedef const char String[];
 
 #define NULL 0 
@@ -158,6 +159,19 @@ void print(u8 plane, u8 x, u8 y, String str);
         "move.b #0,(0xa10003).l     | TH to 0\n\t"\
         "nop\n\tnop                 | (sync!)\n\t"\
         "move.b (0xa10003).l,%%d0   | read byte 2\n\t"\
+        "move.w %%d0,%0             | copy to output"\
+        :"=g"(n)::"d0"); n ^= 0xffff; // OR result
+#define GETJOYSTATE2(n) asm(\
+        "move.l #0,%%d0             | clear d0\n\t"\
+        "moveq #0x40,%%d0           | set bit 6\n\t"\
+        "move.b %%d0,(0xa1000b).l   | set TH pin to 'write'\n\t"\
+        "move.b %%d0,(0xa10005).l   | TH to 1\n\t"\
+        "nop\n\tnop                 | (sync!)\n\t"\
+        "move.b (0xa10005).l,%%d0   | read byte 1\n\t"\
+        "rol.w #8,%%d0              | shift to upper\n\t"\
+        "move.b #0,(0xa10005).l     | TH to 0\n\t"\
+        "nop\n\tnop                 | (sync!)\n\t"\
+        "move.b (0xa10005).l,%%d0   | read byte 2\n\t"\
         "move.w %%d0,%0             | copy to output"\
         :"=g"(n)::"d0"); n ^= 0xffff; // OR result
 

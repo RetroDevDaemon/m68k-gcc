@@ -6,11 +6,10 @@
 #define BG_WIDTH 64
 #define BG_HEIGHT 32
 
-inline void __attribute__((optimize("O3"))) GAME_DRAW();
+void __attribute__((optimize("O3"))) GAME_DRAW();
 
 #include "bentgen.h"
 
-//#define static static const
 // Tile format is: e.g. 0x0077BB77
 // 2 Pixels per byte, left to right, color 0-f. Easy to plot
 #include "font.h"
@@ -20,12 +19,13 @@ inline void __attribute__((optimize("O3"))) GAME_DRAW();
 
 // game function defs 
 void __attribute__((optimize("Os"))) main();
-inline void GAME_INPUT();
+void GAME_INPUT();
+void ProcessInput();
 Sprite* AddSprite(u16 ypos, u8 size, u16 attr, u16 xpos);
 u16 strsize(String* s);
 
-// MUST BE STATIC CONST POINTER! idk why
-//static u16* pals[4];
+// MUST BE ram CONST POINTER! idk why
+//ram u16* pals[4];
 u8 fq;
 u8 pSpeed;
 u32 frameCounter;
@@ -40,9 +40,22 @@ Sprite* p1ship;
 Sprite* test;
 u8 NUM_SPRITES;
 u32* spriteRamPtr;
-u16 joyState;
+static u16 joyState1;
+static u16 last_joyState1;
+static u16 joyState2;
+static u16 last_joyState2;
     
 static Sprite activeSprites[80];
+//static struct bullet* playerBullets[40];
+u8 num_p_bullets = 0;
+
+struct bullet { 
+    signed char timer;
+    Sprite* myspr;
+};
+
+bool REORDER_SPRITES = false;
+u8 sprites_destroyed = 0;
 
 Sprite* AddSprite(u16 ypos, u8 size, u16 attr, u16 xpos)
 {
@@ -54,6 +67,18 @@ Sprite* AddSprite(u16 ypos, u8 size, u16 attr, u16 xpos)
     activeSprites[NUM_SPRITES].x_pos = xpos;
     NUM_SPRITES++;
     return &activeSprites[NUM_SPRITES-1];
+}
+
+Sprite* AddSpriteAt(u16 ypos, u8 size, u16 attr, u16 xpos, u8 spriteNum)
+{
+    activeSprites[spriteNum].y_pos = ypos;
+    activeSprites[spriteNum].size = size; // use macro 
+    //if(NUM_SPRITES > 0) activeSprites[NUM_SPRITES-1].next = NUM_SPRITES;
+    activeSprites[spriteNum].next = spriteNum + 1;
+    activeSprites[spriteNum].spr_attr = attr;
+    activeSprites[spriteNum].x_pos = xpos;
+    //NUM_SPRITES++;
+    return &activeSprites[spriteNum];
 }
 
 void main()
@@ -101,22 +126,87 @@ void main()
 
     while(1)
     { 
-        /* Do nothing!!
-        frameCounter++;
-        WaitHBlank();
-        VDPStatus_u16(vdpstat);
-        hcount++;
-        */
-        //GAME_INPUT();
+        u8 lastEmpty = 0;
+        // every time a sprite is changed, search through SAT RAM and 
+        //  find the first spr_attr = 0. mark this as the next sprite.
+        //  -- don't unlink sprites! just move them off-screen! --
+        ProcessInput();     // Process last frame's buttons
+        for(i = 0; i < 40; i++) // BULLET HELL!
+        { 
+            activeSprites[i+2].x_pos += 18;
+            if(activeSprites[i+2].x_pos > 470) {
+                activeSprites[i+2].x_pos = p1ship->x_pos;
+                activeSprites[i+2].y_pos = p1ship->y_pos;
+            }
+        }
 
-        WaitVBlank();
+        WaitVBlank();       // Wait until draw is done
+        GAME_INPUT();       // get fresh joy states
+    }
+}
+
+// how to remove a sprite:
+// (1. change link order if priority is an issue)
+// 2. set y=350, attr and size to 0
+//      AND decrement sprite counter
+// 3. set REORDER_SPRITES flag to true
+// 4. next loop, reorder all sprite ram - if attr != 0 then its a valid sprite
+//    copy entire spr data backwards to the last empty location - minus link
+void RemoveSprite(Sprite* spr)
+{
+    spr->y_pos = 350;
+    spr->spr_attr = 0;
+    spr->size = 0;
+    NUM_SPRITES--;
+    REORDER_SPRITES = true;
+}
+
+ /* old loop: Do nothing!!
+frameCounter++;
+WaitHBlank();
+VDPStatus_u16(vdpstat);
+hcount++;
+    */
+
+void ProcessInput()
+{
+    if(joyState1 & BTN_A_PRESSED) { // Fire test
+        if(num_p_bullets < 40)
+        {
+            AddSprite(p1ship->y_pos,\
+                SPRSIZE(2,2), \
+                SPR_ATTR(0x31, 0, 0, 0, 0), \
+                p1ship->x_pos);
+            num_p_bullets++;
+            //playerBullets[num_p_bullets]->timer = 15;
+        }
+        
+    }
+    if(joyState1 & BTN_UP_PRESSED) // Up
+    {
+        p1ship->y_pos -= pSpeed;
+        test->y_pos -= pSpeed;
+    }
+    if(joyState1 & BTN_DOWN_PRESSED) // Down
+    {
+        p1ship->y_pos += pSpeed;
+        test->y_pos += pSpeed;
+    }
+    if(joyState1 & BTN_LEFT_PRESSED) // Left
+    {
+        p1ship->x_pos -= pSpeed;
+        test->x_pos -= pSpeed;
+    }
+    if(joyState1 & BTN_RIGHT_PRESSED) // Right
+    {
+        p1ship->x_pos += pSpeed;
+        test->x_pos += pSpeed;
     }
 }
 
 // Called during VBlank
 void GAME_DRAW()
 {   
-    GAME_INPUT();
     // TODO: Convert this to DMA
     u32* spr = (u32*)&activeSprites[0];
     SetVRAMWriteAddress(VRAM_SAT);
@@ -125,33 +215,10 @@ void GAME_DRAW()
 
 void GAME_INPUT()
 {
-    joyState = null;
-    GETJOYSTATE1(joyState);
-
-    if(joyState & bit(0)) // Up
-    {
-        p1ship->y_pos -= pSpeed;
-        test->y_pos -= pSpeed;
-    }
-    if(joyState & bit(1)) // Down
-    {
-        p1ship->y_pos += pSpeed;
-        test->y_pos += pSpeed;
-    }
-    //if(joyState & bit(4)) // A
-    if(joyState & bit(10)) // Left
-    {
-        p1ship->x_pos -= pSpeed;
-        test->x_pos -= pSpeed;
-    }
-    //if(joyState & bit(5)) // St
-    if(joyState & bit(11)) // Right
-    {
-        p1ship->x_pos += pSpeed;
-        test->x_pos += pSpeed;
-    }
-    // bit(12) B 
-    // bit(13) C
+    last_joyState1 = joyState1;
+    GETJOYSTATE1(joyState1);
+    last_joyState2 = joyState2;
+    GETJOYSTATE2(joyState2);
 }
 
 u16 strsize(String* s)
