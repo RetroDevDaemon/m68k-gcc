@@ -8,7 +8,7 @@ px = f.load()
 f.close()
 bn = os.path.basename(sys.argv[1])
 bn = bn.split('.')[0]
-outcstr = 'u16 ' + bn + '[] = { \n\t'
+outcstr = 'const u16 ' + bn + '[] = { \n\t'
 i = 0
 while i < 16:
     palw = 0

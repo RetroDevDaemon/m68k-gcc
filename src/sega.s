@@ -17,7 +17,7 @@
 
 _Start_Of_Rom:
 _Vectors_68K:
-        dc.l    0x00FFFE00              /* Stack address */
+        dc.l    0x00FFF000              /* Stack address */
         dc.l    _Entry_Point            /* Program start address */
         dc.l    _Bus_Error
         dc.l    _Address_Error
@@ -43,9 +43,9 @@ _Vectors_68K:
         dc.l    _INT,_INT,_INT,_INT,_INT,_INT,_INT,_INT
 
 	.ascii	"SEGA MEGA DRIVE " 					/* Console Name (16) */
-	.ascii	"(C)2021         "					/* Copyright Information (16) */
-	.ascii	"Star Thrall                                     "	/* Domestic Name (48) */
-	.ascii	"Star Thrall                                     "	/* Domestic Name (48) */
+	.ascii	"(C)2021 BCG     "					/* Copyright Information (16) */
+	.ascii	"GunThrall                                     "	/* Domestic Name (48) */
+	.ascii	"GunThrall                                     "	/* Domestic Name (48) */
 	.ascii	"GM 00000000-00"					/* Serial Number (2, 14) */
 	dc.w	0x0000							/* Checksum (2) */
 	.ascii	"J               "					/* I/O Support (16) */
@@ -288,7 +288,7 @@ SetupValues:
 .byte		255			/* VDP 0x8A - HBlank register		*/
 .byte		0			/* VDP 0x8B - full screen scroll		*/
 .byte		0x81			/* VDP 0x8C - 40 cell display		*/
-.byte		(0xDC00>>10)		/* VDP 0x8D - hscroll table address		*/
+.byte		(0xF800>>10)		/* VDP 0x8D - hscroll table address		*/
 .byte		0			/* VDP 0x8E - unused		*/
 .byte		1			/* VDP 0x8F - VDP increment		*/
 .byte		1			/* VDP 0x90 - 64 cell hscroll size		*/

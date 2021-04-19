@@ -6,26 +6,19 @@
 #define BG_WIDTH 64
 #define BG_HEIGHT 32
 
-void __attribute__((optimize("O3"))) GAME_DRAW();
-
 #include "bentgen.h"
 
 // Tile format is: e.g. 0x0077BB77
 // 2 Pixels per byte, left to right, color 0-f. Easy to plot
-#include "font.h"
-#include "palette.h"
-#include "player1.h"
-#include "playership_pal.h"
-#include "pbullet1.h"
+#include "gfx.h"
 
 // game function defs 
-void __attribute__((optimize("Os"))) main();
+void main();
 void GAME_INPUT();
 
+u8 FindFirstEmptyBullet();
+void LinkBulletsTwo();
 void ProcessInput();
-Sprite* AddSprite(Sprite* as, u16 ypos, u8 size, u16 attr, u16 xpos);
-u16 strsize(String* s);
-void LinkAllSpriteData();
 
 // Global Vars
 u8 fq;
@@ -49,7 +42,6 @@ u8 sprites_destroyed = 0;
 
 // Sprite definitions
 static Sprite player1sprite;
-const void* spriteRamBase = &player1sprite;
 static Sprite playerBullets[29];
 static Sprite enemySprites[15];
 static Sprite enemyBullets[35];
@@ -81,10 +73,13 @@ struct bullet
 
 void main()
 {   
+    //WaitVBlank();
     spriteRamBase = &player1sprite;
     LinkAllSpriteData();
+    LinkBulletsTwo();
     LoadPalette(1, (u16*)&playership_pal);
     LoadPalette(0, (u16*)&palette);
+    LoadPalette(2, (u16*)&asteroid_palette);
     
     u8 i = 0;
     u16 c = 0; 
@@ -94,6 +89,7 @@ void main()
     NUM_SPRITES = 0;
 
 /// INITIALIZE VRAM GRAPHICS ///
+    // 0-400h is empty for now
     // Copy in our font!
     // Tile number 32 (start of ascii table) * 32 bytes per tile = 1024 = $400
     SetVRAMWriteAddress(0x400);
@@ -118,13 +114,24 @@ void main()
         cr += c;
         WRITE_DATAREG32(*cr);
     }
+    // asteroid - ID 144
+    for(c = 0; c < (8 * 20); c++) {
+        cr = (u32*)&asteroid_0;
+        cr += c;
+        WRITE_DATAREG32(*cr);
+    } // to 164
 ///
 
     // set ship as 4x3 sprite
     // size: E. 8 bytes
     p1ship = AddSprite(&player1sprite, 200, SPRSIZE(4,3), SPR_ATTR(128, 0, 0, 1, 0), 200);
     test = AddSprite(&enemySprites[0], 250, SPRSIZE(4,3), SPR_ATTR(128, 0, 0, 0, 0), 250);
-    
+
+#define ASTEROID_A 144
+
+    DrawTile(BG_A, TILEATTR(144, 0, 0, 2, 0), 10, 10, 5, 4);
+    DrawTile(BG_A, TILEATTR(144, 0, 0, 2, 0), 12, 17, 5, 4);
+
     // BG plane A
     print(BG_A, 0, 0, hw);
     print(BG_A, 1, 1, hw2);
@@ -165,6 +172,11 @@ void main()
                 }
             }
         }
+
+        bga_hscroll_pos += 20;
+        bga_vscroll_pos -= 20;
+        bgb_hscroll_pos++;
+        bgb_vscroll_pos++;
     }
 }
 
@@ -173,19 +185,25 @@ void GAME_DRAW()
 {   
     if(frameFlip == 0) frameFlip = 1;
     else frameFlip = 0;
-    //frameFlip = 1;
-    GAME_INPUT();       // get fresh joy states
-    // TODO: Convert this to DMA
 
+    GAME_INPUT();       // get fresh joy states
+
+    // TODO: Convert this to DMA
     u32* spr = spriteRamBase;
     SetVRAMWriteAddress(VRAM_SAT);
     // player1
     WRITE_DATAREG32(*spr++);
     WRITE_DATAREG32(*spr++); 
     // bullet flicker
-    if(frameFlip) spr = (u32*)&playerBullets;
-    else spr = (u32*)&playerBulletsTwo;
-    for(u8 i = 0; i < PLAYER_BULLET_MAX*2; i++) WRITE_DATAREG32(*spr++);
+    u8 i = 0;
+    if(frameFlip) { spr = (u32*)&playerBullets; }
+    else { spr = (u32*)&playerBulletsTwo; }
+    for(i = 0; i < PLAYER_BULLET_MAX*2; i++) { WRITE_DATAREG32(*spr++); }
+    spr = (u32*)&enemySprites;
+    for(i = 0; i < 15 * 2; i++) { WRITE_DATAREG32(*spr++); }
+
+    // write scroll ram
+    UpdateBGScroll();
 }
 
 void GAME_INPUT()
@@ -203,30 +221,10 @@ VDPStatus_u16(vdpstat);
 hcount++;
     */
 
-Sprite* AddSprite(Sprite* as, u16 ypos, u8 size, u16 attr, u16 xpos)
+void LinkBulletsTwo()
 {
-    as->y_pos = ypos;
-    as->size = size;     // use SPRSIZE macro 
-    as->spr_attr = attr;
-    as->x_pos = xpos;
-    return as;
-}
-
-void LinkAllSpriteData()
-{
-    Sprite* s = (Sprite*)spriteRamBase;
-    // Set all 80 sprites to linear draw/link order
-    for(u8 i = 0; i < 80; i++) 
-    {
-        s[i].spr_attr = null;   // set to blank sprite
-        s[i].next = i + 1;
-        s[i].x_pos = 0;
-        s[i].y_pos = 0;
-        s[i].size = 0;
-    }
-    s[79].next = 0;     // final sprite must link to 0
     // UH OH! Link these fools!
-    s = (Sprite*)&playerBullets;
+    Sprite* s = (Sprite*)&playerBullets;
     for(u8 i = 0; i < PLAYER_BULLET_MAX; i++){
         playerBulletsTwo[i].next = s[i].next;
     }
@@ -296,12 +294,4 @@ void ProcessInput()
         p1ship->x_pos += pSpeed;
         test->x_pos += pSpeed;
     }
-}
-
-
-u16 strsize(String* s)
-{
-    u16 sz;
-    while(*s != '\00') sz++;
-    return sz;
 }

@@ -20,3 +20,4 @@ while i > 0:
     f.write(bytes([0]))
     i -= 1
 f.close()
+print(str(fsiz) + ' padded to ' + str(ofs))

@@ -2,7 +2,7 @@
 # @RetroDevDiscord
 #==============================
 CC=m68k-elf-gcc 
-CFLAGS=-nostdlib -O0 -m68000 -std=gnu11 -fno-pie -no-pie -fno-use-linker-plugin -fomit-frame-pointer 
+CFLAGS=-nostdlib -O0 -m68000 -std=gnu11 -fno-pie -no-pie -fno-use-linker-plugin -fomit-frame-pointer -fno-inline -fno-builtin-inline 
 AS=m68k-elf-as
 ASFLAGS=-march=68000 --register-prefix-optional 
 LD=m68k-elf-ld 
@@ -16,7 +16,7 @@ LINKSCR=rom.ld
 
 # Link order should be sega.s, main.s, everything else
 main: DIRs
-	${CC} ${CFLAGS} -O0 -v -Isrc -Ires -fno-inline -fno-builtin-inline -S ${SRCDIR}/main.c -o ${BUILDDIR}/main.s
+	${CC} ${CFLAGS} -v -Isrc -Ires -S ${SRCDIR}/main.c -o ${BUILDDIR}/main.s
 	${AS} ${ASFLAGS} -als=${OUTDIR}/listing.lst -o ${BUILDDIR}/main.o ${SRCDIR}/sega.s ${BUILDDIR}/main.s ${SRCDIR}/68kmath.s  
 	${LD} -s -Tsrc/${LINKSCR} -o ${OUTDIR}/_main.rom ${BUILDDIR}/main.o
 	${PYTHON} tools/padrom.py ${OUTDIR}/_main.rom
