@@ -5,30 +5,32 @@ MEMORY
 }
 SECTIONS
 {
-
   .text : {
     . = ALIGN(2);
     _stext = .;
-    *(.text)
+    *(.text*)
     . = ALIGN(2);
-    *(.rodata)
-    . = ALIGN(2); 
+    *(.rodata*)
+    . = ALIGN(2);
+    _etext = .; 
   } > ROM 
   _end_rom = .;
   . = 0xFF0000;
-  .data : AT (ADDR(.text) + SIZEOF(.text)){
+  .data : AT (ADDR(.text) + SIZEOF(.text) + SIZEOF(.rodata)){
     . = ALIGN(2);
     _sdata = .;
-    *(.data)
+    *(.data*)
     . = ALIGN(2);
+    _edata = .;
   } > RAM
-  .bss : { 
+  .bss :  { 
     . = ALIGN(2);
-    *(.bss)
+    _sbss = .;
+    *(.bss*)
     . = ALIGN(2);
     *(COMMON)
     . = ALIGN(2);
+    _ebss = .;
   } > RAM
-     
 }
 OUTPUT_FORMAT(binary)

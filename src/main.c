@@ -1,39 +1,13 @@
 
-#include "bentgen.h"
 
-//; 68k memory map
-#define CTRL_1_DATA 0x00A10003
-#define CTRL_2_DATA 0x00A10005
-#define CTRL_X_DATA 0x00A10007
-#define CTRL_1_CONTROL 0x00A10009
-#define CTRL_2_CONTROL 0x00A1000B
-#define CTRL_X_control 0x00A1000D
-#define REG_HWVERSION 0x00A10001
-#define REG_TMS 0x00A14000
-#define PSG_INPUT 0x00C00011
-#define RAM_START 0x00FF0000
-#define VDP_DATA 0x00C00000
-#define VDP_CONTROL 0x00C00004
-#define VDP_COUNTER 0x00C00008
-#define Z80_ADDRESS_SPACE 0x00A10000
-#define Z80_BUS 0x00A11100
-#define Z80_RESET 0x00A11200
-//; VDP access modes
-#define VDP_CRAM_READ 0x20000000
-#define VDP_CRAM_WRITE WRITE_PAL0
-#define VDP_VRAM_READ 0x00000000
-#define VDP_VRAM_WRITE 0x40000000
-#define VDP_VSRAM_READ 0x10000000
-#define VDP_VSRAM_WRITE 0x14000000
-//; buttons
-#define BUTTON_UP_PRESSED 0x01
-#define BUTTON_DOWN_PRESSED 0x02
-#define BUTTON_LEFT_PRESSED 0x04
-#define BUTTON_RIGHT_PRESSED 0x08
-#define BUTTON_B_PRESSED 0x10
-#define BUTTON_C_PRESSED 0x20
-#define BUTTON_A_PRESSED 0x40
-#define BUTTON_START_PRESSED 0x80
+#define VRAM_BG_B 0xe000
+#define VRAM_BG_A 0xc000
+#define VRAM_SAT 0xd800
+
+#define BG_WIDTH 64
+#define BG_HEIGHT 32
+
+#include "bentgen.h"
 
 u32 frameCounter;
 u16 vdpstat;
@@ -88,7 +62,8 @@ static const u32 letterA[8] = {
 
 // MUST BE STATIC CONST POINTER! idk why
 static const u16* pals[4];
-    
+u8 fq;
+
 void main()
 {   
 
@@ -99,16 +74,11 @@ void main()
     pals[1] = &palette4;
     LoadPalette(2, pals[0]);
     LoadPalette(3, pals[1]);
-
-    u8 fq;
+    // Enable VBlank on VDP 
+    WriteVDPRegister(WRITE|REG(1)|0x64);
+    
     while(1)
     { 
-        WriteVDPRegister((u32)WRITE|REG(7)|fq);
-        fq++;
-        u8 i;
-        for(i = 0; i < 10; i++) WaitVBlank();
-        if(fq > 63) fq = 0;
-        
         /*
         frameCounter++;
         WaitHBlank();
@@ -116,4 +86,11 @@ void main()
         hcount++;
         */
     }
+}
+
+void GAME_DRAW()
+{
+    WriteVDPRegister((u32)WRITE|REG(7)|fq);
+    fq++;
+    if(fq > 63) fq = 0;
 }

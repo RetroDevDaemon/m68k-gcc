@@ -2,29 +2,28 @@
 # @RetroDevDiscord
 #==============================
 CC=m68k-elf-gcc 
-CFLAGS=-nostdlib -m68000 -std=gnu11 -fno-pie -no-pie -fno-use-linker-plugin -fomit-frame-pointer 
+CFLAGS=-nostdlib -O0 -m68000 -std=gnu11 -fno-pie -no-pie -fno-use-linker-plugin -fomit-frame-pointer 
 AS=m68k-elf-as
 ASFLAGS=-march=68000 --register-prefix-optional 
-OBJCOPY=m68k-elf-objcopy
-#OBJCOPY=m68k-apple-macos-objcopy
 LD=m68k-elf-ld 
-#LD=m68k-apple-macos-ld
-OBJDUMP=m68k-elf-objdump
-#OBJDUMP=m68k-apple-macos-objdump
+LDFLAGS=
 MKDIR=mkdir 
 BUILDDIR=build
-SHOWELF=1
 SRCDIR=src
 OUTDIR=out
 PYTHON=python3
 LINKSCR=rom.ld
-HEADERSZ=0x32c
 
+# Link order should be sega.s, main.s, everything else
 main: DIRs
-	${CC} ${CFLAGS} -Ttext=${HEADERSZ} -S ${SRCDIR}/main.c -o ${BUILDDIR}/main.s
-	${AS} ${ASFLAGS} -o ${BUILDDIR}/main.o ${SRCDIR}/sega.s ${BUILDDIR}/main.s 
-	${LD} -s -T${LINKSCR} -o _main.rom ${BUILDDIR}/main.o
-	${PYTHON} tools/padrom.py _main.rom
+	${CC} ${CFLAGS} -O0 -v -Isrc -Ires -fno-inline -fno-builtin-inline -S ${SRCDIR}/main.c -o ${BUILDDIR}/main.s
+	${AS} ${ASFLAGS} -als=${OUTDIR}/listing.lst -o ${BUILDDIR}/main.o ${SRCDIR}/sega.s ${BUILDDIR}/main.s ${SRCDIR}/68kmath.s  
+	${LD} -s -Tsrc/${LINKSCR} -o ${OUTDIR}/_main.rom ${BUILDDIR}/main.o
+	${PYTHON} tools/padrom.py ${OUTDIR}/_main.rom
+	rm -rf ${OUTDIR}/_main.rom 
+
+run: main 
+	dgen out.md 
 
 # Create build directory	
 DIRs:
