@@ -31,12 +31,12 @@ typedef const char String[];
 #define SPRSIZE(x,y) (u8)(((x-1)<<2)|(y-1))
     
 
-#define WRITE_CTRLREG(n) asm("move.l %0,(0xc00004).l"::"g"(n))
-#define WRITE_DATAREG8(n) asm("move.b %0,(0xC00000).l"::"g"(n))
-#define WRITE_DATAREG16(n) asm("move.w %0,(0xc00000).l"::"g"(n))
-#define WRITE_DATAREG32(n) asm("move.l %0,(0xc00000).l"::"g"(n))
-#define READ_DATAREG32(n) asm("move.l (0xc00000).l,%0":"=g"(n):)
-#define BREAKPOINT asm("BRK%=:\n\t""jra BRK%=":::);
+#define WRITE_CTRLREG(n) asm volatile("move.l %0,(0xc00004).l"::"g"(n))
+#define WRITE_DATAREG8(n) asm volatile("move.b %0,(0xC00000).l"::"g"(n))
+#define WRITE_DATAREG16(n) asm volatile("move.w %0,(0xc00000).l"::"g"(n))
+#define WRITE_DATAREG32(n) asm volatile("move.l %0,(0xc00000).l"::"g"(n))
+#define READ_DATAREG32(n) asm volatile("move.l (0xc00000).l,%0":"=g"(n):)
+#define BREAKPOINT asm volatile("BRK%=:\n\t""jra BRK%=":::);
 
 //; 68k memory map
 #define CTRL_1_DATA 0x00A10003
@@ -119,7 +119,7 @@ void SetVRAMReadAddress(u16 address);
 void print(u8 plane, u8 x, u8 y, String str);
 
 
-#define LOADPAL(pal) asm("move.l %1, (0xc00004).l\n\t"\
+#define LOADPAL(pal) asm volatile("move.l %1, (0xc00004).l\n\t"\
     "lea %0, %%a0\n\t"\
     "move.l #0x07, %%d0\n\t"\
     "clrlewp:\n\t"\
@@ -129,9 +129,9 @@ void print(u8 plane, u8 x, u8 y, String str);
     :"m"(pal),"g"(CRAM_ADDR)\
     :"a0","d0");
 
-#define WriteVDPRegister(v) asm("move.w %0,(0xC00004).l"::"g"(v))
-#define VDPStatus_u16(var) asm("move.w (0xc00004).l,%0":"=g"(var)::)
-#define EnableIRQLevel(n) asm("move.w %0,sr"::"g"((n<<8)|0x20))
+#define WriteVDPRegister(v) asm volatile("move.w %0,(0xC00004).l"::"g"(v))
+#define VDPStatus_u16(var) asm volatile("move.w (0xc00004).l,%0":"=g"(var)::)
+#define EnableIRQLevel(n) asm volatile("move.w %0,sr"::"g"((n<<8)|0x20))
 
 
 #define WaitVBlank() asm volatile("VB%=: move.w (0xc00004).l,%%d0\n\t" \
@@ -148,7 +148,7 @@ void print(u8 plane, u8 x, u8 y, String str);
         "btst #2,%%d0\n\t" \
         "bne VB%=":::"d0")
 
-#define GETJOYSTATE1(n) asm(\
+#define GETJOYSTATE1(n) asm volatile(\
         "move.l #0,%%d0             | clear d0\n\t"\
         "moveq #0x40,%%d0           | set bit 6\n\t"\
         "move.b %%d0,(0xa10009).l   | set TH pin to 'write'\n\t"\
@@ -161,7 +161,7 @@ void print(u8 plane, u8 x, u8 y, String str);
         "move.b (0xa10003).l,%%d0   | read byte 2\n\t"\
         "move.w %%d0,%0             | copy to output"\
         :"=g"(n)::"d0"); n ^= 0xffff; // OR result
-#define GETJOYSTATE2(n) asm(\
+#define GETJOYSTATE2(n) asm volatile(\
         "move.l #0,%%d0             | clear d0\n\t"\
         "moveq #0x40,%%d0           | set bit 6\n\t"\
         "move.b %%d0,(0xa1000b).l   | set TH pin to 'write'\n\t"\
