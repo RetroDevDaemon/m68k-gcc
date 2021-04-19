@@ -61,7 +61,7 @@ typedef const char String[];
 #define VDP_VRAM_READ 0x00000000
 #define VDP_VRAM_WRITE 0x40000000
 #define VDP_VSRAM_READ 0x10000000
-#define VDP_VSRAM_WRITE 0x14000000
+//#define VDP_VSRAM_WRITE 0x14000000 bad
 //; buttons
 #define BTN_UP_PRESSED bit(0)
 #define BTN_DOWN_PRESSED bit(1)
@@ -77,8 +77,8 @@ typedef const char String[];
 // C000 - D800 : BG_A
 // D800 - E000 : SAT
 // e000 - f000 : BG_B
-// f000 - fc00 : window map
-// fc00 +      : hscroll table 
+// f000 - f800 : window map
+// f800 +      : hscroll table 
 
 // Tilemap format:
 // LPPVHTTT TTTTTTTT
@@ -106,9 +106,12 @@ typedef struct spriteAttribute {
 
 #define SPR_ATTR(tileno, hf, vf, pal, pri) \
     (u16)(tileno|(hf<<11)|(vf<<12)|(pal<<13)|(pri<<15))
+#define TILEATTR(n, hf, vf, pal, pri) \
+    (u16)(n|(hf<<11)|(vf<<12)|(pal<<13)|(pri<<15))
 
 void _start();
 void main();
+void GAME_DRAW();
 void __attribute__((interrupt)) catch();
 void __attribute__((interrupt)) HBlank();
 void __attribute__((interrupt)) VBlank();
@@ -117,6 +120,13 @@ void SetVDPPlaneAddress(u8 plane, u16 addr);
 void SetVRAMWriteAddress(u16 address);
 void SetVRAMReadAddress(u16 address);
 void print(u8 plane, u8 x, u8 y, String str);
+//
+Sprite* AddSprite(Sprite* as, u16 ypos, u8 size, u16 attr, u16 xpos);
+u16 strsize(String* s);
+void LinkAllSpriteData();
+void DrawSpriteAsTile(u8 plane, u16 tileNo, u8 x, u8 y, u8 w, u8 h);
+void DrawTile(u8 plane, u16 TILEATTR, u8 x, u8 y, u8 w, u8 h);
+void UpdateBGScroll();
 
 
 #define LOADPAL(pal) asm volatile("move.l %1, (0xc00004).l\n\t"\
@@ -195,7 +205,9 @@ void VBlank()
     return;
 }
 
+
 void _start() {
+    asm("movea.l 0x00FFF000,%%sp":::"sp"); // set stack pointer if its not
     // enable VBL IRQ
     EnableIRQLevel(5);
     main(); 
@@ -281,5 +293,90 @@ void print(u8 plane, u8 x, u8 y, String str)
         i++;
     }
 }
+
+
+// Use DrawTile when possible
+void DrawSpriteAsTile(u8 plane, u16 tileNo, u8 x, u8 y, u8 w, u8 h)
+{
+    WriteVDPRegister(WRITE|REG(0xf)|2); // auto - inc
+    u16* start = VRAM_BG_A + (2 * ((BG_WIDTH * y) + x));
+    if(plane == BG_B) start = VRAM_BG_B + (2 * ((BG_WIDTH + y) + x));
+    for(u8 xx = 0; xx < w; xx++) { 
+        for(u8 yy = 0; yy < h; yy++) {
+            SetVRAMWriteAddress(start + (0x40*yy) + xx); // much slower iteration loop
+            WRITE_DATAREG16(tileNo++);
+        }
+    }
+}
+
+// Tilemap format:
+// LPPVHTTT TTTTTTTT
+// bits 0-10: tile num 0-1024
+// bit 11: Hflip
+// bit 12: Vflip
+// bits 13-14: palette no (0-3)
+// bit 15: layer priority
+void DrawTile(u8 plane, u16 TILEATTR, u8 x, u8 y, u8 w, u8 h)
+{
+    WriteVDPRegister(WRITE|REG(0xf)|2); // auto - inc
+    // 2 bytes per character, 64 chars per plane row * 2 = 128 or $40 for newline
+    u16* start = VRAM_BG_A + (2 * ((BG_WIDTH * y) + x));
+    if(plane == BG_B) start = VRAM_BG_B + (2 * ((BG_WIDTH + y) + x));
+    for(u8 yy = 0; yy < h; yy++) { 
+        SetVRAMWriteAddress(start + (0x40*yy));
+        for(u8 xx = 0; xx < w; xx++) {
+            WRITE_DATAREG16(TILEATTR++);
+        }
+    }
+}
+
+
+static u16 bga_hscroll_pos = 0;
+static u16 bga_vscroll_pos = 0;
+static u16 bgb_hscroll_pos = 0;
+static u16 bgb_vscroll_pos = 0;
+
+void UpdateBGScroll()
+{
+    SetVRAMWriteAddress(0xf800);
+    WRITE_DATAREG32((bga_hscroll_pos << 16) | bgb_hscroll_pos);
+    asm("move.l %0,(0xc00004).l"::"g"(0x40000010+(0xf800<<14)):);
+    WRITE_DATAREG32((bga_vscroll_pos << 16) | bgb_vscroll_pos);
+}
+
+Sprite* AddSprite(Sprite* as, u16 ypos, u8 size, u16 attr, u16 xpos)
+{
+    as->y_pos = ypos;
+    as->size = size;     // use SPRSIZE macro 
+    as->spr_attr = attr;
+    as->x_pos = xpos;
+    return as;
+}
+
+const void* spriteRamBase;
+
+void LinkAllSpriteData()
+{
+    Sprite* s = (Sprite*)spriteRamBase;
+    // Set all 80 sprites to linear draw/link order
+    for(u8 i = 0; i < 80; i++) 
+    {
+        s[i].spr_attr = null;   // set to blank sprite
+        s[i].next = i + 1;
+        s[i].x_pos = 0;
+        s[i].y_pos = 0;
+        s[i].size = 0;
+    }
+    s[79].next = 0;     // final sprite must link to 0
+}
+
+
+u16 strsize(String* s)
+{
+    u16 sz;
+    while(*s != '\00') sz++;
+    return sz;
+}
+
 
 #endif
