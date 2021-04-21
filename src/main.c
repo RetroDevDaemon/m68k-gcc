@@ -2,7 +2,7 @@
 #define VRAM_BG_B 0xe000
 #define VRAM_BG_A 0xc000
 #define VRAM_SAT 0xd800
-#define VRAM_SCROLL 0xf800
+#define VRAM_SCROLL 0xfc00
 
 #define BG_WIDTH 64
 #define BG_HEIGHT 32
@@ -57,6 +57,7 @@ typedef struct {
     Sprite* ptr;    // fill when adding the sprite
     u16 tile_attr;  // tile start and pal etc. <- swap for animation
     u8 size;        // size macro 
+    u8 nop;
 } EnemyType;
 static EnemyType Enemies[15];
 
@@ -218,7 +219,6 @@ void main()
     while(1)
     { 
         WaitVBlank();       // Wait until draw is done
-        
         // MAIN GAME LOOP 
         ProcessInput();     // Process last frame's buttons
 
@@ -249,16 +249,17 @@ void main()
         }
         
         // Enemy behavior
-        for(i = 0; i < 15; i++) {
+        for(i = 0; i < 2; i++) {
             Enemies[i].ptr->x_pos --;
             if(twentyFrameCounter == 0) {
-                Enemies[i].tile_attr = TILEATTR(BLOB1_SPR + 4, 0, 0, 3, 0);
+                Enemies[i].ptr->spr_attr = TILEATTR(BLOB1_SPR + 4, 0, 0, 3, 0);
             }
             if(twentyFrameCounter == 10) {
-                Enemies[i].tile_attr = TILEATTR(BLOB1_SPR, 0, 0, 3, 0);
+                Enemies[i].ptr->spr_attr = TILEATTR(BLOB1_SPR, 0, 0, 3, 0);
             }  
-            enemySprites[i].spr_attr = Enemies[i].tile_attr;
+            //enemySprites[i].spr_attr = Enemies[i].tile_attr;
         }
+        
 
         // Player animation
         /*

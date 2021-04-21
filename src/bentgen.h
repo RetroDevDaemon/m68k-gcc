@@ -207,7 +207,7 @@ void VBlank()
 
 
 void _start() {
-    asm("movea.l 0x00FFF000,%%sp":::"sp"); // set stack pointer if its not
+    //asm("movea.l 0x00FFF000,%%sp":::"sp"); // set stack pointer if its not
     // enable VBL IRQ
     EnableIRQLevel(5);
     main(); 
