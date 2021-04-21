@@ -29,14 +29,14 @@ typedef const char String[];
 #define WRITE_PAL2 (u32)(0xc0400000)
 #define WRITE_PAL3 (u32)(0xc0600000)
 #define SPRSIZE(x,y) (u8)(((x-1)<<2)|(y-1))
-    
+#define asm asm volatile    
 
-#define WRITE_CTRLREG(n) asm volatile("move.l %0,(0xc00004).l"::"g"(n))
-#define WRITE_DATAREG8(n) asm volatile("move.b %0,(0xC00000).l"::"g"(n))
-#define WRITE_DATAREG16(n) asm volatile("move.w %0,(0xc00000).l"::"g"(n))
-#define WRITE_DATAREG32(n) asm volatile("move.l %0,(0xc00000).l"::"g"(n))
-#define READ_DATAREG32(n) asm volatile("move.l (0xc00000).l,%0":"=g"(n):)
-#define BREAKPOINT asm volatile("BRK%=:\n\t""jra BRK%=":::);
+#define WRITE_CTRLREG(n) asm("move.l %0,(0xc00004).l"::"g"(n))
+#define WRITE_DATAREG8(n) asm("move.b %0,(0xC00000).l"::"g"(n))
+#define WRITE_DATAREG16(n) asm("move.w %0,(0xc00000).l"::"g"(n))
+#define WRITE_DATAREG32(n) asm("move.l %0,(0xc00000).l"::"g"(n))
+#define READ_DATAREG32(n) asm("move.l (0xc00000).l,%0":"=g"(n):)
+#define BREAKPOINT asm("BRK%=:\n\t""jra BRK%=":::);
 
 //; 68k memory map
 #define CTRL_1_DATA 0x00A10003
@@ -73,7 +73,7 @@ typedef const char String[];
 #define BTN_START_PRESSED bit(5)
 
 // standard vram map:
-// 0000 - C000 : pattern defs
+// 0000 - C000 : pattern defs (enough for 1536, max 2047=0xffeo)
 // C000 - D800 : BG_A
 // D800 - E000 : SAT
 // e000 - f000 : BG_B
@@ -129,7 +129,7 @@ void DrawTile(u8 plane, u16 TILEATTR, u8 x, u8 y, u8 w, u8 h);
 void UpdateBGScroll();
 
 
-#define LOADPAL(pal) asm volatile("move.l %1, (0xc00004).l\n\t"\
+#define LOADPAL(pal) asm("move.l %1, (0xc00004).l\n\t"\
     "lea %0, %%a0\n\t"\
     "move.l #0x07, %%d0\n\t"\
     "clrlewp:\n\t"\
@@ -139,26 +139,26 @@ void UpdateBGScroll();
     :"m"(pal),"g"(CRAM_ADDR)\
     :"a0","d0");
 
-#define WriteVDPRegister(v) asm volatile("move.w %0,(0xC00004).l"::"g"(v))
-#define VDPStatus_u16(var) asm volatile("move.w (0xc00004).l,%0":"=g"(var)::)
-#define EnableIRQLevel(n) asm volatile("move.w %0,sr"::"g"((n<<8)|0x20))
+#define WriteVDPRegister(v) asm("move.w %0,(0xC00004).l"::"g"(v))
+#define VDPStatus_u16(var) asm("move.w (0xc00004).l,%0":"=g"(var)::)
+#define EnableIRQLevel(n) asm("move.w %0,sr"::"g"((n<<8)|0x20))
 
 
-#define WaitVBlank() asm volatile("VB%=: move.w (0xc00004).l,%%d0\n\t" \
+#define WaitVBlank() asm("VB%=: move.w (0xc00004).l,%%d0\n\t" \
         "btst #3,%%d0\n\t" \
         "beq VB%=\n\t" \
         "VBB%=: move.w (0xc00004).l,%%d0\n\t"\
         "btst #3,%%d0\n\t"\
         "bne VBB%=":::"d0");
     
-#define WaitHBlank() asm volatile("VB%=: move.w (0xc00004).l,%%d0\n\t" \
+#define WaitHBlank() asm("VB%=: move.w (0xc00004).l,%%d0\n\t" \
         "btst #2,%%d0\n\t" \
         "beq VB%=":::"d0");\
-    asm volatile("VB%=: move.w (0xc00004).l,%%d0\n\t" \
+    asm("VB%=: move.w (0xc00004).l,%%d0\n\t" \
         "btst #2,%%d0\n\t" \
         "bne VB%=":::"d0")
 
-#define GETJOYSTATE1(n) asm volatile(\
+#define GETJOYSTATE1(n) asm(\
         "move.l #0,%%d0             | clear d0\n\t"\
         "moveq #0x40,%%d0           | set bit 6\n\t"\
         "move.b %%d0,(0xa10009).l   | set TH pin to 'write'\n\t"\
@@ -171,7 +171,7 @@ void UpdateBGScroll();
         "move.b (0xa10003).l,%%d0   | read byte 2\n\t"\
         "move.w %%d0,%0             | copy to output"\
         :"=g"(n)::"d0"); n ^= 0xffff; // OR result
-#define GETJOYSTATE2(n) asm volatile(\
+#define GETJOYSTATE2(n) asm(\
         "move.l #0,%%d0             | clear d0\n\t"\
         "moveq #0x40,%%d0           | set bit 6\n\t"\
         "move.b %%d0,(0xa1000b).l   | set TH pin to 'write'\n\t"\
@@ -276,6 +276,7 @@ void LoadPalette(u8 palNo, u16* p)
 
 void print(u8 plane, u8 x, u8 y, String str)
 {
+    //WriteVDPRegister(WRITE|REG(0xf)|2);
     // 2 bytes per character, 64 chars per plane row * 2 = 128 or $80 for newline
     switch(plane){
         case(BG_A):    // BG_A
@@ -298,7 +299,7 @@ void print(u8 plane, u8 x, u8 y, String str)
 // Use DrawTile when possible
 void DrawSpriteAsTile(u8 plane, u16 tileNo, u8 x, u8 y, u8 w, u8 h)
 {
-    WriteVDPRegister(WRITE|REG(0xf)|2); // auto - inc
+    //WriteVDPRegister(WRITE|REG(0xf)|2); // auto - inc
     u16* start = VRAM_BG_A + (2 * ((BG_WIDTH * y) + x));
     if(plane == BG_B) start = VRAM_BG_B + (2 * ((BG_WIDTH + y) + x));
     for(u8 xx = 0; xx < w; xx++) { 
@@ -318,12 +319,13 @@ void DrawSpriteAsTile(u8 plane, u16 tileNo, u8 x, u8 y, u8 w, u8 h)
 // bit 15: layer priority
 void DrawTile(u8 plane, u16 TILEATTR, u8 x, u8 y, u8 w, u8 h)
 {
-    WriteVDPRegister(WRITE|REG(0xf)|2); // auto - inc
+    //WriteVDPRegister(WRITE|REG(0xf)|2); // auto - inc
     // 2 bytes per character, 64 chars per plane row * 2 = 128 or $40 for newline
-    u16* start = VRAM_BG_A + (2 * ((BG_WIDTH * y) + x));
+    u16* start = 0;
+    if(plane == BG_A) start = VRAM_BG_A + (2 * ((BG_WIDTH * y) + x));
     if(plane == BG_B) start = VRAM_BG_B + (2 * ((BG_WIDTH + y) + x));
     for(u8 yy = 0; yy < h; yy++) { 
-        SetVRAMWriteAddress(start + (0x40*yy));
+        SetVRAMWriteAddress((u16*)(start + (0x40*yy)));
         for(u8 xx = 0; xx < w; xx++) {
             WRITE_DATAREG16(TILEATTR++);
         }
@@ -335,15 +337,19 @@ static u16 bga_hscroll_pos = 0;
 static u16 bga_vscroll_pos = 0;
 static u16 bgb_hscroll_pos = 0;
 static u16 bgb_vscroll_pos = 0;
-
+// Ensure VRAM_SCROLL is defined first: default 0xf800
 void UpdateBGScroll()
 {
-    SetVRAMWriteAddress(0xf800);
+    //WriteVDPRegister(WRITE|REG(0xf)|4);
+    SetVRAMWriteAddress(VRAM_SCROLL);
     WRITE_DATAREG32((bga_hscroll_pos << 16) | bgb_hscroll_pos);
-    asm("move.l %0,(0xc00004).l"::"g"(0x40000010+(0xf800<<14)):);
+    asm("move.l %0,(0xc00004).l":
+        :"g"(0x40000010 + (VRAM_SCROLL << 14)):);
     WRITE_DATAREG32((bga_vscroll_pos << 16) | bgb_vscroll_pos);
 }
 
+// Usage: 
+//<new sprite ptr> = AddSprite(<ptr to sprite data in SAT>, ...)
 Sprite* AddSprite(Sprite* as, u16 ypos, u8 size, u16 attr, u16 xpos)
 {
     as->y_pos = ypos;
@@ -354,7 +360,7 @@ Sprite* AddSprite(Sprite* as, u16 ypos, u8 size, u16 attr, u16 xpos)
 }
 
 const void* spriteRamBase;
-
+// Before calling this, point spriteRamBase to the correct location
 void LinkAllSpriteData()
 {
     Sprite* s = (Sprite*)spriteRamBase;
@@ -363,8 +369,8 @@ void LinkAllSpriteData()
     {
         s[i].spr_attr = null;   // set to blank sprite
         s[i].next = i + 1;
-        s[i].x_pos = 0;
-        s[i].y_pos = 0;
+        s[i].x_pos = 511;
+        s[i].y_pos = 511;
         s[i].size = 0;
     }
     s[79].next = 0;     // final sprite must link to 0
