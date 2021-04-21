@@ -7,6 +7,9 @@ typedef unsigned short u16;
 typedef unsigned char u8;
 typedef u8 bool;
 typedef const char String[];
+typedef signed long s32;
+typedef signed short s16;
+typedef signed char s8;
 
 #define NULL 0 
 #define null NULL 

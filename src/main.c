@@ -12,7 +12,7 @@
 // Tile format is: e.g. 0x0077BB77
 // 2 Pixels per byte, left to right, color 0-f. Easy to plot
 #include "gfx.h"
-
+//#include "xgm.h"
 // game function defs 
 void main();
 void GAME_INPUT();
@@ -94,12 +94,13 @@ void __attribute__((optimize("Os"))) stdcpy(u32* src, u32* dst, u32 siz)
 
 void main()
 {   
-    //WaitVBlank();
+    //XGM_setLoopNumber(-1);
+    WaitVBlank();
     //stdcpy(0x00ff0000, 0x00ff0001, 100);
     spriteRamBase = &player1sprite;
     LinkAllSpriteData();
     LinkBulletsTwo();
-    LoadPalette(1, (u16*)&phaes1_palette);
+    LoadPalette(1, (u16*)&enemy_palette1);
     LoadPalette(0, (u16*)&level1_bga_palette);
     LoadPalette(2, (u16*)&level1_bga_palette2);
     LoadPalette(3, (u16*)&slime1_palette);
@@ -144,56 +145,56 @@ void main()
         cr += c;
         WRITE_DATAREG32(*cr);
     } // to 164
-    for(c = 0; c < (8 * 32); c++) { // 2x2 * 8 frames
+    for(c = 0; c < (8 * 20); c++) { // 5 frames
         cr = (u32*)&slime1_sheet_0;
         cr += c;
         WRITE_DATAREG32(*cr);
-    } // to 196
+    } // to 184
     for(c = 0; c < (16*3*8); c++) { // phaes only
     //for(c = 0; c < (16*5*8); c++) { // phaesta and hairb +harc
         cr = (u32*)&phaes1_rows_0;
         cr += c;
         WRITE_DATAREG32(*cr);
-    } //244:
-    for(c = 0; c < (8 * 575); c++) { //575
+    } //232:
+    for(c = 0; c < (8 * 633); c++) { 
         cr = (u32*)&stage1_bga_b_0;
         cr += c;
         WRITE_DATAREG32(*cr);
-    } // 819:
+    } // 865:
     for(c = 0; c < (8 * 216); c++) { 
         cr = (u32*)&stage1_bottombg_0;
         cr += c;
         WRITE_DATAREG32(*cr);
-    } // 1035:
+    } // 1081:
     for(c = 0; c < (8 * 16); c++) { // moon
         cr = (u32*)&moons_0;
         cr += c;
         WRITE_DATAREG32(*cr);
     }
 ///
-    AddSprite(&moon, 150, SPRSIZE(4,4), SPR_ATTR(1035, 0, 0, 0, 0), 300);
+    AddSprite(&moon, 150, SPRSIZE(4,4), SPR_ATTR(1081, 0, 0, 0, 0), 300);
     // draw map test
     // FRONT LAYER
-    DrawTile(BG_A, TILEATTR(819, 0, 0, 0, 0), 0, 21, 27, 8);
-    DrawTile(BG_A, TILEATTR(819, 0, 0, 0, 0), 27, 21, 27, 8);
-    DrawTile(BG_A, TILEATTR(819, 0, 0, 0, 0), 64-27, 21, 27, 8);
+    DrawTile(BG_A, TILEATTR(865, 0, 0, 0, 0), 0, 21, 27, 8);
+    DrawTile(BG_A, TILEATTR(865, 0, 0, 0, 0), 27, 21, 27, 8);
+    DrawTile(BG_A, TILEATTR(865, 0, 0, 0, 0), 64-27, 21, 27, 8);
     // BG LAYER
-    for(u8 y = 0; y < 30; y++){
+    for(u8 y = 0; y < 25; y++){
         SetVRAMWriteAddress(VRAM_BG_B + (0x80 * y));
         for(c = 0; c < 48; c++) {
-            WRITE_DATAREG16((u16)(244 + stage1_bga_b_map[(y*48)+c])|(pal_no(2)));
+            WRITE_DATAREG16((u16)(232 + stage1_bga_b_map[(y*48)+c])|(pal_no(2)));
         }
     }
     // set ship as 4x3 sprite
     // size: E. 8 byte
-#define PLAYER1_SPR 128
-    p1ship[0] = AddSprite(&player1sprite[0], 200, SPRSIZE(4,4), SPR_ATTR(196, 0, 0, 1, 0), 200);
-    p1ship[1] = AddSprite(&player1sprite[1], 232, SPRSIZE(4,4), SPR_ATTR(196+16, 0, 0, 1, 0), 200);
-    p1ship[2] = AddSprite(&player1sprite[2], 200, SPRSIZE(4,4), SPR_ATTR(196+32, 0, 0, 1, 0), 232);
+#define PLAYER1_SPR 184
+    p1ship[0] = AddSprite(&player1sprite[0], 200, SPRSIZE(4,4), SPR_ATTR(PLAYER1_SPR, 0, 0, 0, 0), 200);
+    p1ship[1] = AddSprite(&player1sprite[1], 232, SPRSIZE(4,4), SPR_ATTR(PLAYER1_SPR+16, 0, 0, 0, 0), 200);
+    p1ship[2] = AddSprite(&player1sprite[2], 200, SPRSIZE(4,4), SPR_ATTR(PLAYER1_SPR+32, 0, 0, 0, 0), 232);
 
 #define BLOB1_SPR 164
     Enemies[0].size = SPRSIZE(2,2);
-    Enemies[0].tile_attr = SPR_ATTR(BLOB1_SPR, 0, 0, 3, 0);
+    Enemies[0].tile_attr = SPR_ATTR(BLOB1_SPR, 0, 0, 1, 0);
     Enemies[0].ptr = AddSprite(&enemySprites[0], 180, Enemies[0].size, Enemies[0].tile_attr, 400);
     Enemies[1].ptr = AddSprite(&enemySprites[1], 200, Enemies[0].size, Enemies[0].tile_attr, 420);
     
@@ -214,8 +215,8 @@ void main()
     // Enable VBlank on VDP 
     WriteVDPRegister(WRITE|REG(1)|0x64);
     num_p_bullets = 0;
-    bgb_vscroll_pos += 45;
-    bgb_hscroll_pos += 300;
+    bgb_vscroll_pos += 24;
+    bgb_hscroll_pos += 250;
     while(1)
     { 
         WaitVBlank();       // Wait until draw is done
@@ -252,10 +253,10 @@ void main()
         for(i = 0; i < 2; i++) {
             Enemies[i].ptr->x_pos --;
             if(twentyFrameCounter == 0) {
-                Enemies[i].ptr->spr_attr = TILEATTR(BLOB1_SPR + 4, 0, 0, 3, 0);
+                Enemies[i].ptr->spr_attr = TILEATTR(BLOB1_SPR + 4, 0, 0, 1, 0);
             }
             if(twentyFrameCounter == 10) {
-                Enemies[i].ptr->spr_attr = TILEATTR(BLOB1_SPR, 0, 0, 3, 0);
+                Enemies[i].ptr->spr_attr = TILEATTR(BLOB1_SPR, 0, 0, 1, 0);
             }  
             //enemySprites[i].spr_attr = Enemies[i].tile_attr;
         }
