@@ -866,9 +866,19 @@ const u32 stage1_bga_b_86[] = {
 	0x99999999,
 	0x99999999,
 	0x99999999,
-	0x99999999,
+	0x89899898,
 };
 const u32 stage1_bga_b_87[] = {
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x98989898,
+};
+const u32 stage1_bga_b_88[] = {
 	0x99999999,
 	0x99997979,
 	0x99999999,
@@ -876,9 +886,9 @@ const u32 stage1_bga_b_87[] = {
 	0x99999999,
 	0x99999999,
 	0x99999999,
-	0x99999999,
+	0x98989898,
 };
-const u32 stage1_bga_b_88[] = {
+const u32 stage1_bga_b_89[] = {
 	0x99999999,
 	0x79797979,
 	0x99999999,
@@ -886,9 +896,29 @@ const u32 stage1_bga_b_88[] = {
 	0x99999999,
 	0x99999999,
 	0x99999999,
-	0x99999999,
+	0x98989898,
 };
-const u32 stage1_bga_b_89[] = {
+const u32 stage1_bga_b_90[] = {
+	0x99999999,
+	0x79797979,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x98989899,
+};
+const u32 stage1_bga_b_91[] = {
+	0x99999999,
+	0x79797979,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99989898,
+};
+const u32 stage1_bga_b_92[] = {
 	0x99999999,
 	0x99999999,
 	0x99999999,
@@ -896,9 +926,9 @@ const u32 stage1_bga_b_89[] = {
 	0x99999999,
 	0x99595959,
 	0x99999585,
-	0x59595855,
+	0x98595855,
 };
-const u32 stage1_bga_b_90[] = {
+const u32 stage1_bga_b_93[] = {
 	0x99999999,
 	0x99999959,
 	0x99999999,
@@ -908,7 +938,7 @@ const u32 stage1_bga_b_90[] = {
 	0x85855aaa,
 	0x55585aaa,
 };
-const u32 stage1_bga_b_91[] = {
+const u32 stage1_bga_b_94[] = {
 	0x99958555,
 	0x59585855,
 	0x99958555,
@@ -918,7 +948,7 @@ const u32 stage1_bga_b_91[] = {
 	0xaa555aaa,
 	0xaa5555aa,
 };
-const u32 stage1_bga_b_92[] = {
+const u32 stage1_bga_b_95[] = {
 	0x55555aa5,
 	0x5aaaaa55,
 	0xaaaaaaa5,
@@ -928,7 +958,7 @@ const u32 stage1_bga_b_92[] = {
 	0xaa555aa5,
 	0xaaa555a5,
 };
-const u32 stage1_bga_b_93[] = {
+const u32 stage1_bga_b_96[] = {
 	0x55aa5566,
 	0x555aa555,
 	0x555aaa55,
@@ -938,7 +968,7 @@ const u32 stage1_bga_b_93[] = {
 	0x5555555a,
 	0x555555aa,
 };
-const u32 stage1_bga_b_94[] = {
+const u32 stage1_bga_b_97[] = {
 	0x66666655,
 	0x66666666,
 	0x56555666,
@@ -948,7 +978,7 @@ const u32 stage1_bga_b_94[] = {
 	0x55555666,
 	0x55555556,
 };
-const u32 stage1_bga_b_95[] = {
+const u32 stage1_bga_b_98[] = {
 	0x55665566,
 	0x66555666,
 	0x65555666,
@@ -958,7 +988,7 @@ const u32 stage1_bga_b_95[] = {
 	0x66555556,
 	0x66666656,
 };
-const u32 stage1_bga_b_96[] = {
+const u32 stage1_bga_b_99[] = {
 	0x66666666,
 	0x66666665,
 	0x66666699,
@@ -968,7 +998,7 @@ const u32 stage1_bga_b_96[] = {
 	0x66599999,
 	0x66999999,
 };
-const u32 stage1_bga_b_97[] = {
+const u32 stage1_bga_b_100[] = {
 	0x99999995,
 	0x99999995,
 	0x99999999,
@@ -978,7 +1008,7 @@ const u32 stage1_bga_b_97[] = {
 	0x99999999,
 	0x99999999,
 };
-const u32 stage1_bga_b_98[] = {
+const u32 stage1_bga_b_101[] = {
 	0x5aa8888a,
 	0x5a888888,
 	0x5a888888,
@@ -988,7 +1018,7 @@ const u32 stage1_bga_b_98[] = {
 	0x99955999,
 	0x99999999,
 };
-const u32 stage1_bga_b_99[] = {
+const u32 stage1_bga_b_102[] = {
 	0xa8888855,
 	0x88888888,
 	0x88888888,
@@ -998,7 +1028,7 @@ const u32 stage1_bga_b_99[] = {
 	0x5aaaaa55,
 	0xaa5555a9,
 };
-const u32 stage1_bga_b_100[] = {
+const u32 stage1_bga_b_103[] = {
 	0x588aaaa5,
 	0x588aaa55,
 	0x888aaa55,
@@ -1008,39 +1038,9 @@ const u32 stage1_bga_b_100[] = {
 	0x59999999,
 	0x99999999,
 };
-const u32 stage1_bga_b_101[] = {
+const u32 stage1_bga_b_104[] = {
 	0x55999999,
 	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-};
-const u32 stage1_bga_b_102[] = {
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99566599,
-};
-const u32 stage1_bga_b_103[] = {
-	0x99999999,
-	0x79999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-};
-const u32 stage1_bga_b_104[] = {
-	0x99999999,
-	0x99797979,
 	0x99999999,
 	0x99999999,
 	0x99999999,
@@ -1050,15 +1050,55 @@ const u32 stage1_bga_b_104[] = {
 };
 const u32 stage1_bga_b_105[] = {
 	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99566599,
+};
+const u32 stage1_bga_b_106[] = {
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99989898,
+};
+const u32 stage1_bga_b_107[] = {
+	0x99999999,
+	0x79999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x98989898,
+};
+const u32 stage1_bga_b_108[] = {
+	0x99999999,
+	0x99797979,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x99999999,
+	0x98989898,
+};
+const u32 stage1_bga_b_109[] = {
+	0x99999999,
 	0x79799999,
 	0x99999999,
 	0x99999999,
 	0x99999999,
 	0x99999999,
 	0x99999999,
-	0x99999999,
+	0x98989898,
 };
-const u32 stage1_bga_b_106[] = {
+const u32 stage1_bga_b_110[] = {
 	0x99999999,
 	0x79797999,
 	0x99999999,
@@ -1066,9 +1106,9 @@ const u32 stage1_bga_b_106[] = {
 	0x99999999,
 	0x99999999,
 	0x99999999,
-	0x99999999,
+	0x98989898,
 };
-const u32 stage1_bga_b_107[] = {
+const u32 stage1_bga_b_111[] = {
 	0x99990000,
 	0x99990000,
 	0x99990000,
@@ -1076,21 +1116,31 @@ const u32 stage1_bga_b_107[] = {
 	0x99990000,
 	0x99990000,
 	0x99990000,
-	0x99990000,
+	0x98980000,
 };
-const u32 stage1_bga_b_108[] = {
-	0x99999999,
-	0x99999999,
+const u32 stage1_bga_b_112[] = {
+	0x98988989,
+	0x89899898,
+	0x98988989,
+	0x89899898,
+	0x98988989,
+	0x89899898,
+	0x89898989,
+	0x98989898,
+};
+const u32 stage1_bga_b_113[] = {
 	0x89898989,
 	0x98989898,
 	0x89898989,
 	0x98989898,
 	0x89898989,
 	0x98989898,
+	0x89898989,
+	0x98989898,
 };
-const u32 stage1_bga_b_109[] = {
-	0x99999999,
-	0x99999999,
+const u32 stage1_bga_b_114[] = {
+	0x89898989,
+	0x98989898,
 	0x89898988,
 	0x98989895,
 	0x89895566,
@@ -1098,9 +1148,9 @@ const u32 stage1_bga_b_109[] = {
 	0x89898989,
 	0x98989898,
 };
-const u32 stage1_bga_b_110[] = {
-	0x99999999,
-	0x99995566,
+const u32 stage1_bga_b_115[] = {
+	0x89898989,
+	0x98985566,
 	0x85566666,
 	0x66666666,
 	0x66666666,
@@ -1108,9 +1158,9 @@ const u32 stage1_bga_b_110[] = {
 	0x89898989,
 	0x98989898,
 };
-const u32 stage1_bga_b_111[] = {
-	0x99999999,
-	0x55999999,
+const u32 stage1_bga_b_116[] = {
+	0x99998989,
+	0x55989898,
 	0x66698989,
 	0x66665898,
 	0x66898989,
@@ -1118,9 +1168,9 @@ const u32 stage1_bga_b_111[] = {
 	0x89898989,
 	0x98989898,
 };
-const u32 stage1_bga_b_112[] = {
-	0x99999999,
-	0x99999999,
+const u32 stage1_bga_b_117[] = {
+	0x89898989,
+	0x98989898,
 	0x89898989,
 	0x98989898,
 	0x89898989,
@@ -1128,17 +1178,17 @@ const u32 stage1_bga_b_112[] = {
 	0x89898989,
 	0x98988888,
 };
-const u32 stage1_bga_b_113[] = {
-	0x99958555,
-	0x9958585a,
-	0x888585aa,
+const u32 stage1_bga_b_118[] = {
+	0x89958555,
+	0x9858585a,
+	0x898585aa,
 	0x585855a5,
 	0x88855aaa,
 	0x58585aaa,
 	0x88855aaa,
 	0x5858555a,
 };
-const u32 stage1_bga_b_114[] = {
+const u32 stage1_bga_b_119[] = {
 	0xaaa55aaa,
 	0xaaa5aaaa,
 	0xaaa5aaaa,
@@ -1148,7 +1198,7 @@ const u32 stage1_bga_b_114[] = {
 	0xaaa55555,
 	0xa555aa55,
 };
-const u32 stage1_bga_b_115[] = {
+const u32 stage1_bga_b_120[] = {
 	0xa55aaaaa,
 	0xaaaaaaaa,
 	0xaaaaaaaa,
@@ -1158,7 +1208,7 @@ const u32 stage1_bga_b_115[] = {
 	0xaaaaaaaa,
 	0xaaa555aa,
 };
-const u32 stage1_bga_b_116[] = {
+const u32 stage1_bga_b_121[] = {
 	0xa55555aa,
 	0x555aaaaa,
 	0x55aaaaa5,
@@ -1168,7 +1218,7 @@ const u32 stage1_bga_b_116[] = {
 	0xaaaaaaaa,
 	0xaaaaabbb,
 };
-const u32 stage1_bga_b_117[] = {
+const u32 stage1_bga_b_122[] = {
 	0x555aaaa5,
 	0xa5555aaa,
 	0x5555555a,
@@ -1178,7 +1228,7 @@ const u32 stage1_bga_b_117[] = {
 	0xaaaa555a,
 	0xbaaaaa55,
 };
-const u32 stage1_bga_b_118[] = {
+const u32 stage1_bga_b_123[] = {
 	0x555aaaa5,
 	0x5aaaaaaa,
 	0xaaa55555,
@@ -1188,7 +1238,7 @@ const u32 stage1_bga_b_118[] = {
 	0xaa555a55,
 	0x5aaa5aaa,
 };
-const u32 stage1_bga_b_119[] = {
+const u32 stage1_bga_b_124[] = {
 	0x66555666,
 	0xa5555556,
 	0xa5555555,
@@ -1198,7 +1248,7 @@ const u32 stage1_bga_b_119[] = {
 	0x55555556,
 	0x55555555,
 };
-const u32 stage1_bga_b_120[] = {
+const u32 stage1_bga_b_125[] = {
 	0x69999956,
 	0x65995555,
 	0x66955555,
@@ -1208,7 +1258,7 @@ const u32 stage1_bga_b_120[] = {
 	0x65556666,
 	0x65555665,
 };
-const u32 stage1_bga_b_121[] = {
+const u32 stage1_bga_b_126[] = {
 	0x66599999,
 	0x55666999,
 	0x55555666,
@@ -1218,7 +1268,7 @@ const u32 stage1_bga_b_121[] = {
 	0x66666555,
 	0x55666655,
 };
-const u32 stage1_bga_b_122[] = {
+const u32 stage1_bga_b_127[] = {
 	0x99999999,
 	0x99999999,
 	0x88888888,
@@ -1228,7 +1278,7 @@ const u32 stage1_bga_b_122[] = {
 	0x56688888,
 	0x866888a8,
 };
-const u32 stage1_bga_b_123[] = {
+const u32 stage1_bga_b_128[] = {
 	0x99999999,
 	0x99999999,
 	0x88888888,
@@ -1238,7 +1288,7 @@ const u32 stage1_bga_b_123[] = {
 	0x888a8a8a,
 	0xa8a8aaaa,
 };
-const u32 stage1_bga_b_124[] = {
+const u32 stage1_bga_b_129[] = {
 	0x99999999,
 	0x99999999,
 	0x8a8a8a88,
@@ -1248,7 +1298,7 @@ const u32 stage1_bga_b_124[] = {
 	0xaaaa8aaa,
 	0xaaaaaaab,
 };
-const u32 stage1_bga_b_125[] = {
+const u32 stage1_bga_b_130[] = {
 	0x99999999,
 	0x99999999,
 	0x88888888,
@@ -1258,7 +1308,7 @@ const u32 stage1_bga_b_125[] = {
 	0xaaaaa88a,
 	0xbaaaaa88,
 };
-const u32 stage1_bga_b_126[] = {
+const u32 stage1_bga_b_131[] = {
 	0x9a666699,
 	0x95666666,
 	0x86666666,
@@ -1268,9 +1318,9 @@ const u32 stage1_bga_b_126[] = {
 	0xa5555555,
 	0x88aaa555,
 };
-const u32 stage1_bga_b_127[] = {
-	0x99999999,
-	0x55999999,
+const u32 stage1_bga_b_132[] = {
+	0x99998989,
+	0x55989898,
 	0x66898989,
 	0x66665a98,
 	0x66655555,
@@ -1278,9 +1328,9 @@ const u32 stage1_bga_b_127[] = {
 	0x55595989,
 	0x5aa89898,
 };
-const u32 stage1_bga_b_128[] = {
-	0x99999999,
-	0x99999999,
+const u32 stage1_bga_b_133[] = {
+	0x89898989,
+	0x98989898,
 	0x89898989,
 	0x98989898,
 	0xaaa98989,
@@ -1288,9 +1338,9 @@ const u32 stage1_bga_b_128[] = {
 	0x89898989,
 	0x98989898,
 };
-const u32 stage1_bga_b_129[] = {
-	0x99990000,
-	0x99990000,
+const u32 stage1_bga_b_134[] = {
+	0x89890000,
+	0x98980000,
 	0x89890000,
 	0x98980000,
 	0x89890000,
@@ -1298,7 +1348,7 @@ const u32 stage1_bga_b_129[] = {
 	0x89890000,
 	0x98980000,
 };
-const u32 stage1_bga_b_130[] = {
+const u32 stage1_bga_b_135[] = {
 	0x89898989,
 	0x88888888,
 	0x88888888,
@@ -1308,7 +1358,7 @@ const u32 stage1_bga_b_130[] = {
 	0x85666666,
 	0x88855566,
 };
-const u32 stage1_bga_b_131[] = {
+const u32 stage1_bga_b_136[] = {
 	0x89898989,
 	0x88888888,
 	0x88888888,
@@ -1318,7 +1368,7 @@ const u32 stage1_bga_b_131[] = {
 	0x66666665,
 	0x66665888,
 };
-const u32 stage1_bga_b_132[] = {
+const u32 stage1_bga_b_137[] = {
 	0x89898989,
 	0x88888885,
 	0x88888868,
@@ -1328,7 +1378,7 @@ const u32 stage1_bga_b_132[] = {
 	0x58866666,
 	0x88856666,
 };
-const u32 stage1_bga_b_133[] = {
+const u32 stage1_bga_b_138[] = {
 	0x89898989,
 	0x86888888,
 	0x68688888,
@@ -1338,7 +1388,7 @@ const u32 stage1_bga_b_133[] = {
 	0x66658558,
 	0x66658888,
 };
-const u32 stage1_bga_b_134[] = {
+const u32 stage1_bga_b_139[] = {
 	0x89898989,
 	0x88888888,
 	0x88888888,
@@ -1348,7 +1398,7 @@ const u32 stage1_bga_b_134[] = {
 	0x88888888,
 	0x88888888,
 };
-const u32 stage1_bga_b_135[] = {
+const u32 stage1_bga_b_140[] = {
 	0x89898989,
 	0x88888888,
 	0x88888888,
@@ -1358,7 +1408,7 @@ const u32 stage1_bga_b_135[] = {
 	0x88888888,
 	0x88558888,
 };
-const u32 stage1_bga_b_136[] = {
+const u32 stage1_bga_b_141[] = {
 	0x89898989,
 	0x88888888,
 	0x88888888,
@@ -1368,7 +1418,7 @@ const u32 stage1_bga_b_136[] = {
 	0x88888888,
 	0x88888885,
 };
-const u32 stage1_bga_b_137[] = {
+const u32 stage1_bga_b_142[] = {
 	0x89898989,
 	0x88888888,
 	0x88888888,
@@ -1378,7 +1428,7 @@ const u32 stage1_bga_b_137[] = {
 	0x88888888,
 	0x66588888,
 };
-const u32 stage1_bga_b_138[] = {
+const u32 stage1_bga_b_143[] = {
 	0x89898989,
 	0x88888888,
 	0x88888888,
@@ -1388,7 +1438,7 @@ const u32 stage1_bga_b_138[] = {
 	0x88888888,
 	0x88888856,
 };
-const u32 stage1_bga_b_139[] = {
+const u32 stage1_bga_b_144[] = {
 	0x89898989,
 	0x88888888,
 	0x88888888,
@@ -1398,7 +1448,7 @@ const u32 stage1_bga_b_139[] = {
 	0x88886666,
 	0x88886666,
 };
-const u32 stage1_bga_b_140[] = {
+const u32 stage1_bga_b_145[] = {
 	0x89898888,
 	0x88885858,
 	0x88888888,
@@ -1408,7 +1458,7 @@ const u32 stage1_bga_b_140[] = {
 	0x66666666,
 	0x66666668,
 };
-const u32 stage1_bga_b_141[] = {
+const u32 stage1_bga_b_146[] = {
 	0x88855555,
 	0x58585855,
 	0x88858585,
@@ -1418,7 +1468,7 @@ const u32 stage1_bga_b_141[] = {
 	0x5558855a,
 	0x8888855a,
 };
-const u32 stage1_bga_b_142[] = {
+const u32 stage1_bga_b_147[] = {
 	0x55aaaa5a,
 	0x5aaaaa5a,
 	0xaaaaa55a,
@@ -1428,7 +1478,7 @@ const u32 stage1_bga_b_142[] = {
 	0xaaaaaaaa,
 	0xa555aaaa,
 };
-const u32 stage1_bga_b_143[] = {
+const u32 stage1_bga_b_148[] = {
 	0xaaa5aaaa,
 	0xaa55aaaa,
 	0xa5555aaa,
@@ -1438,7 +1488,7 @@ const u32 stage1_bga_b_143[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 };
-const u32 stage1_bga_b_144[] = {
+const u32 stage1_bga_b_149[] = {
 	0xaaaabbbb,
 	0xaaabbbbb,
 	0xaabbbbbb,
@@ -1448,7 +1498,7 @@ const u32 stage1_bga_b_144[] = {
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 };
-const u32 stage1_bga_b_145[] = {
+const u32 stage1_bga_b_150[] = {
 	0xbbbaaaa5,
 	0xbbbbaa55,
 	0xbbbbaaa5,
@@ -1458,7 +1508,7 @@ const u32 stage1_bga_b_145[] = {
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 };
-const u32 stage1_bga_b_146[] = {
+const u32 stage1_bga_b_151[] = {
 	0x55aaaaaa,
 	0x55555aaa,
 	0x555555aa,
@@ -1468,7 +1518,7 @@ const u32 stage1_bga_b_146[] = {
 	0xaaaaaaaa,
 	0xbaaaaaaa,
 };
-const u32 stage1_bga_b_147[] = {
+const u32 stage1_bga_b_152[] = {
 	0xa5a55555,
 	0xa55a5555,
 	0xaaaa5555,
@@ -1478,7 +1528,7 @@ const u32 stage1_bga_b_147[] = {
 	0xaaaaaaaa,
 	0xbbbbbaaa,
 };
-const u32 stage1_bga_b_148[] = {
+const u32 stage1_bga_b_153[] = {
 	0x55555555,
 	0xaaaa5555,
 	0xaaaaaa55,
@@ -1488,7 +1538,7 @@ const u32 stage1_bga_b_148[] = {
 	0xa5555555,
 	0xa5555555,
 };
-const u32 stage1_bga_b_149[] = {
+const u32 stage1_bga_b_154[] = {
 	0x55655666,
 	0x55555566,
 	0x55555566,
@@ -1498,7 +1548,7 @@ const u32 stage1_bga_b_149[] = {
 	0x55566665,
 	0x55565556,
 };
-const u32 stage1_bga_b_150[] = {
+const u32 stage1_bga_b_155[] = {
 	0x6888888a,
 	0x8888aaaa,
 	0x88aaaaaa,
@@ -1508,7 +1558,7 @@ const u32 stage1_bga_b_150[] = {
 	0x556bbbbb,
 	0x556bbaaa,
 };
-const u32 stage1_bga_b_151[] = {
+const u32 stage1_bga_b_156[] = {
 	0x8a8a8aaa,
 	0xaaa8aaaa,
 	0xbbaaabbb,
@@ -1518,7 +1568,7 @@ const u32 stage1_bga_b_151[] = {
 	0xbbbbaaaa,
 	0xaaaaabbb,
 };
-const u32 stage1_bga_b_152[] = {
+const u32 stage1_bga_b_157[] = {
 	0xaaaaabbb,
 	0xaaaaabab,
 	0xaaaaaaaa,
@@ -1528,7 +1578,7 @@ const u32 stage1_bga_b_152[] = {
 	0xaabbbbbb,
 	0xbaabbbbb,
 };
-const u32 stage1_bga_b_153[] = {
+const u32 stage1_bga_b_158[] = {
 	0xbbbbbaa8,
 	0xbbbba8aa,
 	0xbbbbba8a,
@@ -1538,7 +1588,7 @@ const u32 stage1_bga_b_153[] = {
 	0xbbbaabba,
 	0xaaaabbaa,
 };
-const u32 stage1_bga_b_154[] = {
+const u32 stage1_bga_b_159[] = {
 	0x88888888,
 	0x88888888,
 	0xa8a8a888,
@@ -1548,7 +1598,7 @@ const u32 stage1_bga_b_154[] = {
 	0xa8a8a8a8,
 	0x8a8a8a8a,
 };
-const u32 stage1_bga_b_155[] = {
+const u32 stage1_bga_b_160[] = {
 	0x88898989,
 	0x88888888,
 	0x88888888,
@@ -1558,7 +1608,7 @@ const u32 stage1_bga_b_155[] = {
 	0x8a888888,
 	0x88888888,
 };
-const u32 stage1_bga_b_156[] = {
+const u32 stage1_bga_b_161[] = {
 	0x89898989,
 	0x88888888,
 	0x88888888,
@@ -1568,7 +1618,7 @@ const u32 stage1_bga_b_156[] = {
 	0x88888888,
 	0x88888888,
 };
-const u32 stage1_bga_b_157[] = {
+const u32 stage1_bga_b_162[] = {
 	0x89890000,
 	0x88880000,
 	0x88880000,
@@ -1578,7 +1628,7 @@ const u32 stage1_bga_b_157[] = {
 	0x88880000,
 	0x88880000,
 };
-const u32 stage1_bga_b_158[] = {
+const u32 stage1_bga_b_163[] = {
 	0x88888885,
 	0x88888888,
 	0x88888888,
@@ -1588,7 +1638,7 @@ const u32 stage1_bga_b_158[] = {
 	0x88888888,
 	0x88888888,
 };
-const u32 stage1_bga_b_159[] = {
+const u32 stage1_bga_b_164[] = {
 	0x55588888,
 	0x88888555,
 	0x88886666,
@@ -1598,7 +1648,7 @@ const u32 stage1_bga_b_159[] = {
 	0x88856666,
 	0x88886666,
 };
-const u32 stage1_bga_b_160[] = {
+const u32 stage1_bga_b_165[] = {
 	0x88888666,
 	0x58856666,
 	0x66666666,
@@ -1608,7 +1658,7 @@ const u32 stage1_bga_b_160[] = {
 	0x66666666,
 	0x66666666,
 };
-const u32 stage1_bga_b_161[] = {
+const u32 stage1_bga_b_166[] = {
 	0x66688888,
 	0x66688888,
 	0x66688888,
@@ -1618,7 +1668,7 @@ const u32 stage1_bga_b_161[] = {
 	0x6666588c,
 	0x66665888,
 };
-const u32 stage1_bga_b_162[] = {
+const u32 stage1_bga_b_167[] = {
 	0x88888888,
 	0x88888885,
 	0x88888566,
@@ -1628,7 +1678,7 @@ const u32 stage1_bga_b_162[] = {
 	0x888c8566,
 	0x88888885,
 };
-const u32 stage1_bga_b_163[] = {
+const u32 stage1_bga_b_168[] = {
 	0x86665888,
 	0x66666888,
 	0x66668888,
@@ -1638,7 +1688,7 @@ const u32 stage1_bga_b_163[] = {
 	0x66666655,
 	0x55558888,
 };
-const u32 stage1_bga_b_164[] = {
+const u32 stage1_bga_b_169[] = {
 	0x88888866,
 	0x85666666,
 	0x88866666,
@@ -1648,7 +1698,7 @@ const u32 stage1_bga_b_164[] = {
 	0x88888888,
 	0x88888888,
 };
-const u32 stage1_bga_b_165[] = {
+const u32 stage1_bga_b_170[] = {
 	0x66665558,
 	0x66666666,
 	0x66666665,
@@ -1658,7 +1708,7 @@ const u32 stage1_bga_b_165[] = {
 	0x888c8888,
 	0x88888555,
 };
-const u32 stage1_bga_b_166[] = {
+const u32 stage1_bga_b_171[] = {
 	0x88888566,
 	0x66658666,
 	0x55888855,
@@ -1668,7 +1718,7 @@ const u32 stage1_bga_b_166[] = {
 	0x55566666,
 	0x88888866,
 };
-const u32 stage1_bga_b_167[] = {
+const u32 stage1_bga_b_172[] = {
 	0x68885666,
 	0x58888666,
 	0x88556666,
@@ -1678,7 +1728,7 @@ const u32 stage1_bga_b_167[] = {
 	0x66666555,
 	0x66665555,
 };
-const u32 stage1_bga_b_168[] = {
+const u32 stage1_bga_b_173[] = {
 	0x66666688,
 	0x66666588,
 	0x55666888,
@@ -1688,7 +1738,7 @@ const u32 stage1_bga_b_168[] = {
 	0x55666665,
 	0x66665555,
 };
-const u32 stage1_bga_b_169[] = {
+const u32 stage1_bga_b_174[] = {
 	0x85658555,
 	0x66666855,
 	0x56666585,
@@ -1698,7 +1748,7 @@ const u32 stage1_bga_b_169[] = {
 	0x555c888c,
 	0x66658888,
 };
-const u32 stage1_bga_b_170[] = {
+const u32 stage1_bga_b_175[] = {
 	0x55aaaaaa,
 	0x5aaaaaaa,
 	0x5aaaaaaa,
@@ -1708,7 +1758,7 @@ const u32 stage1_bga_b_170[] = {
 	0x5aabbbbb,
 	0x55abbbbb,
 };
-const u32 stage1_bga_b_171[] = {
+const u32 stage1_bga_b_176[] = {
 	0xaabbbaaa,
 	0xabbbbbba,
 	0xabbbbbbb,
@@ -1718,7 +1768,7 @@ const u32 stage1_bga_b_171[] = {
 	0xbbbbbbba,
 	0xbbbbbbba,
 };
-const u32 stage1_bga_b_172[] = {
+const u32 stage1_bga_b_177[] = {
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 	0xabbbbbbb,
@@ -1728,7 +1778,7 @@ const u32 stage1_bga_b_172[] = {
 	0xbbbbaaaa,
 	0xabbbbaab,
 };
-const u32 stage1_bga_b_173[] = {
+const u32 stage1_bga_b_178[] = {
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 	0xbbbbbbbb,
@@ -1738,7 +1788,7 @@ const u32 stage1_bga_b_173[] = {
 	0xabbaaaaa,
 	0xbbbbbaaa,
 };
-const u32 stage1_bga_b_174[] = {
+const u32 stage1_bga_b_179[] = {
 	0xbaaaaaab,
 	0xbaaaaaab,
 	0xbaaaaabb,
@@ -1748,7 +1798,7 @@ const u32 stage1_bga_b_174[] = {
 	0xabbbbbbb,
 	0xabbbbbbb,
 };
-const u32 stage1_bga_b_175[] = {
+const u32 stage1_bga_b_180[] = {
 	0xbbbbbbaa,
 	0xbbbbbbaa,
 	0xbbbbbbaa,
@@ -1758,7 +1808,7 @@ const u32 stage1_bga_b_175[] = {
 	0xabbbbbbb,
 	0xaabbbbbb,
 };
-const u32 stage1_bga_b_176[] = {
+const u32 stage1_bga_b_181[] = {
 	0xaaaa5555,
 	0xaaaaaaaa,
 	0xaaaaaaaa,
@@ -1768,7 +1818,7 @@ const u32 stage1_bga_b_176[] = {
 	0xbbb55aaa,
 	0xbbbaaaaa,
 };
-const u32 stage1_bga_b_177[] = {
+const u32 stage1_bga_b_182[] = {
 	0x55565556,
 	0x55566556,
 	0x55666665,
@@ -1778,7 +1828,7 @@ const u32 stage1_bga_b_177[] = {
 	0x55556666,
 	0xa5556655,
 };
-const u32 stage1_bga_b_178[] = {
+const u32 stage1_bga_b_183[] = {
 	0x5566aaaa,
 	0x6666aaaa,
 	0x556666aa,
@@ -1788,7 +1838,7 @@ const u32 stage1_bga_b_178[] = {
 	0x66666666,
 	0x55556666,
 };
-const u32 stage1_bga_b_179[] = {
+const u32 stage1_bga_b_184[] = {
 	0xaaaaaabb,
 	0xaaaaaaab,
 	0xaaaaaaaa,
@@ -1798,7 +1848,7 @@ const u32 stage1_bga_b_179[] = {
 	0x6666aaaa,
 	0x66666aaa,
 };
-const u32 stage1_bga_b_180[] = {
+const u32 stage1_bga_b_185[] = {
 	0xabaaaabb,
 	0xbbabbaab,
 	0xbbabbbab,
@@ -1808,7 +1858,7 @@ const u32 stage1_bga_b_180[] = {
 	0xaaabbbba,
 	0xaaabbbbb,
 };
-const u32 stage1_bga_b_181[] = {
+const u32 stage1_bga_b_186[] = {
 	0xabaaaaaa,
 	0xbbbaaaaa,
 	0xbbbbaabb,
@@ -1818,7 +1868,7 @@ const u32 stage1_bga_b_181[] = {
 	0xabbbbbba,
 	0xabbbbbba,
 };
-const u32 stage1_bga_b_182[] = {
+const u32 stage1_bga_b_187[] = {
 	0xaaa8a8a8,
 	0xbaaa8888,
 	0xbbbaa888,
@@ -1828,77 +1878,147 @@ const u32 stage1_bga_b_182[] = {
 	0xaaabbaa8,
 	0xbaaaba8a,
 };
-const u32 stage1_bga_b_183[] = {
+const u32 stage1_bga_b_188[] = {
 	0x88888888,
 	0x88888888,
+	0x8888888c,
 	0x88888888,
+	0xaaa88c8c,
 	0x88888888,
-	0xaaaa8888,
-	0x88888888,
-	0xa8a88888,
+	0xa8a88c8c,
 	0x8a8a8a88,
 };
-const u32 stage1_bga_b_184[] = {
+const u32 stage1_bga_b_189[] = {
 	0x88888888,
 	0x88888888,
+	0x888c888c,
 	0x88888888,
+	0x888c8c8c,
 	0x88888888,
-	0x88888888,
-	0x88888888,
-	0x88888c88,
-	0x88888888,
-};
-const u32 stage1_bga_b_185[] = {
-	0x88888888,
-	0x88888888,
-	0x88888888,
-	0x88888888,
-	0x88888888,
-	0x88888888,
-	0x88888888,
+	0x8c8c8c8c,
 	0x88888888,
 };
-const u32 stage1_bga_b_186[] = {
+const u32 stage1_bga_b_190[] = {
 	0x88888888,
 	0x88888888,
+	0x888c888c,
 	0x88888888,
+	0x8c8c8c8c,
 	0x88888888,
-	0x88888888,
-	0x88888888,
-	0x8c888c88,
+	0x8c8c8c8c,
 	0x88888888,
 };
-const u32 stage1_bga_b_187[] = {
-	0x88888888,
-	0x88888888,
+const u32 stage1_bga_b_191[] = {
 	0x88888888,
 	0x88888888,
 	0x88888888,
 	0x88888888,
 	0x8c888888,
 	0x88888888,
+	0x8c8c8c8c,
+	0x88888888,
 };
-const u32 stage1_bga_b_188[] = {
+const u32 stage1_bga_b_192[] = {
 	0x88888888,
 	0x88888888,
+	0x88888888,
+	0x88888888,
+	0x88888888,
+	0x88888888,
+	0x8c8c8c8c,
+	0x88888888,
+};
+const u32 stage1_bga_b_193[] = {
+	0x88888888,
+	0x88888888,
+	0x888c8888,
+	0x88888888,
+	0x8c8c8c88,
+	0x88888888,
+	0x8c8c8c8c,
+	0x88888888,
+};
+const u32 stage1_bga_b_194[] = {
 	0x88888888,
 	0x88888888,
 	0x8888888c,
 	0x88888888,
-	0x88888c88,
+	0x8c8c888c,
+	0x88888888,
+	0x8c8c8c8c,
 	0x88888888,
 };
-const u32 stage1_bga_b_189[] = {
+const u32 stage1_bga_b_195[] = {
+	0x88888888,
+	0x88888888,
+	0x888c888c,
+	0x88888888,
+	0x8c8c888c,
+	0x88888888,
+	0x8c8c8c8c,
+	0x88888888,
+};
+const u32 stage1_bga_b_196[] = {
+	0x88888888,
+	0x88888888,
+	0x8888888c,
+	0x88888888,
+	0x88888c8c,
+	0x88888888,
+	0x8c8c8c8c,
+	0x88888888,
+};
+const u32 stage1_bga_b_197[] = {
+	0x88888888,
+	0x88888888,
+	0x8888888c,
+	0x88888888,
+	0x8c888c8c,
+	0x88888888,
+	0x8c8c8c8c,
+	0x88888888,
+};
+const u32 stage1_bga_b_198[] = {
+	0x8c888888,
+	0x88888888,
+	0x88888888,
+	0x88888888,
+	0x8c888888,
+	0x88888888,
+	0x8c8c8c8c,
+	0x88888888,
+};
+const u32 stage1_bga_b_199[] = {
+	0x88888888,
+	0x88888888,
+	0x888c8888,
+	0x88888888,
+	0x8c8c8c8c,
+	0x88888888,
+	0x8c8c8c8c,
+	0x88888888,
+};
+const u32 stage1_bga_b_200[] = {
+	0x88888888,
+	0x88888888,
+	0x88888888,
+	0x88888888,
+	0x8c8c8c8c,
+	0x88888888,
+	0x8c8c8c8c,
+	0x88888888,
+};
+const u32 stage1_bga_b_201[] = {
 	0x88880000,
 	0x88880000,
 	0x88880000,
 	0x88880000,
+	0x8c8c0000,
 	0x88880000,
-	0x88880000,
-	0x8c880000,
+	0x8c8c0000,
 	0x88880000,
 };
-const u32 stage1_bga_b_190[] = {
+const u32 stage1_bga_b_202[] = {
 	0x88888888,
 	0x88888888,
 	0x8c8c8c8c,
@@ -1908,7 +2028,7 @@ const u32 stage1_bga_b_190[] = {
 	0x8c8c8c8c,
 	0xc8c8c8c8,
 };
-const u32 stage1_bga_b_191[] = {
+const u32 stage1_bga_b_203[] = {
 	0x88885566,
 	0x88888886,
 	0x8c8c5566,
@@ -1918,7 +2038,7 @@ const u32 stage1_bga_b_191[] = {
 	0x8c8c8c86,
 	0xc8c8c8c6,
 };
-const u32 stage1_bga_b_192[] = {
+const u32 stage1_bga_b_204[] = {
 	0x66658c8c,
 	0x66888888,
 	0x66658c8c,
@@ -1928,7 +2048,7 @@ const u32 stage1_bga_b_192[] = {
 	0x66666666,
 	0x66666666,
 };
-const u32 stage1_bga_b_193[] = {
+const u32 stage1_bga_b_205[] = {
 	0x8c8c8c8c,
 	0x88888888,
 	0x8c8c8c8c,
@@ -1938,7 +2058,7 @@ const u32 stage1_bga_b_193[] = {
 	0x66555555,
 	0x6658c8c8,
 };
-const u32 stage1_bga_b_194[] = {
+const u32 stage1_bga_b_206[] = {
 	0x8c888888,
 	0x88888888,
 	0x8c8c8c8c,
@@ -1948,7 +2068,7 @@ const u32 stage1_bga_b_194[] = {
 	0x5c8c8c8c,
 	0xc8c8c8c8,
 };
-const u32 stage1_bga_b_195[] = {
+const u32 stage1_bga_b_207[] = {
 	0x88888855,
 	0x88888585,
 	0x5c5c5c55,
@@ -1958,37 +2078,37 @@ const u32 stage1_bga_b_195[] = {
 	0x8c5c5555,
 	0xc5c555aa,
 };
-const u32 stage1_bga_b_196[] = {
-	0x555555bb,
-	0x85555bbb,
-	0x55555bbb,
-	0xaaa55bbb,
-	0xaaa5bbbb,
-	0xaaa5bbbb,
-	0x555555bb,
-	0xaaaaa55b,
+const u32 stage1_bga_b_208[] = {
+	0x55555555,
+	0x85555555,
+	0x55555555,
+	0xaaa55555,
+	0xaaa55555,
+	0xaaa55555,
+	0x55555555,
+	0xaaaaa555,
 };
-const u32 stage1_bga_b_197[] = {
+const u32 stage1_bga_b_209[] = {
 	0x88888855,
 	0x88855555,
-	0x8555bbbb,
-	0x55bbbbbb,
-	0x5bbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-};
-const u32 stage1_bga_b_198[] = {
+	0x85555555,
 	0x55555555,
 	0x55555555,
-	0xbbbbb555,
-	0xbbbbbb55,
-	0xbbbbbb55,
-	0x55bbb555,
-	0xb5555555,
-	0xbbb55aaa,
+	0x55555555,
+	0x55555555,
+	0x55555555,
 };
-const u32 stage1_bga_b_199[] = {
+const u32 stage1_bga_b_210[] = {
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555aaa,
+};
+const u32 stage1_bga_b_211[] = {
 	0x66666665,
 	0x56666666,
 	0x55666666,
@@ -1998,7 +2118,7 @@ const u32 stage1_bga_b_199[] = {
 	0x55555555,
 	0xaaa55555,
 };
-const u32 stage1_bga_b_200[] = {
+const u32 stage1_bga_b_212[] = {
 	0x56668c8c,
 	0x56655555,
 	0x6655aaaa,
@@ -2008,7 +2128,7 @@ const u32 stage1_bga_b_200[] = {
 	0x5aaa5555,
 	0x55aaa555,
 };
-const u32 stage1_bga_b_201[] = {
+const u32 stage1_bga_b_213[] = {
 	0x855bbbbb,
 	0x598abbbb,
 	0xa555bbbb,
@@ -2018,7 +2138,7 @@ const u32 stage1_bga_b_201[] = {
 	0x5555aa55,
 	0xaaa5aaa5,
 };
-const u32 stage1_bga_b_202[] = {
+const u32 stage1_bga_b_214[] = {
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 	0xbbbbbbbb,
@@ -2028,17 +2148,17 @@ const u32 stage1_bga_b_202[] = {
 	0xbbbbbbbb,
 	0x5bbbbbbb,
 };
-const u32 stage1_bga_b_203[] = {
+const u32 stage1_bga_b_215[] = {
 	0xaabbbaaa,
 	0xbabbbaab,
 	0xbabbbbbb,
-	0xa8aaaaab,
+	0xaaaaaaab,
 	0xaaaabbba,
 	0xbaabbbba,
 	0xbbaabbba,
 	0xbbbabbbb,
 };
-const u32 stage1_bga_b_204[] = {
+const u32 stage1_bga_b_216[] = {
 	0xaaabbbaa,
 	0xaaaabbaa,
 	0xbbbaabba,
@@ -2048,7 +2168,7 @@ const u32 stage1_bga_b_204[] = {
 	0xabbaaaaa,
 	0xbbbaaabb,
 };
-const u32 stage1_bga_b_205[] = {
+const u32 stage1_bga_b_217[] = {
 	0xaaaabbba,
 	0xbbbaaaaa,
 	0xbbbbaabb,
@@ -2058,7 +2178,7 @@ const u32 stage1_bga_b_205[] = {
 	0xaabbaaaa,
 	0xbbaaaaaa,
 };
-const u32 stage1_bga_b_206[] = {
+const u32 stage1_bga_b_218[] = {
 	0xaaaabbbb,
 	0xbbaaaabb,
 	0xbbbbbaab,
@@ -2068,7 +2188,7 @@ const u32 stage1_bga_b_206[] = {
 	0xabbbbaaa,
 	0xaaabbaaa,
 };
-const u32 stage1_bga_b_207[] = {
+const u32 stage1_bga_b_219[] = {
 	0xbbbaaaaa,
 	0xbbbaaaaa,
 	0xbbbaaaa5,
@@ -2078,7 +2198,7 @@ const u32 stage1_bga_b_207[] = {
 	0xaaaaaa55,
 	0xaaaaaaa5,
 };
-const u32 stage1_bga_b_208[] = {
+const u32 stage1_bga_b_220[] = {
 	0xa5555555,
 	0x55555555,
 	0x5aaaaaa5,
@@ -2088,7 +2208,7 @@ const u32 stage1_bga_b_208[] = {
 	0xaaaa5555,
 	0xaa555555,
 };
-const u32 stage1_bga_b_209[] = {
+const u32 stage1_bga_b_221[] = {
 	0x55555556,
 	0x55555555,
 	0x55555555,
@@ -2098,7 +2218,7 @@ const u32 stage1_bga_b_209[] = {
 	0x555aaaaa,
 	0x5555aaaa,
 };
-const u32 stage1_bga_b_210[] = {
+const u32 stage1_bga_b_222[] = {
 	0x666666aa,
 	0x5566665a,
 	0x5556666a,
@@ -2108,7 +2228,7 @@ const u32 stage1_bga_b_210[] = {
 	0x55555666,
 	0x55555666,
 };
-const u32 stage1_bga_b_211[] = {
+const u32 stage1_bga_b_223[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 	0xaaaaaaaa,
@@ -2118,7 +2238,7 @@ const u32 stage1_bga_b_211[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 };
-const u32 stage1_bga_b_212[] = {
+const u32 stage1_bga_b_224[] = {
 	0xabbbbbba,
 	0xaababbbb,
 	0xabababbb,
@@ -2128,7 +2248,7 @@ const u32 stage1_bga_b_212[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 };
-const u32 stage1_bga_b_213[] = {
+const u32 stage1_bga_b_225[] = {
 	0xbbbaaaaa,
 	0xbbbaaabb,
 	0xbaabbbbb,
@@ -2138,7 +2258,7 @@ const u32 stage1_bga_b_213[] = {
 	0xaaaaaabb,
 	0xaaaaaaab,
 };
-const u32 stage1_bga_b_214[] = {
+const u32 stage1_bga_b_226[] = {
 	0xaaa8a8a8,
 	0xbbbaaaaa,
 	0xbbbbbaab,
@@ -2148,8 +2268,8 @@ const u32 stage1_bga_b_214[] = {
 	0xabbaaaaa,
 	0xbaaaaaaa,
 };
-const u32 stage1_bga_b_215[] = {
-	0x888c8c8c,
+const u32 stage1_bga_b_227[] = {
+	0x8c8c8c8c,
 	0xaaaaaa88,
 	0xbbbaaaaa,
 	0xbbbbbbaa,
@@ -2158,8 +2278,8 @@ const u32 stage1_bga_b_215[] = {
 	0xaaaabbba,
 	0xaaaababb,
 };
-const u32 stage1_bga_b_216[] = {
-	0x888c8c88,
+const u32 stage1_bga_b_228[] = {
+	0x8c8c8c8c,
 	0x88888888,
 	0x8c8c8c8c,
 	0xa8c8c8c8,
@@ -2168,7 +2288,7 @@ const u32 stage1_bga_b_216[] = {
 	0xbaaaaaaa,
 	0xaaaaaaca,
 };
-const u32 stage1_bga_b_217[] = {
+const u32 stage1_bga_b_229[] = {
 	0x8c8c8c8c,
 	0x88888888,
 	0x8c8c8c8c,
@@ -2178,8 +2298,8 @@ const u32 stage1_bga_b_217[] = {
 	0xaaaaaaaa,
 	0xcac8c8c8,
 };
-const u32 stage1_bga_b_218[] = {
-	0x888c8c88,
+const u32 stage1_bga_b_230[] = {
+	0x8c8c8c8c,
 	0x88888888,
 	0x8c8c8c8c,
 	0xc8c8c8c8,
@@ -2188,7 +2308,7 @@ const u32 stage1_bga_b_218[] = {
 	0x8c8c8c8c,
 	0xc8c8c8c8,
 };
-const u32 stage1_bga_b_219[] = {
+const u32 stage1_bga_b_231[] = {
 	0x8c8c8c8c,
 	0x88888888,
 	0x8c8c8c8c,
@@ -2198,28 +2318,8 @@ const u32 stage1_bga_b_219[] = {
 	0x8c8c8c8c,
 	0xc8c8c8c8,
 };
-const u32 stage1_bga_b_220[] = {
-	0x88888888,
-	0x88888888,
+const u32 stage1_bga_b_232[] = {
 	0x8c8c8c8c,
-	0xc8c8c8c8,
-	0x8c8c8c8c,
-	0xc8c8c8c8,
-	0x8c8c8c8c,
-	0xc8c8c8c8,
-};
-const u32 stage1_bga_b_221[] = {
-	0x8888888c,
-	0x88888888,
-	0x8c8c8c8c,
-	0xc8c8c8c8,
-	0x8c8c8c8c,
-	0xc8c8c8c8,
-	0x8c8c8c8c,
-	0xc8c8c8c8,
-};
-const u32 stage1_bga_b_222[] = {
-	0x8c8c888c,
 	0x88888888,
 	0x8c8c8c8c,
 	0xc8c8c8c8,
@@ -2228,8 +2328,8 @@ const u32 stage1_bga_b_222[] = {
 	0x8c8c8c8c,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_223[] = {
-	0x8c888c8c,
+const u32 stage1_bga_b_233[] = {
+	0x8c8c8c8c,
 	0x88888888,
 	0x8c8c8c8c,
 	0xc8c8c8cd,
@@ -2238,8 +2338,8 @@ const u32 stage1_bga_b_223[] = {
 	0xdddd8c8d,
 	0xddddddc8,
 };
-const u32 stage1_bga_b_224[] = {
-	0x8c8c888c,
+const u32 stage1_bga_b_234[] = {
+	0x8c8c8c8c,
 	0x88888888,
 	0x8c8c8c8c,
 	0xd8c8c8c8,
@@ -2248,47 +2348,7 @@ const u32 stage1_bga_b_224[] = {
 	0xdddc8c8c,
 	0xcdddc8c8,
 };
-const u32 stage1_bga_b_225[] = {
-	0x8c888c8c,
-	0x88888888,
-	0x8c8c8c8c,
-	0xc8c8c8c8,
-	0x8c8c8c8c,
-	0xc8c8c8c8,
-	0x8c8c8c8c,
-	0xc8c8c8c8,
-};
-const u32 stage1_bga_b_226[] = {
-	0x8c8c8888,
-	0x88888888,
-	0x8c8c8c8c,
-	0xc8c8c8c8,
-	0x8c8c8c8c,
-	0xc8c8c8c8,
-	0x8c8c8c8c,
-	0xc8c8c8c8,
-};
-const u32 stage1_bga_b_227[] = {
-	0x888c8c8c,
-	0x88888888,
-	0x8c8c8c8c,
-	0xc8c8c8c8,
-	0x8c8c8c8c,
-	0xc8c8c8c8,
-	0x8c8c8c8c,
-	0xc8c8c8c8,
-};
-const u32 stage1_bga_b_228[] = {
-	0x8c8c888c,
-	0x88888888,
-	0x8c8c8c8c,
-	0xc8c8c8c8,
-	0x8c8c8c8c,
-	0xc8c8c8c8,
-	0x8c8c8c8c,
-	0xc8c8c8c8,
-};
-const u32 stage1_bga_b_229[] = {
+const u32 stage1_bga_b_235[] = {
 	0x8c8c0000,
 	0x88880000,
 	0x8c8c0000,
@@ -2298,7 +2358,7 @@ const u32 stage1_bga_b_229[] = {
 	0x8c8c0000,
 	0xc8c80000,
 };
-const u32 stage1_bga_b_230[] = {
+const u32 stage1_bga_b_236[] = {
 	0x8c8c8c8c,
 	0xc8c8c8c8,
 	0x8c8c8c8c,
@@ -2308,7 +2368,7 @@ const u32 stage1_bga_b_230[] = {
 	0xccccc666,
 	0xc8c86666,
 };
-const u32 stage1_bga_b_231[] = {
+const u32 stage1_bga_b_237[] = {
 	0x8c8c8566,
 	0xc8c86666,
 	0x8c856666,
@@ -2318,7 +2378,7 @@ const u32 stage1_bga_b_231[] = {
 	0x66666666,
 	0x66666666,
 };
-const u32 stage1_bga_b_232[] = {
+const u32 stage1_bga_b_238[] = {
 	0x66666666,
 	0x66666666,
 	0x66666665,
@@ -2328,7 +2388,7 @@ const u32 stage1_bga_b_232[] = {
 	0x6666666c,
 	0x66666666,
 };
-const u32 stage1_bga_b_233[] = {
+const u32 stage1_bga_b_239[] = {
 	0x658c8c8c,
 	0xc8c8c8c8,
 	0x8c8c8c8c,
@@ -2338,7 +2398,7 @@ const u32 stage1_bga_b_233[] = {
 	0xcccccccc,
 	0xc8c8c8c8,
 };
-const u32 stage1_bga_b_234[] = {
+const u32 stage1_bga_b_240[] = {
 	0x8c8c8c8c,
 	0xc8c8c8c8,
 	0x8c8c8c8c,
@@ -2348,7 +2408,7 @@ const u32 stage1_bga_b_234[] = {
 	0xcccccccc,
 	0xc8c8c8c8,
 };
-const u32 stage1_bga_b_235[] = {
+const u32 stage1_bga_b_241[] = {
 	0x8c555aaa,
 	0x55555aaa,
 	0x8c8c555a,
@@ -2358,37 +2418,37 @@ const u32 stage1_bga_b_235[] = {
 	0xccccc555,
 	0xc8c8c555,
 };
-const u32 stage1_bga_b_236[] = {
+const u32 stage1_bga_b_242[] = {
 	0xaaaaaa55,
 	0xaaa55555,
 	0xa5555555,
-	0x55aaaa5b,
-	0x5aaaaa5b,
-	0x55aaa55b,
+	0x55aaaa55,
+	0x5aaaaa55,
+	0x55aaa555,
 	0x55555a55,
-	0x555555bb,
-};
-const u32 stage1_bga_b_237[] = {
-	0xbbbbb55b,
-	0xbbbbbb55,
-	0xbbbbbbb5,
-	0xbbbbbbb5,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbb55bb,
-};
-const u32 stage1_bga_b_238[] = {
-	0xbbbb5555,
-	0x55bb5555,
-	0xb5555555,
-	0xbbb55555,
-	0xbbbb55aa,
-	0xbbbbb5aa,
-	0xbbbb5555,
 	0x55555555,
 };
-const u32 stage1_bga_b_239[] = {
+const u32 stage1_bga_b_243[] = {
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+};
+const u32 stage1_bga_b_244[] = {
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x555555aa,
+	0x555555aa,
+	0x55555555,
+	0x55555555,
+};
+const u32 stage1_bga_b_245[] = {
 	0xaaaaa556,
 	0x5aaaa556,
 	0x55aaa556,
@@ -2398,7 +2458,7 @@ const u32 stage1_bga_b_239[] = {
 	0x5a555aaa,
 	0x5555aaaa,
 };
-const u32 stage1_bga_b_240[] = {
+const u32 stage1_bga_b_246[] = {
 	0x555aaaa5,
 	0x55555555,
 	0x655555aa,
@@ -2408,7 +2468,7 @@ const u32 stage1_bga_b_240[] = {
 	0xaaaa6555,
 	0xaaa56555,
 };
-const u32 stage1_bga_b_241[] = {
+const u32 stage1_bga_b_247[] = {
 	0x5a55aaa5,
 	0x5a5aaaaa,
 	0x55555aaa,
@@ -2416,9 +2476,9 @@ const u32 stage1_bga_b_241[] = {
 	0xaa5aa555,
 	0x55aaaa55,
 	0x5555a555,
-	0x5aa55558,
+	0x5aa55555,
 };
-const u32 stage1_bga_b_242[] = {
+const u32 stage1_bga_b_248[] = {
 	0x5bbbbbbb,
 	0x5bbbbbba,
 	0x55bbbbbb,
@@ -2426,9 +2486,9 @@ const u32 stage1_bga_b_242[] = {
 	0x55bbbbbb,
 	0x555bbbbb,
 	0x555bbbbb,
-	0x8855bbbb,
+	0x5555bbbb,
 };
-const u32 stage1_bga_b_243[] = {
+const u32 stage1_bga_b_249[] = {
 	0xbbbabbbb,
 	0xaaaaaaab,
 	0xaabbaaaa,
@@ -2438,7 +2498,7 @@ const u32 stage1_bga_b_243[] = {
 	0xaaaaabbb,
 	0xaaaaabbb,
 };
-const u32 stage1_bga_b_244[] = {
+const u32 stage1_bga_b_250[] = {
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 	0xbbbbbbb5,
@@ -2448,7 +2508,7 @@ const u32 stage1_bga_b_244[] = {
 	0xbbbbbbbb,
 	0xbbb555bb,
 };
-const u32 stage1_bga_b_245[] = {
+const u32 stage1_bga_b_251[] = {
 	0xbbaaaabb,
 	0x555abbbb,
 	0x555555bb,
@@ -2458,7 +2518,7 @@ const u32 stage1_bga_b_245[] = {
 	0xbb555bbb,
 	0xbbbbbbbb,
 };
-const u32 stage1_bga_b_246[] = {
+const u32 stage1_bga_b_252[] = {
 	0xbaabbbaa,
 	0xbbaaabba,
 	0xaaaabbba,
@@ -2468,7 +2528,7 @@ const u32 stage1_bga_b_246[] = {
 	0xbbbbbbab,
 	0xbbaaaaaa,
 };
-const u32 stage1_bga_b_247[] = {
+const u32 stage1_bga_b_253[] = {
 	0xaaaaaaa5,
 	0xaaaaaaaa,
 	0xaaaaaaaa,
@@ -2478,7 +2538,7 @@ const u32 stage1_bga_b_247[] = {
 	0xaaaaaaaa,
 	0xbbbbbaaa,
 };
-const u32 stage1_bga_b_248[] = {
+const u32 stage1_bga_b_254[] = {
 	0x5555aaaa,
 	0xaaa55aaa,
 	0xaaaa5aaa,
@@ -2488,7 +2548,7 @@ const u32 stage1_bga_b_248[] = {
 	0xaa5aaaaa,
 	0xaa55aaaa,
 };
-const u32 stage1_bga_b_249[] = {
+const u32 stage1_bga_b_255[] = {
 	0x55555aa5,
 	0xaa5a5aa5,
 	0xaaaa55aa,
@@ -2498,7 +2558,7 @@ const u32 stage1_bga_b_249[] = {
 	0x55a55555,
 	0xa5aaaa55,
 };
-const u32 stage1_bga_b_250[] = {
+const u32 stage1_bga_b_256[] = {
 	0x55555666,
 	0x55555666,
 	0xa5556655,
@@ -2508,7 +2568,7 @@ const u32 stage1_bga_b_250[] = {
 	0xaa566aaa,
 	0x55565aaa,
 };
-const u32 stage1_bga_b_251[] = {
+const u32 stage1_bga_b_257[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 	0xaaaaaaaa,
@@ -2518,7 +2578,7 @@ const u32 stage1_bga_b_251[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 };
-const u32 stage1_bga_b_252[] = {
+const u32 stage1_bga_b_258[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 	0xaaaaaaaa,
@@ -2528,7 +2588,7 @@ const u32 stage1_bga_b_252[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 };
-const u32 stage1_bga_b_253[] = {
+const u32 stage1_bga_b_259[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 	0xaaaaaaaa,
@@ -2538,7 +2598,7 @@ const u32 stage1_bga_b_253[] = {
 	0xaaaababa,
 	0xaaababab,
 };
-const u32 stage1_bga_b_254[] = {
+const u32 stage1_bga_b_260[] = {
 	0xaaabbbbb,
 	0xaabbbabb,
 	0xaabbabab,
@@ -2548,7 +2608,7 @@ const u32 stage1_bga_b_254[] = {
 	0xabbbbbbb,
 	0xaaaabbbb,
 };
-const u32 stage1_bga_b_255[] = {
+const u32 stage1_bga_b_261[] = {
 	0xbbbaabab,
 	0xbbbbaabb,
 	0xbbbbaabb,
@@ -2558,7 +2618,7 @@ const u32 stage1_bga_b_255[] = {
 	0xaabbaaaa,
 	0xbaabaaaa,
 };
-const u32 stage1_bga_b_256[] = {
+const u32 stage1_bga_b_262[] = {
 	0xbaacacac,
 	0xbaaacaca,
 	0xbaaaacac,
@@ -2568,7 +2628,7 @@ const u32 stage1_bga_b_256[] = {
 	0xaccccccc,
 	0xaccccccc,
 };
-const u32 stage1_bga_b_257[] = {
+const u32 stage1_bga_b_263[] = {
 	0x8c8c8c8c,
 	0xcac8c8c8,
 	0x8c8c8c8c,
@@ -2578,7 +2638,7 @@ const u32 stage1_bga_b_257[] = {
 	0xcccccccc,
 	0xcccccccc,
 };
-const u32 stage1_bga_b_258[] = {
+const u32 stage1_bga_b_264[] = {
 	0x8c8c8c8c,
 	0xc8c8c8c8,
 	0x8c8c8c8c,
@@ -2588,7 +2648,7 @@ const u32 stage1_bga_b_258[] = {
 	0xcccccccc,
 	0xcccccccc,
 };
-const u32 stage1_bga_b_259[] = {
+const u32 stage1_bga_b_265[] = {
 	0x8c8c8c8c,
 	0xc8c8c8c8,
 	0x8c8c8c8c,
@@ -2598,7 +2658,7 @@ const u32 stage1_bga_b_259[] = {
 	0xccccccdd,
 	0xcccccddd,
 };
-const u32 stage1_bga_b_260[] = {
+const u32 stage1_bga_b_266[] = {
 	0x8c8c8c8c,
 	0xc8c8c8c8,
 	0x8c8ddddd,
@@ -2608,7 +2668,7 @@ const u32 stage1_bga_b_260[] = {
 	0xdddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_261[] = {
+const u32 stage1_bga_b_267[] = {
 	0x8cdddd8d,
 	0xcddddddd,
 	0xdddddddd,
@@ -2618,7 +2678,7 @@ const u32 stage1_bga_b_261[] = {
 	0xdddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_262[] = {
+const u32 stage1_bga_b_268[] = {
 	0xdddddddd,
 	0xdddddddd,
 	0xdddddddd,
@@ -2628,7 +2688,7 @@ const u32 stage1_bga_b_262[] = {
 	0xdddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_263[] = {
+const u32 stage1_bga_b_269[] = {
 	0xdd8cdd8c,
 	0xd8c8ddd8,
 	0x8c8cdddd,
@@ -2638,7 +2698,7 @@ const u32 stage1_bga_b_263[] = {
 	0xdddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_264[] = {
+const u32 stage1_bga_b_270[] = {
 	0x8cdd8c8c,
 	0xc8ddc8c8,
 	0xdddd8c8c,
@@ -2648,7 +2708,7 @@ const u32 stage1_bga_b_264[] = {
 	0xddddddcc,
 	0xddddc8c8,
 };
-const u32 stage1_bga_b_265[] = {
+const u32 stage1_bga_b_271[] = {
 	0x8c8c8c8c,
 	0xc8c8c8c8,
 	0x8c8c8c8c,
@@ -2658,7 +2718,7 @@ const u32 stage1_bga_b_265[] = {
 	0xcccccddc,
 	0xc8c8cccc,
 };
-const u32 stage1_bga_b_266[] = {
+const u32 stage1_bga_b_272[] = {
 	0x8c8c0000,
 	0xc8c80000,
 	0x8c8c0000,
@@ -2668,7 +2728,7 @@ const u32 stage1_bga_b_266[] = {
 	0xcccc0000,
 	0xcccc0000,
 };
-const u32 stage1_bga_b_267[] = {
+const u32 stage1_bga_b_273[] = {
 	0x55666666,
 	0xc8c86666,
 	0xccccc566,
@@ -2678,7 +2738,7 @@ const u32 stage1_bga_b_267[] = {
 	0x66666666,
 	0x66666666,
 };
-const u32 stage1_bga_b_268[] = {
+const u32 stage1_bga_b_274[] = {
 	0x66666666,
 	0x66666666,
 	0x66666666,
@@ -2688,7 +2748,7 @@ const u32 stage1_bga_b_268[] = {
 	0x6666666c,
 	0x66666666,
 };
-const u32 stage1_bga_b_269[] = {
+const u32 stage1_bga_b_275[] = {
 	0x66666666,
 	0x66666666,
 	0x66666666,
@@ -2698,7 +2758,7 @@ const u32 stage1_bga_b_269[] = {
 	0xcccccccc,
 	0x55ccccc6,
 };
-const u32 stage1_bga_b_270[] = {
+const u32 stage1_bga_b_276[] = {
 	0x55555555,
 	0x58c8c8c8,
 	0xcccccccc,
@@ -2708,7 +2768,7 @@ const u32 stage1_bga_b_270[] = {
 	0x566665cc,
 	0x6666665c,
 };
-const u32 stage1_bga_b_271[] = {
+const u32 stage1_bga_b_277[] = {
 	0x55555555,
 	0x55555555,
 	0xcccc5555,
@@ -2718,57 +2778,37 @@ const u32 stage1_bga_b_271[] = {
 	0xcccccc5a,
 	0xcccccc5a,
 };
-const u32 stage1_bga_b_272[] = {
+const u32 stage1_bga_b_278[] = {
 	0x55555555,
 	0x55a55555,
-	0x5aaaa55b,
-	0x5aaaa5bb,
+	0x5aaaa555,
+	0x5aaaa555,
 	0x55555555,
 	0xaaaaaaa5,
-	0xaaaaaaaa,
+	0xaaaaaaa5,
 	0xaaaaa555,
 };
-const u32 stage1_bga_b_273[] = {
-	0xbbbbb5bb,
-	0xbbbbb5bb,
-	0xbb55bbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0x5bbbbbbb,
-	0x55bbbbbb,
-	0x55bbbbbb,
+const u32 stage1_bga_b_279[] = {
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x5555555b,
 };
-const u32 stage1_bga_b_274[] = {
-	0xbbbbb555,
-	0xbbbbbb55,
-	0xbbbbbbb5,
-	0xbbbbbbb5,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-};
-const u32 stage1_bga_b_275[] = {
-	0x55bbbb55,
-	0xbbbbbbb5,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbb555,
-	0xbbb55555,
-	0xbbb555bb,
-};
-const u32 stage1_bga_b_276[] = {
+const u32 stage1_bga_b_280[] = {
 	0x555aaaaa,
 	0x555aaaaa,
 	0x555aaaa5,
-	0xb5555555,
+	0x55555555,
 	0x55555665,
 	0x55555566,
 	0x55555556,
-	0xbb555556,
+	0x5b555556,
 };
-const u32 stage1_bga_b_277[] = {
+const u32 stage1_bga_b_281[] = {
 	0xaaa565aa,
 	0xaa556aaa,
 	0x5556655a,
@@ -2778,8 +2818,8 @@ const u32 stage1_bga_b_277[] = {
 	0x55665565,
 	0x55566666,
 };
-const u32 stage1_bga_b_278[] = {
-	0xaaaaa588,
+const u32 stage1_bga_b_282[] = {
+	0xaaaaa555,
 	0xaaaaa555,
 	0xaaaaa555,
 	0x5aaaaa55,
@@ -2788,9 +2828,9 @@ const u32 stage1_bga_b_278[] = {
 	0x555555aa,
 	0x55aa555a,
 };
-const u32 stage1_bga_b_279[] = {
-	0x8855bbbb,
-	0x5885bbbb,
+const u32 stage1_bga_b_283[] = {
+	0x5555bbbb,
+	0x5555bbbb,
 	0x55555bbb,
 	0x555555bb,
 	0xaaa5555b,
@@ -2798,7 +2838,7 @@ const u32 stage1_bga_b_279[] = {
 	0xaaaa555b,
 	0xaaaaa5bb,
 };
-const u32 stage1_bga_b_280[] = {
+const u32 stage1_bga_b_284[] = {
 	0xbbbaabbb,
 	0xbbbbaabb,
 	0xbbbbaaa5,
@@ -2808,7 +2848,7 @@ const u32 stage1_bga_b_280[] = {
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 };
-const u32 stage1_bga_b_281[] = {
+const u32 stage1_bga_b_285[] = {
 	0xb5555566,
 	0x55555555,
 	0x55555555,
@@ -2818,7 +2858,7 @@ const u32 stage1_bga_b_281[] = {
 	0xbb555555,
 	0xbb555555,
 };
-const u32 stage1_bga_b_282[] = {
+const u32 stage1_bga_b_286[] = {
 	0x6bbbbbbb,
 	0x566bbbbb,
 	0x5566bbbb,
@@ -2828,7 +2868,7 @@ const u32 stage1_bga_b_282[] = {
 	0x55666bbb,
 	0x56666665,
 };
-const u32 stage1_bga_b_283[] = {
+const u32 stage1_bga_b_287[] = {
 	0xbbbbbaab,
 	0xbbbbbbaa,
 	0xbbbbbaaa,
@@ -2838,7 +2878,7 @@ const u32 stage1_bga_b_283[] = {
 	0xb5555bbb,
 	0xb5555bbb,
 };
-const u32 stage1_bga_b_284[] = {
+const u32 stage1_bga_b_288[] = {
 	0xbbbbbaaa,
 	0xbbbbbaaa,
 	0xabbbbbaa,
@@ -2848,7 +2888,7 @@ const u32 stage1_bga_b_284[] = {
 	0xbbaaabbb,
 	0xaaaabbbb,
 };
-const u32 stage1_bga_b_285[] = {
+const u32 stage1_bga_b_289[] = {
 	0xaaa5aaaa,
 	0xaaa55555,
 	0xaaaaaaa5,
@@ -2858,7 +2898,7 @@ const u32 stage1_bga_b_285[] = {
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 };
-const u32 stage1_bga_b_286[] = {
+const u32 stage1_bga_b_290[] = {
 	0xaaa55555,
 	0xa5555555,
 	0x55555555,
@@ -2868,7 +2908,7 @@ const u32 stage1_bga_b_286[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 };
-const u32 stage1_bga_b_287[] = {
+const u32 stage1_bga_b_291[] = {
 	0x55565aaa,
 	0x5556aaaa,
 	0x5556aaa5,
@@ -2878,7 +2918,7 @@ const u32 stage1_bga_b_287[] = {
 	0xaa566555,
 	0xaaa56655,
 };
-const u32 stage1_bga_b_288[] = {
+const u32 stage1_bga_b_292[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 	0x5555aaaa,
@@ -2888,7 +2928,7 @@ const u32 stage1_bga_b_288[] = {
 	0x5556aa65,
 	0x556aaaa5,
 };
-const u32 stage1_bga_b_289[] = {
+const u32 stage1_bga_b_293[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 	0xaaaaaaaa,
@@ -2898,7 +2938,7 @@ const u32 stage1_bga_b_289[] = {
 	0x5555665a,
 	0x55555565,
 };
-const u32 stage1_bga_b_290[] = {
+const u32 stage1_bga_b_294[] = {
 	0xaaaabbaa,
 	0xaaaaaaab,
 	0xaaaaaaaa,
@@ -2908,7 +2948,7 @@ const u32 stage1_bga_b_290[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 };
-const u32 stage1_bga_b_291[] = {
+const u32 stage1_bga_b_295[] = {
 	0xabbaabbb,
 	0xbbbbaaaa,
 	0xabbaaaba,
@@ -2918,7 +2958,7 @@ const u32 stage1_bga_b_291[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 };
-const u32 stage1_bga_b_292[] = {
+const u32 stage1_bga_b_296[] = {
 	0xbbaaaaaa,
 	0xbbbaaaaa,
 	0xaabaabaa,
@@ -2928,7 +2968,7 @@ const u32 stage1_bga_b_292[] = {
 	0xaaaaaaaa,
 	0xaaaaaaba,
 };
-const u32 stage1_bga_b_293[] = {
+const u32 stage1_bga_b_297[] = {
 	0xcccccccc,
 	0xcccccccc,
 	0xcccccccc,
@@ -2938,7 +2978,7 @@ const u32 stage1_bga_b_293[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 };
-const u32 stage1_bga_b_294[] = {
+const u32 stage1_bga_b_298[] = {
 	0xcccccccc,
 	0xcccccccc,
 	0xcacccccc,
@@ -2948,7 +2988,7 @@ const u32 stage1_bga_b_294[] = {
 	0xcacccdcd,
 	0xaccccccc,
 };
-const u32 stage1_bga_b_295[] = {
+const u32 stage1_bga_b_299[] = {
 	0xcccccccc,
 	0xcccccccc,
 	0xcccccccc,
@@ -2958,7 +2998,7 @@ const u32 stage1_bga_b_295[] = {
 	0xcccccdcd,
 	0xcccccccc,
 };
-const u32 stage1_bga_b_296[] = {
+const u32 stage1_bga_b_300[] = {
 	0xcccccccc,
 	0xcccccccc,
 	0xcccccccc,
@@ -2968,27 +3008,27 @@ const u32 stage1_bga_b_296[] = {
 	0xcdcdcccc,
 	0xcccccccc,
 };
-const u32 stage1_bga_b_297[] = {
+const u32 stage1_bga_b_301[] = {
 	0xcccccddd,
-	0xccccdddd,
-	0xccccdddd,
-	0xccccdddd,
+	0xccccddde,
+	0xccccddde,
+	0xccccddd6,
+	0xccccee6f,
 	0xcccccdd6,
-	0xcccccddd,
-	0xcdcdccdd,
-	0xcccccccd,
+	0xcdcdccde,
+	0xccccccce,
 };
-const u32 stage1_bga_b_298[] = {
+const u32 stage1_bga_b_302[] = {
 	0xdddddddd,
 	0xdddddddd,
 	0xdddddddd,
 	0xdddddddd,
-	0xdddddddd,
+	0x6eeddddd,
 	0xdddddddd,
 	0xdddddddd,
 	0xddddcccd,
 };
-const u32 stage1_bga_b_299[] = {
+const u32 stage1_bga_b_303[] = {
 	0xdddddddd,
 	0xdddddddd,
 	0xdddddddd,
@@ -2998,7 +3038,7 @@ const u32 stage1_bga_b_299[] = {
 	0xdddddccc,
 	0xddddcccc,
 };
-const u32 stage1_bga_b_300[] = {
+const u32 stage1_bga_b_304[] = {
 	0xdddddddd,
 	0xddddddc8,
 	0xdddddccc,
@@ -3008,7 +3048,7 @@ const u32 stage1_bga_b_300[] = {
 	0xdddddddd,
 	0xccdddddd,
 };
-const u32 stage1_bga_b_301[] = {
+const u32 stage1_bga_b_305[] = {
 	0xdddddddc,
 	0xc8ddddd8,
 	0xccdddddc,
@@ -3018,7 +3058,7 @@ const u32 stage1_bga_b_301[] = {
 	0xdddddddc,
 	0xdddddccc,
 };
-const u32 stage1_bga_b_302[] = {
+const u32 stage1_bga_b_306[] = {
 	0xcccccccd,
 	0xc8c8dddd,
 	0xcccddddc,
@@ -3028,7 +3068,7 @@ const u32 stage1_bga_b_302[] = {
 	0xcddddddd,
 	0xcccddddd,
 };
-const u32 stage1_bga_b_303[] = {
+const u32 stage1_bga_b_307[] = {
 	0xdddccccc,
 	0xc8ddcccc,
 	0xccddcccc,
@@ -3038,53 +3078,13 @@ const u32 stage1_bga_b_303[] = {
 	0xdddddddc,
 	0xdddddccc,
 };
-const u32 stage1_bga_b_304[] = {
+const u32 stage1_bga_b_308[] = {
 	0xcccccccc,
 	0xcccccccc,
 	0xcccccccc,
 	0xcccccccc,
 	0xcdddcccc,
 	0xdccccccc,
-	0xcdcdcdcd,
-	0xcccccccc,
-};
-const u32 stage1_bga_b_305[] = {
-	0xcccccccc,
-	0xcccccccc,
-	0xcccccccc,
-	0xcccccccc,
-	0xcccccccc,
-	0xcccccccc,
-	0xcccccccd,
-	0xcccccccc,
-};
-const u32 stage1_bga_b_306[] = {
-	0xcccccccc,
-	0xcccccccc,
-	0xcccccccc,
-	0xcccccccc,
-	0xcccccccc,
-	0xcccccccc,
-	0xcdcdcccd,
-	0xcccccccc,
-};
-const u32 stage1_bga_b_307[] = {
-	0xcccccccc,
-	0xcccccccc,
-	0xcccccccc,
-	0xcccccccc,
-	0xcdcdcccc,
-	0xcccccccc,
-	0xcdcdcdcd,
-	0xcccccccc,
-};
-const u32 stage1_bga_b_308[] = {
-	0xcccccccc,
-	0xcccccccc,
-	0xcccccccc,
-	0xcccccccc,
-	0xcccdcdcd,
-	0xcccccccc,
 	0xcdcdcdcd,
 	0xcccccccc,
 };
@@ -3095,7 +3095,7 @@ const u32 stage1_bga_b_309[] = {
 	0xcccccccc,
 	0xcccccccc,
 	0xcccccccc,
-	0xcdcdcdcc,
+	0xcccccccd,
 	0xcccccccc,
 };
 const u32 stage1_bga_b_310[] = {
@@ -3105,10 +3105,50 @@ const u32 stage1_bga_b_310[] = {
 	0xcccccccc,
 	0xcccccccc,
 	0xcccccccc,
+	0xcdcdcccd,
+	0xcccccccc,
+};
+const u32 stage1_bga_b_311[] = {
+	0xcccccccc,
+	0xcccccccc,
+	0xcccccccc,
+	0xcccccccc,
+	0xcdcdcccc,
+	0xcccccccc,
+	0xcdcdcdcd,
+	0xcccccccc,
+};
+const u32 stage1_bga_b_312[] = {
+	0xcccccccc,
+	0xcccccccc,
+	0xcccccccc,
+	0xcccccccc,
+	0xcccdcdcd,
+	0xcccccccc,
+	0xcdcdcdcd,
+	0xcccccccc,
+};
+const u32 stage1_bga_b_313[] = {
+	0xcccccccc,
+	0xcccccccc,
+	0xcccccccc,
+	0xcccccccc,
+	0xcccccccc,
+	0xcccccccc,
+	0xcdcdcdcc,
+	0xcccccccc,
+};
+const u32 stage1_bga_b_314[] = {
+	0xcccccccc,
+	0xcccccccc,
+	0xcccccccc,
+	0xcccccccc,
+	0xcccccccc,
+	0xcccccccc,
 	0xcccccccc,
 	0xcccccce6,
 };
-const u32 stage1_bga_b_311[] = {
+const u32 stage1_bga_b_315[] = {
 	0xcccccccc,
 	0xcccccccc,
 	0xcccccccc,
@@ -3118,7 +3158,7 @@ const u32 stage1_bga_b_311[] = {
 	0xcccce66e,
 	0x6ee66666,
 };
-const u32 stage1_bga_b_312[] = {
+const u32 stage1_bga_b_316[] = {
 	0xcccc0000,
 	0xcccc0000,
 	0xcccc0000,
@@ -3128,7 +3168,7 @@ const u32 stage1_bga_b_312[] = {
 	0xcccc0000,
 	0xeccc0000,
 };
-const u32 stage1_bga_b_313[] = {
+const u32 stage1_bga_b_317[] = {
 	0x666ccc66,
 	0x6666c666,
 	0x66666666,
@@ -3138,7 +3178,7 @@ const u32 stage1_bga_b_313[] = {
 	0x66666666,
 	0x66666666,
 };
-const u32 stage1_bga_b_314[] = {
+const u32 stage1_bga_b_318[] = {
 	0x6666666c,
 	0x66666665,
 	0x66666666,
@@ -3148,67 +3188,57 @@ const u32 stage1_bga_b_314[] = {
 	0x66666666,
 	0x66666665,
 };
-const u32 stage1_bga_b_315[] = {
+const u32 stage1_bga_b_319[] = {
 	0xcccccc55,
 	0xcccccc55,
-	0xcdcdcdcd,
-	0x6cdcdcd8,
-	0x66cdcd88,
-	0x6665dc88,
+	0xcccccccc,
+	0x6cccccc8,
+	0x66cccc88,
+	0x6665cc88,
 	0x66666685,
 	0x56665555,
 };
-const u32 stage1_bga_b_316[] = {
-	0x5aa555bb,
-	0x5555bbbb,
-	0x855bbbbb,
-	0x85bbbbb5,
-	0x55bbbbbb,
-	0x5bbbbbbb,
-	0x5bbbbbbb,
-	0x5bbbbbbb,
-};
-const u32 stage1_bga_b_317[] = {
-	0x55bbbbbb,
-	0x5bbbbbbb,
-	0x5bbbbbbb,
-	0x5bbbbbbb,
-	0x55bbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-};
-const u32 stage1_bga_b_318[] = {
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-};
-const u32 stage1_bga_b_319[] = {
-	0xbb555bbb,
-	0xbb55bbbb,
-	0xbbbbbbbb,
-	0xbbbbbb55,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-};
 const u32 stage1_bga_b_320[] = {
-	0xbbb55566,
-	0xbbb55555,
-	0xbbb55555,
-	0x5b555555,
-	0x55555555,
-	0xb55a5555,
-	0xbb5aa555,
-	0xb55aaa5a,
+	0x5aa555b5,
+	0x55555b5b,
+	0x8555b5bb,
+	0x555b5bb5,
+	0x55bbbbb5,
+	0x5bbbbbbb,
+	0x55b5b5b5,
+	0x5b5b5b5b,
 };
 const u32 stage1_bga_b_321[] = {
+	0x55b55555,
+	0x5b5b5555,
+	0x55b5b555,
+	0x5b5b5b55,
+	0x55b5b5b5,
+	0xbbbb5b55,
+	0xb5bbb555,
+	0x5b5b5b55,
+};
+const u32 stage1_bga_b_322[] = {
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x555b5555,
+};
+const u32 stage1_bga_b_323[] = {
+	0xb5b55566,
+	0x5b555555,
+	0xb5b55555,
+	0x5b555555,
+	0x55555555,
+	0x555a5555,
+	0x555aa555,
+	0x555aaa5a,
+};
+const u32 stage1_bga_b_324[] = {
 	0x55665556,
 	0x55655555,
 	0x55665555,
@@ -3218,7 +3248,7 @@ const u32 stage1_bga_b_321[] = {
 	0x5aa55566,
 	0xaaaaa555,
 };
-const u32 stage1_bga_b_322[] = {
+const u32 stage1_bga_b_325[] = {
 	0x55aaaa5a,
 	0x6aaaaa5a,
 	0x5aaaaaaa,
@@ -3228,7 +3258,7 @@ const u32 stage1_bga_b_322[] = {
 	0x55566555,
 	0x55556555,
 };
-const u32 stage1_bga_b_323[] = {
+const u32 stage1_bga_b_326[] = {
 	0xaaaa55bb,
 	0xaaaa55bb,
 	0xaaa55bb5,
@@ -3238,7 +3268,7 @@ const u32 stage1_bga_b_323[] = {
 	0x5555aaaa,
 	0x5555aaaa,
 };
-const u32 stage1_bga_b_324[] = {
+const u32 stage1_bga_b_327[] = {
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 	0x5bbbbbb5,
@@ -3248,7 +3278,7 @@ const u32 stage1_bga_b_324[] = {
 	0xaaa66666,
 	0xa5555566,
 };
-const u32 stage1_bga_b_325[] = {
+const u32 stage1_bga_b_328[] = {
 	0xbb555555,
 	0x55555555,
 	0x55555555,
@@ -3258,7 +3288,7 @@ const u32 stage1_bga_b_325[] = {
 	0x55555556,
 	0x55555566,
 };
-const u32 stage1_bga_b_326[] = {
+const u32 stage1_bga_b_329[] = {
 	0x55555566,
 	0x56655566,
 	0x55666656,
@@ -3268,7 +3298,7 @@ const u32 stage1_bga_b_326[] = {
 	0x55566666,
 	0x66666666,
 };
-const u32 stage1_bga_b_327[] = {
+const u32 stage1_bga_b_330[] = {
 	0xbb55bbbb,
 	0xbbbbbbbb,
 	0xbbbbbbba,
@@ -3278,7 +3308,7 @@ const u32 stage1_bga_b_327[] = {
 	0x555566bb,
 	0x5555566b,
 };
-const u32 stage1_bga_b_328[] = {
+const u32 stage1_bga_b_331[] = {
 	0xbbbaaabb,
 	0xbbbbbabb,
 	0xbbbbbaab,
@@ -3288,7 +3318,7 @@ const u32 stage1_bga_b_328[] = {
 	0xbaabbaab,
 	0xbbabbbba,
 };
-const u32 stage1_bga_b_329[] = {
+const u32 stage1_bga_b_332[] = {
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 	0xbbbbbbbb,
@@ -3298,7 +3328,7 @@ const u32 stage1_bga_b_329[] = {
 	0xbbaaaaba,
 	0xaaaaaaaa,
 };
-const u32 stage1_bga_b_330[] = {
+const u32 stage1_bga_b_333[] = {
 	0xbaaaaaaa,
 	0xbaaaaaaa,
 	0xbaaaaaaa,
@@ -3308,7 +3338,7 @@ const u32 stage1_bga_b_330[] = {
 	0xbbbaaaaa,
 	0xbbbbaaaa,
 };
-const u32 stage1_bga_b_331[] = {
+const u32 stage1_bga_b_334[] = {
 	0xaaa55666,
 	0xaaa55566,
 	0xaaa55555,
@@ -3318,7 +3348,7 @@ const u32 stage1_bga_b_331[] = {
 	0xa55aaaaa,
 	0xaa55aaaa,
 };
-const u32 stage1_bga_b_332[] = {
+const u32 stage1_bga_b_335[] = {
 	0x66655aaa,
 	0x5656665a,
 	0x55555666,
@@ -3328,7 +3358,7 @@ const u32 stage1_bga_b_332[] = {
 	0xaa555555,
 	0xaa555555,
 };
-const u32 stage1_bga_b_333[] = {
+const u32 stage1_bga_b_336[] = {
 	0x55555665,
 	0xa5556666,
 	0xa6566556,
@@ -3338,7 +3368,7 @@ const u32 stage1_bga_b_333[] = {
 	0x56666655,
 	0x66666665,
 };
-const u32 stage1_bga_b_334[] = {
+const u32 stage1_bga_b_337[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 	0x6aaaaaaa,
@@ -3348,7 +3378,7 @@ const u32 stage1_bga_b_334[] = {
 	0x5665aaaa,
 	0x5555aaaa,
 };
-const u32 stage1_bga_b_335[] = {
+const u32 stage1_bga_b_338[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 	0xaaaaaaaa,
@@ -3358,7 +3388,7 @@ const u32 stage1_bga_b_335[] = {
 	0xaaaaaaaa,
 	0xaa556665,
 };
-const u32 stage1_bga_b_336[] = {
+const u32 stage1_bga_b_339[] = {
 	0xaaaaaaaa,
 	0xbaaaaaaa,
 	0xaaaaaaaa,
@@ -3368,7 +3398,7 @@ const u32 stage1_bga_b_336[] = {
 	0xaa5665aa,
 	0xa6665665,
 };
-const u32 stage1_bga_b_337[] = {
+const u32 stage1_bga_b_340[] = {
 	0xcacdcdcd,
 	0xacdcdcdc,
 	0xaacacdcd,
@@ -3378,7 +3408,7 @@ const u32 stage1_bga_b_337[] = {
 	0xaaaaaddd,
 	0xaaaaacdc,
 };
-const u32 stage1_bga_b_338[] = {
+const u32 stage1_bga_b_341[] = {
 	0xcdcdcdcd,
 	0xdcdcdcdc,
 	0xcdcdcdcd,
@@ -3388,7 +3418,7 @@ const u32 stage1_bga_b_338[] = {
 	0xdddddddd,
 	0xdddcdcdc,
 };
-const u32 stage1_bga_b_339[] = {
+const u32 stage1_bga_b_342[] = {
 	0xcdcdcdcd,
 	0xdcdcdcdc,
 	0xcdcdcdcd,
@@ -3398,7 +3428,7 @@ const u32 stage1_bga_b_339[] = {
 	0xdddddddd,
 	0xdcdcdddd,
 };
-const u32 stage1_bga_b_340[] = {
+const u32 stage1_bga_b_343[] = {
 	0xcdcdcdcd,
 	0xdcdcdcdd,
 	0xcdcddddd,
@@ -3408,7 +3438,7 @@ const u32 stage1_bga_b_340[] = {
 	0xdddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_341[] = {
+const u32 stage1_bga_b_344[] = {
 	0xddddcdcd,
 	0xdddcdcdc,
 	0xddddddcd,
@@ -3418,7 +3448,7 @@ const u32 stage1_bga_b_341[] = {
 	0xdddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_342[] = {
+const u32 stage1_bga_b_345[] = {
 	0xddddcdcd,
 	0xdcdcdcdc,
 	0xcdcdcdcd,
@@ -3428,7 +3458,7 @@ const u32 stage1_bga_b_342[] = {
 	0xdddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_343[] = {
+const u32 stage1_bga_b_346[] = {
 	0xcdcddddd,
 	0xdcdcdcdc,
 	0xcdcdcdcd,
@@ -3438,27 +3468,27 @@ const u32 stage1_bga_b_343[] = {
 	0xdddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_344[] = {
+const u32 stage1_bga_b_347[] = {
 	0xcdcdcdcd,
 	0xdcdcdcdc,
 	0xcdcdcdcd,
 	0xdcdcdcdc,
 	0xcdcdcdcd,
 	0xdcdcdcdc,
-	0xddde6666,
-	0xde6fffff,
+	0xdddddddd,
+	0xdddddddd,
 };
-const u32 stage1_bga_b_345[] = {
+const u32 stage1_bga_b_348[] = {
 	0xcdcdcddd,
 	0xdcdcdcdc,
 	0xcdcdcdcd,
 	0xdcdcdcdc,
 	0xcdcdcdcd,
 	0xdcdcdcdc,
-	0x6edddddd,
-	0xff6edddc,
+	0xdddddddd,
+	0xdddddddc,
 };
-const u32 stage1_bga_b_346[] = {
+const u32 stage1_bga_b_349[] = {
 	0xddddcdcd,
 	0xdcdcdcdc,
 	0xcdcdcdcd,
@@ -3468,7 +3498,7 @@ const u32 stage1_bga_b_346[] = {
 	0xdddddddd,
 	0xdcdcdddc,
 };
-const u32 stage1_bga_b_347[] = {
+const u32 stage1_bga_b_350[] = {
 	0xcdcdcdcd,
 	0xdcdcdcdc,
 	0xcdcdcdcd,
@@ -3478,7 +3508,7 @@ const u32 stage1_bga_b_347[] = {
 	0xdddddddd,
 	0xdcdcdddc,
 };
-const u32 stage1_bga_b_348[] = {
+const u32 stage1_bga_b_351[] = {
 	0xcdcdcdcd,
 	0xdcdcdcdc,
 	0xcdcdcdcd,
@@ -3488,7 +3518,7 @@ const u32 stage1_bga_b_348[] = {
 	0xddddddde,
 	0xdcddde66,
 };
-const u32 stage1_bga_b_349[] = {
+const u32 stage1_bga_b_352[] = {
 	0xcdcdcdcd,
 	0xdcdcdcdc,
 	0xcdcdcdcd,
@@ -3498,7 +3528,7 @@ const u32 stage1_bga_b_349[] = {
 	0x66eddddd,
 	0x666cdcdc,
 };
-const u32 stage1_bga_b_350[] = {
+const u32 stage1_bga_b_353[] = {
 	0xcdcdcdcd,
 	0xdcdcdcdc,
 	0xcdcdcdcd,
@@ -3508,7 +3538,7 @@ const u32 stage1_bga_b_350[] = {
 	0xddddddd6,
 	0xdcdcdc66,
 };
-const u32 stage1_bga_b_351[] = {
+const u32 stage1_bga_b_354[] = {
 	0xcdcdcdcd,
 	0xdcdcdcdc,
 	0xcdcdcdcd,
@@ -3518,7 +3548,7 @@ const u32 stage1_bga_b_351[] = {
 	0x666ddddd,
 	0x6666dcdc,
 };
-const u32 stage1_bga_b_352[] = {
+const u32 stage1_bga_b_355[] = {
 	0xcdcdce66,
 	0xdcdce666,
 	0xcdce6666,
@@ -3528,7 +3558,7 @@ const u32 stage1_bga_b_352[] = {
 	0xe6666666,
 	0x66666666,
 };
-const u32 stage1_bga_b_353[] = {
+const u32 stage1_bga_b_356[] = {
 	0x6cce0000,
 	0x66660000,
 	0x66660000,
@@ -3538,7 +3568,7 @@ const u32 stage1_bga_b_353[] = {
 	0x66660000,
 	0x66660000,
 };
-const u32 stage1_bga_b_354[] = {
+const u32 stage1_bga_b_357[] = {
 	0x66666666,
 	0x66666666,
 	0x66666666,
@@ -3548,7 +3578,7 @@ const u32 stage1_bga_b_354[] = {
 	0x66666666,
 	0x66666656,
 };
-const u32 stage1_bga_b_355[] = {
+const u32 stage1_bga_b_358[] = {
 	0x66666666,
 	0x66666666,
 	0x66666666,
@@ -3558,7 +3588,7 @@ const u32 stage1_bga_b_355[] = {
 	0x66556556,
 	0x66555556,
 };
-const u32 stage1_bga_b_356[] = {
+const u32 stage1_bga_b_359[] = {
 	0x66666666,
 	0x65666655,
 	0x55665555,
@@ -3568,7 +3598,7 @@ const u32 stage1_bga_b_356[] = {
 	0x65565555,
 	0x66555555,
 };
-const u32 stage1_bga_b_357[] = {
+const u32 stage1_bga_b_360[] = {
 	0x66666655,
 	0x55666555,
 	0x55565555,
@@ -3578,87 +3608,97 @@ const u32 stage1_bga_b_357[] = {
 	0x56655555,
 	0x55555555,
 };
-const u32 stage1_bga_b_358[] = {
-	0x55555555,
-	0x5555b9b5,
-	0x5555b99b,
-	0x555555b9,
-	0x55555559,
-	0x555bb559,
-	0x55b99b59,
-	0x5b999999,
-};
-const u32 stage1_bga_b_359[] = {
-	0x5bb555bb,
-	0x5555bbbb,
-	0x555bbbbb,
-	0xb55bbbbb,
-	0x95bbbbbb,
-	0x95bbbbb9,
-	0x955b9999,
-	0x9b5bb999,
-};
-const u32 stage1_bga_b_360[] = {
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xb9bbbbbb,
-	0x9b9bbbbb,
-	0xb9b9bbbb,
-	0x999b9bbb,
-	0xb9b9b9bb,
-};
 const u32 stage1_bga_b_361[] = {
-	0xbbbbbb55,
-	0xbbbbbbb5,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbb5,
-	0xbbbbbbbb,
+	0x55555555,
+	0x55555bb5,
+	0x5555b5b5,
+	0x5555555b,
+	0x55555555,
+	0x555b555b,
+	0x55b5b555,
+	0x5bbb5bbb,
 };
 const u32 stage1_bga_b_362[] = {
-	0x55aaaa5a,
-	0x555555aa,
-	0xb55bb555,
-	0xb55bbbb5,
-	0xbb5bbbb5,
-	0xbbbb5555,
-	0x55b55bbb,
-	0xb555bbbb,
+	0x55b555b5,
+	0x5555bbbb,
+	0x555bb5bb,
+	0x555bbbbb,
+	0xb5b5bbb5,
+	0x555bbbbb,
+	0xb55bb5bb,
+	0x5b5bbbbb,
 };
 const u32 stage1_bga_b_363[] = {
+	0xb5b5b555,
+	0xbb5b5555,
+	0xb5b5b5b5,
+	0xbb5b5b5b,
+	0xbbbbbbb5,
+	0xbbbbbbbb,
+	0xb5bbb5bb,
+	0xbbbbbbbb,
+};
+const u32 stage1_bga_b_364[] = {
+	0x55555555,
+	0x5b5b5555,
+	0xb5bbb555,
+	0x5bbbbb55,
+	0xbbb5bbb5,
+	0xbbbbbbbb,
+	0xbbbbb5bb,
+	0xbbbbbbbb,
+};
+const u32 stage1_bga_b_365[] = {
+	0x55b5b555,
+	0x5b5b5b55,
+	0x55bbb5b5,
+	0x5b5bbb5b,
+	0xb5b5bbb5,
+	0x5bbbbb5b,
+	0xb5bbb5b5,
+	0xbbbbbb5b,
+};
+const u32 stage1_bga_b_366[] = {
+	0x55aaaa5a,
+	0x555555aa,
+	0xb55b5555,
+	0x5555b5b5,
+	0xb55b5b55,
+	0x5b5b5555,
+	0x55b55555,
+	0x55555b55,
+};
+const u32 stage1_bga_b_367[] = {
 	0xaaaaa555,
 	0xaaaaaa55,
 	0xaaaaaa55,
 	0x55aaaa55,
 	0x555aa555,
 	0x5555a5bb,
-	0xb555555b,
-	0xbbbbb555,
+	0x55555555,
+	0x55b55555,
 };
-const u32 stage1_bga_b_364[] = {
+const u32 stage1_bga_b_368[] = {
 	0x55556655,
 	0x55556666,
 	0x55566555,
 	0x55555555,
-	0x555bbbbb,
-	0xbb55bbbb,
-	0xbbb55bbb,
-	0xbb55555b,
+	0x555bb5bb,
+	0x5b555b5b,
+	0xb5b55bb5,
+	0x5b55555b,
 };
-const u32 stage1_bga_b_365[] = {
+const u32 stage1_bga_b_369[] = {
 	0x5555aa55,
 	0x6655a555,
 	0x66555555,
 	0x55555aa5,
 	0x555aaaa5,
-	0xb5aa555a,
+	0x55aa555a,
 	0xb55aaa55,
-	0xb55aaaa5,
+	0x555aaaa5,
 };
-const u32 stage1_bga_b_366[] = {
+const u32 stage1_bga_b_370[] = {
 	0x55555556,
 	0x55556666,
 	0x55555555,
@@ -3668,7 +3708,7 @@ const u32 stage1_bga_b_366[] = {
 	0x55555555,
 	0x555555aa,
 };
-const u32 stage1_bga_b_367[] = {
+const u32 stage1_bga_b_371[] = {
 	0x66665666,
 	0x65566666,
 	0x65555666,
@@ -3678,7 +3718,7 @@ const u32 stage1_bga_b_367[] = {
 	0x55555565,
 	0x55555555,
 };
-const u32 stage1_bga_b_368[] = {
+const u32 stage1_bga_b_372[] = {
 	0x66666665,
 	0x66666655,
 	0x55555666,
@@ -3688,7 +3728,7 @@ const u32 stage1_bga_b_368[] = {
 	0x55555556,
 	0x55555555,
 };
-const u32 stage1_bga_b_369[] = {
+const u32 stage1_bga_b_373[] = {
 	0x5555556b,
 	0x55555556,
 	0x66655556,
@@ -3698,7 +3738,7 @@ const u32 stage1_bga_b_369[] = {
 	0x655566bb,
 	0x665556bb,
 };
-const u32 stage1_bga_b_370[] = {
+const u32 stage1_bga_b_374[] = {
 	0xbbbbbbba,
 	0xbbbbbbba,
 	0xbbbbbbba,
@@ -3708,7 +3748,7 @@ const u32 stage1_bga_b_370[] = {
 	0xbbbaabbb,
 	0xbbbaabbb,
 };
-const u32 stage1_bga_b_371[] = {
+const u32 stage1_bga_b_375[] = {
 	0xaabaaaaa,
 	0xabbbbbaa,
 	0xabbbbbba,
@@ -3718,7 +3758,7 @@ const u32 stage1_bga_b_371[] = {
 	0xbbaaaaaa,
 	0xbbbaaabb,
 };
-const u32 stage1_bga_b_372[] = {
+const u32 stage1_bga_b_376[] = {
 	0xabbbbaaa,
 	0xaabbaaaa,
 	0xaaaabbaa,
@@ -3728,7 +3768,7 @@ const u32 stage1_bga_b_372[] = {
 	0xaabbbaaa,
 	0xaaabbaaa,
 };
-const u32 stage1_bga_b_373[] = {
+const u32 stage1_bga_b_377[] = {
 	0xaaa5aaaa,
 	0xaaa5555a,
 	0xaaa55555,
@@ -3738,7 +3778,7 @@ const u32 stage1_bga_b_373[] = {
 	0xaaaaaaa5,
 	0xaaaaaaa5,
 };
-const u32 stage1_bga_b_374[] = {
+const u32 stage1_bga_b_378[] = {
 	0xa55aaaaa,
 	0xa5aaaaaa,
 	0x55aaaaaa,
@@ -3748,7 +3788,7 @@ const u32 stage1_bga_b_374[] = {
 	0x5aaaaa55,
 	0xaaaaaaa5,
 };
-const u32 stage1_bga_b_375[] = {
+const u32 stage1_bga_b_379[] = {
 	0x66566666,
 	0xaa556666,
 	0xaa555566,
@@ -3758,7 +3798,7 @@ const u32 stage1_bga_b_375[] = {
 	0x665aaa56,
 	0x5666aa55,
 };
-const u32 stage1_bga_b_376[] = {
+const u32 stage1_bga_b_380[] = {
 	0x6555aaaa,
 	0x6665aaa5,
 	0x6665aaa5,
@@ -3768,7 +3808,7 @@ const u32 stage1_bga_b_376[] = {
 	0x66665555,
 	0x66666666,
 };
-const u32 stage1_bga_b_377[] = {
+const u32 stage1_bga_b_381[] = {
 	0x55555566,
 	0x55555555,
 	0x55555555,
@@ -3778,7 +3818,7 @@ const u32 stage1_bga_b_377[] = {
 	0x55555555,
 	0x65555555,
 };
-const u32 stage1_bga_b_378[] = {
+const u32 stage1_bga_b_382[] = {
 	0x66555556,
 	0x65555555,
 	0x66555555,
@@ -3788,7 +3828,7 @@ const u32 stage1_bga_b_378[] = {
 	0x55556555,
 	0x55555556,
 };
-const u32 stage1_bga_b_379[] = {
+const u32 stage1_bga_b_383[] = {
 	0x6aaaaaaa,
 	0x65aaaaaa,
 	0x56aaaaaa,
@@ -3798,7 +3838,7 @@ const u32 stage1_bga_b_379[] = {
 	0x65aaaadd,
 	0x6aaaaaaa,
 };
-const u32 stage1_bga_b_380[] = {
+const u32 stage1_bga_b_384[] = {
 	0xaaaadddd,
 	0xaaaadddd,
 	0xaaaddddd,
@@ -3808,7 +3848,7 @@ const u32 stage1_bga_b_380[] = {
 	0xdddedede,
 	0xaddddddd,
 };
-const u32 stage1_bga_b_381[] = {
+const u32 stage1_bga_b_385[] = {
 	0xdddddddd,
 	0xdddddddd,
 	0xdddddddd,
@@ -3818,7 +3858,7 @@ const u32 stage1_bga_b_381[] = {
 	0xdedddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_382[] = {
+const u32 stage1_bga_b_386[] = {
 	0xdddddddd,
 	0xdddddddd,
 	0xdddddddd,
@@ -3828,37 +3868,17 @@ const u32 stage1_bga_b_382[] = {
 	0xdedededd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_383[] = {
+const u32 stage1_bga_b_387[] = {
 	0xdddddddd,
-	0xddddddd6,
-	0xddddddef,
-	0xdddddd6f,
-	0xdddddeff,
-	0xddddd6ff,
-	0xddded6ff,
-	0xddddd6ff,
+	0xdddddddd,
+	0xdddddddd,
+	0xdddddddd,
+	0xdddddddd,
+	0xdddddddd,
+	0xdddddddd,
+	0xdddddeed,
 };
-const u32 stage1_bga_b_384[] = {
-	0x6fffffff,
-	0xffffffff,
-	0xffffffff,
-	0xffffffff,
-	0xffffffff,
-	0xffffffff,
-	0xffffffff,
-	0xffffffff,
-};
-const u32 stage1_bga_b_385[] = {
-	0xffff6ddd,
-	0xfffff6dd,
-	0xffffffed,
-	0xffffff6d,
-	0xfffffffe,
-	0xfffffff6,
-	0xfffffff6,
-	0xfffffff6,
-};
-const u32 stage1_bga_b_386[] = {
+const u32 stage1_bga_b_388[] = {
 	0xdddddddd,
 	0xdddddddd,
 	0xdddddddd,
@@ -3868,7 +3888,7 @@ const u32 stage1_bga_b_386[] = {
 	0xddddddde,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_387[] = {
+const u32 stage1_bga_b_389[] = {
 	0xdddddddd,
 	0xdddddddd,
 	0xdddddddd,
@@ -3878,7 +3898,7 @@ const u32 stage1_bga_b_387[] = {
 	0xdededede,
 	0xddddddd5,
 };
-const u32 stage1_bga_b_388[] = {
+const u32 stage1_bga_b_390[] = {
 	0xdddddddd,
 	0xdddddddd,
 	0xdddddddd,
@@ -3888,7 +3908,7 @@ const u32 stage1_bga_b_388[] = {
 	0x55555555,
 	0x55555555,
 };
-const u32 stage1_bga_b_389[] = {
+const u32 stage1_bga_b_391[] = {
 	0xdddddddd,
 	0xdddddddd,
 	0xdddddddd,
@@ -3898,7 +3918,7 @@ const u32 stage1_bga_b_389[] = {
 	0x55555555,
 	0x55555555,
 };
-const u32 stage1_bga_b_390[] = {
+const u32 stage1_bga_b_392[] = {
 	0xddddd666,
 	0xddddd666,
 	0xde666666,
@@ -3908,7 +3928,7 @@ const u32 stage1_bga_b_390[] = {
 	0x66666666,
 	0x55666666,
 };
-const u32 stage1_bga_b_391[] = {
+const u32 stage1_bga_b_393[] = {
 	0x6666dddd,
 	0x666666ec,
 	0x6666666d,
@@ -3918,7 +3938,7 @@ const u32 stage1_bga_b_391[] = {
 	0x666666ed,
 	0x666ddddd,
 };
-const u32 stage1_bga_b_392[] = {
+const u32 stage1_bga_b_394[] = {
 	0xddd66666,
 	0xd6666666,
 	0xddddd666,
@@ -3928,7 +3948,7 @@ const u32 stage1_bga_b_392[] = {
 	0xdde6eddd,
 	0xde666edd,
 };
-const u32 stage1_bga_b_393[] = {
+const u32 stage1_bga_b_395[] = {
 	0x6666dddd,
 	0x6666dcdc,
 	0x666dddde,
@@ -3938,7 +3958,7 @@ const u32 stage1_bga_b_393[] = {
 	0xdde66666,
 	0xdd666666,
 };
-const u32 stage1_bga_b_394[] = {
+const u32 stage1_bga_b_396[] = {
 	0x66660000,
 	0x66660000,
 	0x66660000,
@@ -3948,7 +3968,7 @@ const u32 stage1_bga_b_394[] = {
 	0x66660000,
 	0x66660000,
 };
-const u32 stage1_bga_b_395[] = {
+const u32 stage1_bga_b_397[] = {
 	0x66666555,
 	0x66665555,
 	0x65565555,
@@ -3958,7 +3978,7 @@ const u32 stage1_bga_b_395[] = {
 	0x55555555,
 	0x55555555,
 };
-const u32 stage1_bga_b_396[] = {
+const u32 stage1_bga_b_398[] = {
 	0x55555655,
 	0x55565555,
 	0x55555565,
@@ -3968,7 +3988,7 @@ const u32 stage1_bga_b_396[] = {
 	0x55566666,
 	0x55566655,
 };
-const u32 stage1_bga_b_397[] = {
+const u32 stage1_bga_b_399[] = {
 	0x66666666,
 	0x55666666,
 	0x55566666,
@@ -3978,7 +3998,7 @@ const u32 stage1_bga_b_397[] = {
 	0x55566666,
 	0x55556666,
 };
-const u32 stage1_bga_b_398[] = {
+const u32 stage1_bga_b_400[] = {
 	0x66655556,
 	0x66665566,
 	0x66665666,
@@ -3988,58 +4008,38 @@ const u32 stage1_bga_b_398[] = {
 	0x66666666,
 	0x55556665,
 };
-const u32 stage1_bga_b_399[] = {
-	0x6655559b,
-	0x6665b999,
-	0x6666b999,
-	0x666666b9,
-	0x66666666,
+const u32 stage1_bga_b_401[] = {
+	0x665555b5,
+	0x66655bbb,
+	0x6665b5bb,
+	0x6666565b,
+	0x66666665,
 	0x65566655,
 	0x55555555,
-	0x555555b9,
-};
-const u32 stage1_bga_b_400[] = {
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x59999999,
-	0x59999999,
-	0x99999999,
-};
-const u32 stage1_bga_b_401[] = {
-	0x99b5bbbb,
-	0x999b9b9b,
-	0x999999b9,
-	0x999b9b9b,
-	0x99999999,
-	0x9999999b,
-	0x9999b9b9,
-	0x99999bbb,
+	0x5555555b,
 };
 const u32 stage1_bga_b_402[] = {
-	0x9b9b9bbb,
-	0xbbb9b9bb,
-	0xb9bb9bbb,
-	0x9b9bbbbb,
-	0x99b9bb9b,
-	0x9b9bb9b9,
-	0xb9bb9b9b,
-	0xbbb9b9b9,
+	0xbbb5bbb5,
+	0xbbbbbbbb,
+	0xb5bbbbbb,
+	0x5bbbbbbb,
+	0xb5b5bbbb,
+	0x5b5bbbbb,
+	0x55b5b5bb,
+	0x5b5bbbbb,
 };
 const u32 stage1_bga_b_403[] = {
-	0xbbb555bb,
+	0xb5b5bbbb,
+	0xbb5bbbbb,
+	0xb5b5b5bb,
+	0xbb5b5bbb,
+	0xbbb5bbb5,
+	0xbbbbbbbb,
 	0xbbbbb5bb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
 	0xbbbbbbbb,
 };
 const u32 stage1_bga_b_404[] = {
-	0xbbbbbb55,
+	0xbbbbbbbb,
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 	0xbbbbbbbb,
@@ -4049,8 +4049,8 @@ const u32 stage1_bga_b_404[] = {
 	0xbbbbbbbb,
 };
 const u32 stage1_bga_b_405[] = {
-	0xbbbbbb5b,
-	0xbbbbbb5b,
+	0xbbbbbbb5,
+	0xbbbbbbbb,
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 	0xbbbbbbbb,
@@ -4059,26 +4059,66 @@ const u32 stage1_bga_b_405[] = {
 	0xbbbbbbbb,
 };
 const u32 stage1_bga_b_406[] = {
-	0xb55aaaaa,
-	0xb5555aaa,
-	0xbbb55aaa,
-	0xbbbb5a55,
-	0x5555555b,
-	0xbb5555bb,
-	0xbbbb55bb,
-	0xbbbbb55b,
+	0xbbbbbbb5,
+	0xbbbbbbbb,
+	0xbbbbb5bb,
+	0xbbbbbbbb,
+	0xbbbbbbb5,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
 };
 const u32 stage1_bga_b_407[] = {
+	0xb5b555b5,
+	0x5b5b555b,
+	0xb5b5b5bb,
+	0xbb5b5b5b,
+	0xbbb5bbb5,
+	0xbbbbbbbb,
+	0xb5bbb5bb,
+	0xbbbbbbbb,
+};
+const u32 stage1_bga_b_408[] = {
+	0xb5b5b555,
+	0x5b5b5b5b,
+	0xb5bbb5b5,
+	0xbbbbbbbb,
+	0xbbb5bbb5,
+	0xbbbbbbbb,
+	0xbbbbb5bb,
+	0xbbbbbbbb,
+};
+const u32 stage1_bga_b_409[] = {
+	0xb5b5b555,
+	0x5b5b5b5b,
+	0xb5bbb5b5,
+	0xbbbbbb5b,
+	0xbbb5b5b5,
+	0xbb5b5b5b,
+	0xb5b5b5b5,
+	0xbb5bbbbb,
+};
+const u32 stage1_bga_b_410[] = {
+	0xb55aaaaa,
+	0x55555aaa,
+	0xb5b55aaa,
+	0x5bbb5a55,
+	0x55555555,
+	0x5b55555b,
+	0xb5b555b5,
+	0xbb5b555b,
+};
+const u32 stage1_bga_b_411[] = {
 	0x5555aaaa,
 	0x555aaa55,
 	0x555aaaa5,
 	0x5b55aaaa,
-	0xbbb5555a,
-	0xbbbb5555,
-	0xbb555555,
-	0xbbbb55aa,
+	0xb5b5555a,
+	0x5b5b5555,
+	0xb5555555,
+	0x5b5b55aa,
 };
-const u32 stage1_bga_b_408[] = {
+const u32 stage1_bga_b_412[] = {
 	0xaa555555,
 	0xaaa55555,
 	0x55a55555,
@@ -4088,7 +4128,7 @@ const u32 stage1_bga_b_408[] = {
 	0x55aaa555,
 	0xa55aaa55,
 };
-const u32 stage1_bga_b_409[] = {
+const u32 stage1_bga_b_413[] = {
 	0x55555555,
 	0x55555555,
 	0x55555555,
@@ -4098,7 +4138,7 @@ const u32 stage1_bga_b_409[] = {
 	0xaaaaaa5a,
 	0x55aaaa5a,
 };
-const u32 stage1_bga_b_410[] = {
+const u32 stage1_bga_b_414[] = {
 	0x56556bbb,
 	0x55556bbb,
 	0x55566bbb,
@@ -4108,7 +4148,7 @@ const u32 stage1_bga_b_410[] = {
 	0xa66bbbbb,
 	0xa5666bbb,
 };
-const u32 stage1_bga_b_411[] = {
+const u32 stage1_bga_b_415[] = {
 	0xbaaaaaab,
 	0xbbbbbaaa,
 	0xbbbbbbaa,
@@ -4118,7 +4158,7 @@ const u32 stage1_bga_b_411[] = {
 	0xbbbbbbbb,
 	0x66666bbb,
 };
-const u32 stage1_bga_b_412[] = {
+const u32 stage1_bga_b_416[] = {
 	0xbbbaabbb,
 	0xaaabbbbb,
 	0xbbaaaabb,
@@ -4128,7 +4168,7 @@ const u32 stage1_bga_b_412[] = {
 	0xbbbabbbb,
 	0xbbbbbbbb,
 };
-const u32 stage1_bga_b_413[] = {
+const u32 stage1_bga_b_417[] = {
 	0xbbaaaaaa,
 	0xbaabbbba,
 	0xaabbbbbb,
@@ -4138,7 +4178,7 @@ const u32 stage1_bga_b_413[] = {
 	0xaaabbbbb,
 	0xbbbbbbbb,
 };
-const u32 stage1_bga_b_414[] = {
+const u32 stage1_bga_b_418[] = {
 	0xabbbaaaa,
 	0xaabbaaaa,
 	0xaaabbaa5,
@@ -4148,7 +4188,7 @@ const u32 stage1_bga_b_414[] = {
 	0xbbbbbbaa,
 	0xbbbbbbaa,
 };
-const u32 stage1_bga_b_415[] = {
+const u32 stage1_bga_b_419[] = {
 	0xaaaaa55a,
 	0xaaaa55aa,
 	0x55555aaa,
@@ -4158,7 +4198,7 @@ const u32 stage1_bga_b_415[] = {
 	0xaa555555,
 	0xa55aa555,
 };
-const u32 stage1_bga_b_416[] = {
+const u32 stage1_bga_b_420[] = {
 	0xa5556655,
 	0xaaaa5666,
 	0xaaaaa566,
@@ -4168,7 +4208,7 @@ const u32 stage1_bga_b_416[] = {
 	0xaaa55555,
 	0x5aaaa556,
 };
-const u32 stage1_bga_b_417[] = {
+const u32 stage1_bga_b_421[] = {
 	0x66666566,
 	0x66665555,
 	0x66665555,
@@ -4178,7 +4218,7 @@ const u32 stage1_bga_b_417[] = {
 	0x55665555,
 	0x66666666,
 };
-const u32 stage1_bga_b_418[] = {
+const u32 stage1_bga_b_422[] = {
 	0x66655555,
 	0x56655555,
 	0x55655555,
@@ -4188,7 +4228,7 @@ const u32 stage1_bga_b_418[] = {
 	0x5555aaaa,
 	0x555aaaaa,
 };
-const u32 stage1_bga_b_419[] = {
+const u32 stage1_bga_b_423[] = {
 	0x55556666,
 	0x5555566a,
 	0x55555566,
@@ -4198,7 +4238,7 @@ const u32 stage1_bga_b_419[] = {
 	0xaa5aaaaa,
 	0xaa55aaaa,
 };
-const u32 stage1_bga_b_420[] = {
+const u32 stage1_bga_b_424[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 	0x55aaaaaa,
@@ -4208,7 +4248,7 @@ const u32 stage1_bga_b_420[] = {
 	0xaaaa5556,
 	0xaaaaaa55,
 };
-const u32 stage1_bga_b_421[] = {
+const u32 stage1_bga_b_425[] = {
 	0xaadedede,
 	0xaaededed,
 	0xaadedede,
@@ -4218,7 +4258,7 @@ const u32 stage1_bga_b_421[] = {
 	0x65dedede,
 	0x56eeeeee,
 };
-const u32 stage1_bga_b_422[] = {
+const u32 stage1_bga_b_426[] = {
 	0xdededede,
 	0xedededed,
 	0xdededede,
@@ -4228,7 +4268,7 @@ const u32 stage1_bga_b_422[] = {
 	0xdededede,
 	0xeeeeeeee,
 };
-const u32 stage1_bga_b_423[] = {
+const u32 stage1_bga_b_427[] = {
 	0xdedddddd,
 	0xededdddd,
 	0xdedddddd,
@@ -4238,7 +4278,7 @@ const u32 stage1_bga_b_423[] = {
 	0xdedddddd,
 	0xeedddddd,
 };
-const u32 stage1_bga_b_424[] = {
+const u32 stage1_bga_b_428[] = {
 	0xddddddde,
 	0xdddddded,
 	0xddddddde,
@@ -4248,7 +4288,7 @@ const u32 stage1_bga_b_424[] = {
 	0xddddddde,
 	0xddddddee,
 };
-const u32 stage1_bga_b_425[] = {
+const u32 stage1_bga_b_429[] = {
 	0xdeddddde,
 	0xeddddddd,
 	0xdeddddde,
@@ -4258,37 +4298,7 @@ const u32 stage1_bga_b_425[] = {
 	0xdeddddde,
 	0xeeedddde,
 };
-const u32 stage1_bga_b_426[] = {
-	0xdeded6ff,
-	0xedede6ff,
-	0xdededeff,
-	0xededed6f,
-	0xdedededf,
-	0xededede6,
-	0xdededede,
-	0xeeeeeeee,
-};
-const u32 stage1_bga_b_427[] = {
-	0xffffffff,
-	0xffffffff,
-	0xffffffff,
-	0xffffffff,
-	0xffffffff,
-	0xffffffff,
-	0x6fffffff,
-	0xee6fffff,
-};
-const u32 stage1_bga_b_428[] = {
-	0xfffffff6,
-	0xfffffff6,
-	0xfffffffe,
-	0xffffff6d,
-	0xffffffde,
-	0xfffff6ed,
-	0xffff6ede,
-	0xff6eeeee,
-};
-const u32 stage1_bga_b_429[] = {
+const u32 stage1_bga_b_430[] = {
 	0xdededede,
 	0xedededed,
 	0xdededede,
@@ -4298,7 +4308,7 @@ const u32 stage1_bga_b_429[] = {
 	0xdedede55,
 	0xeeeeee55,
 };
-const u32 stage1_bga_b_430[] = {
+const u32 stage1_bga_b_431[] = {
 	0xdededed5,
 	0xededede5,
 	0xdededed5,
@@ -4308,7 +4318,7 @@ const u32 stage1_bga_b_430[] = {
 	0x55555555,
 	0x55555555,
 };
-const u32 stage1_bga_b_431[] = {
+const u32 stage1_bga_b_432[] = {
 	0x55555555,
 	0x55555555,
 	0x55555555,
@@ -4318,7 +4328,7 @@ const u32 stage1_bga_b_431[] = {
 	0x55555555,
 	0x55555555,
 };
-const u32 stage1_bga_b_432[] = {
+const u32 stage1_bga_b_433[] = {
 	0x55555555,
 	0x55555555,
 	0x55555555,
@@ -4328,7 +4338,7 @@ const u32 stage1_bga_b_432[] = {
 	0x55555566,
 	0x55555555,
 };
-const u32 stage1_bga_b_433[] = {
+const u32 stage1_bga_b_434[] = {
 	0x55566666,
 	0x55666666,
 	0x55666666,
@@ -4338,7 +4348,7 @@ const u32 stage1_bga_b_433[] = {
 	0x65555666,
 	0x65555556,
 };
-const u32 stage1_bga_b_434[] = {
+const u32 stage1_bga_b_435[] = {
 	0x666edede,
 	0x66ed666d,
 	0x6666666e,
@@ -4348,7 +4358,7 @@ const u32 stage1_bga_b_434[] = {
 	0x66666666,
 	0x66666666,
 };
-const u32 stage1_bga_b_435[] = {
+const u32 stage1_bga_b_436[] = {
 	0xde6666de,
 	0xed666666,
 	0xde666666,
@@ -4358,7 +4368,7 @@ const u32 stage1_bga_b_435[] = {
 	0x66666666,
 	0x66666666,
 };
-const u32 stage1_bga_b_436[] = {
+const u32 stage1_bga_b_437[] = {
 	0x66666666,
 	0x66666666,
 	0x66666666,
@@ -4368,7 +4378,7 @@ const u32 stage1_bga_b_436[] = {
 	0x66666666,
 	0x66666555,
 };
-const u32 stage1_bga_b_437[] = {
+const u32 stage1_bga_b_438[] = {
 	0x66660000,
 	0x66660000,
 	0x66660000,
@@ -4377,16 +4387,6 @@ const u32 stage1_bga_b_437[] = {
 	0x55550000,
 	0x55550000,
 	0x55550000,
-};
-const u32 stage1_bga_b_438[] = {
-	0x55555555,
-	0x55555555,
-	0x55555555,
-	0x55555555,
-	0x55555555,
-	0x55555555,
-	0x55555555,
-	0x55555555,
 };
 const u32 stage1_bga_b_439[] = {
 	0x55555665,
@@ -4416,119 +4416,89 @@ const u32 stage1_bga_b_441[] = {
 	0x55566555,
 	0x55555555,
 	0x55555555,
-	0x555555b9,
+	0x5555555b,
 };
 const u32 stage1_bga_b_442[] = {
-	0x555555b9,
+	0x555555b5,
 	0x55555555,
 	0x55555555,
-	0x55555bb5,
-	0x5555b99b,
-	0x555b9999,
-	0xbb999999,
-	0x99999999,
+	0x55555b55,
+	0x5555b5b5,
+	0x555b5b5b,
+	0xb5bbb5b5,
+	0xbbbbbbbb,
 };
 const u32 stage1_bga_b_443[] = {
-	0x99999999,
-	0xb9999999,
-	0x59999999,
-	0x59999999,
-	0x59999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
+	0xbbb5bbbb,
+	0xbbbbbbbb,
+	0x55bbb5bb,
+	0x5bbbbbbb,
+	0x55b5bbbb,
+	0x5bbbbbbb,
+	0xb5bbbbbb,
+	0xbbbbbbbb,
 };
 const u32 stage1_bga_b_444[] = {
-	0x9999b9b9,
-	0x99999b9b,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x9999999b,
-	0x99999999,
-	0x9999999b,
+	0xbbbbbbb5,
+	0xbbbbbbbb,
+	0xbbbbb5bb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
 };
 const u32 stage1_bga_b_445[] = {
-	0xbbbb9b9b,
-	0x9b9bbbbb,
-	0xb9bbbbb9,
-	0x9b9bbb99,
-	0xb9b9bbb9,
-	0xbbbb9bb9,
-	0xb9bbbbbb,
-	0xbb9b9b9b,
+	0xbbb5bbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
 };
 const u32 stage1_bga_b_446[] = {
-	0xb9b9b9bb,
-	0x9b9bbbbb,
-	0xb9b9b9b9,
-	0x999b9b9b,
-	0xb9b9b9b9,
-	0x99999b99,
-	0x99b9b9b9,
-	0xbb999b99,
+	0xbbb5bbb5,
+	0xbbbbbbbb,
+	0xb5bbb5bb,
+	0xbbbbbbbb,
+	0xbbbbbbb5,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
 };
 const u32 stage1_bga_b_447[] = {
-	0xbbbbbbbb,
-	0xbbbbbb9b,
-	0xb9b9bbbb,
-	0x9b9b9b9b,
-	0xb9b99999,
-	0x99999b9b,
-	0xb9999999,
-	0x99999999,
+	0xbbb5b555,
+	0xbbbb5b5b,
+	0xb5bbb555,
+	0xbbbb5b55,
+	0xbbb5b555,
+	0xbbbb5b5b,
+	0xb5bbb555,
+	0xbbbb5b55,
 };
 const u32 stage1_bga_b_448[] = {
-	0xbbbbbbbb,
-	0x9b9b9bbb,
-	0xbbbbbbbb,
-	0x9b9b9b9b,
-	0xb9b9bbbb,
-	0x9b9b9b9b,
-	0x9999bbbb,
-	0x9b9b9b9b,
+	0xb5555555,
+	0x55555555,
+	0x55b5b555,
+	0x5b5b5b55,
+	0xb5b55555,
+	0x5bbb5b5b,
+	0xb5b5b5bb,
+	0x5b5b5bbb,
 };
 const u32 stage1_bga_b_449[] = {
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0x9bbbbbbb,
-};
-const u32 stage1_bga_b_450[] = {
-	0xbbbbbb5b,
-	0xbbbbbbbb,
-	0xbbbbbb55,
-	0xbbbbbb55,
-	0xbbbbbb55,
-	0xbbbbbb5b,
-	0xbbbbbb5b,
-	0xbbbbbb55,
-};
-const u32 stage1_bga_b_451[] = {
-	0xbb555555,
-	0x55555555,
-	0x5bbbb555,
-	0xbbbbbb55,
-	0xbbbb555b,
-	0xbbbb5bbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-};
-const u32 stage1_bga_b_452[] = {
 	0xaa5aaaa5,
 	0x55aaaaaa,
 	0x55aaaaaa,
 	0x55555aaa,
 	0xb55555aa,
-	0xbbbb5555,
-	0xbbbbbbb5,
-	0xbbbbbbbb,
+	0x5b5b5555,
+	0xb5b5b5b5,
+	0xbbbb5b5b,
 };
-const u32 stage1_bga_b_453[] = {
+const u32 stage1_bga_b_450[] = {
 	0x55555aaa,
 	0xaaaa555a,
 	0xaaaaa555,
@@ -4538,7 +4508,7 @@ const u32 stage1_bga_b_453[] = {
 	0x55555555,
 	0x55555555,
 };
-const u32 stage1_bga_b_454[] = {
+const u32 stage1_bga_b_451[] = {
 	0xa5556666,
 	0xa5555566,
 	0xa5aaa555,
@@ -4548,37 +4518,37 @@ const u32 stage1_bga_b_454[] = {
 	0x55555555,
 	0x55555555,
 };
-const u32 stage1_bga_b_455[] = {
+const u32 stage1_bga_b_452[] = {
 	0x65556bbb,
-	0x5bbb655b,
-	0x5bbbb555,
-	0xbbbbb555,
-	0xbbbbb5b5,
-	0x5bbbbbbb,
-	0x5bbbbbbb,
+	0x5b5b555b,
+	0x55b5b555,
+	0x5bbb5555,
+	0xb5bbb5b5,
+	0x5b5bbbbb,
 	0x55bbbbbb,
+	0x555b5bbb,
 };
-const u32 stage1_bga_b_456[] = {
+const u32 stage1_bga_b_453[] = {
 	0xbbbbbbbb,
 	0xbbbbb55b,
 	0xbbb55555,
-	0xb555bbbb,
+	0x55555b5b,
 	0x5555bbbb,
-	0xb55bbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
+	0x555b5bbb,
+	0xb5b5bbbb,
+	0xbb5bbbbb,
 };
-const u32 stage1_bga_b_457[] = {
+const u32 stage1_bga_b_454[] = {
 	0xbbbbbbbb,
 	0xbbbbbbbb,
-	0x5bbbbbbb,
 	0x55bbbbbb,
 	0x555bbbbb,
-	0xbb55bb55,
-	0xbbb5b555,
-	0x555555bb,
+	0x5555bbbb,
+	0x5b55bb55,
+	0xb5b5b555,
+	0x5555555b,
 };
-const u32 stage1_bga_b_458[] = {
+const u32 stage1_bga_b_455[] = {
 	0xbbbbbbba,
 	0xbbbbbbba,
 	0xbbbbbbba,
@@ -4588,7 +4558,7 @@ const u32 stage1_bga_b_458[] = {
 	0xbbbb565b,
 	0xbbbbb565,
 };
-const u32 stage1_bga_b_459[] = {
+const u32 stage1_bga_b_456[] = {
 	0x55aaaaa5,
 	0x5aaaaaaa,
 	0xaaaaaaaa,
@@ -4598,7 +4568,7 @@ const u32 stage1_bga_b_459[] = {
 	0xaaaaaaaa,
 	0x8aabbbba,
 };
-const u32 stage1_bga_b_460[] = {
+const u32 stage1_bga_b_457[] = {
 	0x5aaaaa55,
 	0x55aaaa55,
 	0xaaaaaaa5,
@@ -4608,7 +4578,7 @@ const u32 stage1_bga_b_460[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 };
-const u32 stage1_bga_b_461[] = {
+const u32 stage1_bga_b_458[] = {
 	0x56555556,
 	0x56655555,
 	0x55655555,
@@ -4618,7 +4588,7 @@ const u32 stage1_bga_b_461[] = {
 	0xaaaaaaa5,
 	0xaaaaaaaa,
 };
-const u32 stage1_bga_b_462[] = {
+const u32 stage1_bga_b_459[] = {
 	0x6555aaaa,
 	0x5555aaaa,
 	0x55555aaa,
@@ -4628,7 +4598,7 @@ const u32 stage1_bga_b_462[] = {
 	0x5aaaa55a,
 	0x55aaa5aa,
 };
-const u32 stage1_bga_b_463[] = {
+const u32 stage1_bga_b_460[] = {
 	0xaaa5aaaa,
 	0xaa556666,
 	0xaaa55555,
@@ -4638,7 +4608,7 @@ const u32 stage1_bga_b_463[] = {
 	0xaaa55aa5,
 	0xaaa55aa5,
 };
-const u32 stage1_bga_b_464[] = {
+const u32 stage1_bga_b_461[] = {
 	0xaaaaaaaa,
 	0x6aaaaaaa,
 	0x66aaaaaa,
@@ -4648,7 +4618,7 @@ const u32 stage1_bga_b_464[] = {
 	0x55a55665,
 	0x5aaa5566,
 };
-const u32 stage1_bga_b_465[] = {
+const u32 stage1_bga_b_462[] = {
 	0x565eeeee,
 	0xa56eeeee,
 	0xa56eeeee,
@@ -4658,7 +4628,7 @@ const u32 stage1_bga_b_465[] = {
 	0x65ee5e5e,
 	0x6eeeeeee,
 };
-const u32 stage1_bga_b_466[] = {
+const u32 stage1_bga_b_463[] = {
 	0xeeeeeeee,
 	0xeeeeeeee,
 	0xeeeeeeee,
@@ -4668,7 +4638,7 @@ const u32 stage1_bga_b_466[] = {
 	0x5eeeee5e,
 	0xeeeeeeee,
 };
-const u32 stage1_bga_b_467[] = {
+const u32 stage1_bga_b_464[] = {
 	0xeeeeeeee,
 	0xeeeeeeee,
 	0xeeeeeeee,
@@ -4678,7 +4648,7 @@ const u32 stage1_bga_b_467[] = {
 	0x5e5e5eed,
 	0xeeeeeeed,
 };
-const u32 stage1_bga_b_468[] = {
+const u32 stage1_bga_b_465[] = {
 	0xeddddddd,
 	0xeddddddd,
 	0xdddddddd,
@@ -4688,7 +4658,7 @@ const u32 stage1_bga_b_468[] = {
 	0xdddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_469[] = {
+const u32 stage1_bga_b_466[] = {
 	0xeeeddddd,
 	0xeeeedddd,
 	0xeeeedddd,
@@ -4698,18 +4668,18 @@ const u32 stage1_bga_b_469[] = {
 	0xddeedddd,
 	0xddeedddd,
 };
-const u32 stage1_bga_b_470[] = {
+const u32 stage1_bga_b_467[] = {
 	0xdedeeede,
 	0xeeeeeeee,
 	0xeeeeeeee,
 	0xeeeeeeee,
-	0xeeeddeee,
-	0xeddddeee,
-	0xdddddd5e,
-	0xddddddde,
+	0xeeeeeeee,
+	0xedddeeee,
+	0xddddde5e,
+	0xddddddee,
 };
-const u32 stage1_bga_b_471[] = {
-	0xdede6666,
+const u32 stage1_bga_b_468[] = {
+	0xdedeeeee,
 	0xeeeeeeee,
 	0xeeeeeeee,
 	0xeeeeeeee,
@@ -4718,8 +4688,8 @@ const u32 stage1_bga_b_471[] = {
 	0x5e5eeeee,
 	0xeeeeeeee,
 };
-const u32 stage1_bga_b_472[] = {
-	0x6eeeeede,
+const u32 stage1_bga_b_469[] = {
+	0xdedeeede,
 	0xeeeeeeee,
 	0xeeeeeeee,
 	0xeeeeeeee,
@@ -4728,7 +4698,7 @@ const u32 stage1_bga_b_472[] = {
 	0xee5e5e5e,
 	0xeeeeeeee,
 };
-const u32 stage1_bga_b_473[] = {
+const u32 stage1_bga_b_470[] = {
 	0xdedee555,
 	0xeeeee555,
 	0xeeeee555,
@@ -4738,7 +4708,7 @@ const u32 stage1_bga_b_473[] = {
 	0x5e5e5e55,
 	0xeeeeeee5,
 };
-const u32 stage1_bga_b_474[] = {
+const u32 stage1_bga_b_471[] = {
 	0x55555555,
 	0x55555555,
 	0x66665555,
@@ -4748,7 +4718,7 @@ const u32 stage1_bga_b_474[] = {
 	0x55556655,
 	0x55556655,
 };
-const u32 stage1_bga_b_475[] = {
+const u32 stage1_bga_b_472[] = {
 	0x55555555,
 	0x55555555,
 	0x55555555,
@@ -4758,7 +4728,7 @@ const u32 stage1_bga_b_475[] = {
 	0x56666666,
 	0x55565555,
 };
-const u32 stage1_bga_b_476[] = {
+const u32 stage1_bga_b_473[] = {
 	0x66555555,
 	0x56555555,
 	0x56555555,
@@ -4768,7 +4738,7 @@ const u32 stage1_bga_b_476[] = {
 	0x66555555,
 	0x66665555,
 };
-const u32 stage1_bga_b_477[] = {
+const u32 stage1_bga_b_474[] = {
 	0x66666666,
 	0x56666666,
 	0x56666666,
@@ -4778,217 +4748,157 @@ const u32 stage1_bga_b_477[] = {
 	0x56666666,
 	0x56666666,
 };
+const u32 stage1_bga_b_475[] = {
+	0x66666555,
+	0x66666555,
+	0x66666555,
+	0x66665555,
+	0x66665555,
+	0x66665555,
+	0x66655555,
+	0x66655555,
+};
+const u32 stage1_bga_b_476[] = {
+	0x55550000,
+	0x55550000,
+	0x55550000,
+	0x55550000,
+	0x55550000,
+	0x55550000,
+	0x55550000,
+	0x55550000,
+};
+const u32 stage1_bga_b_477[] = {
+	0x55555555,
+	0x5555555b,
+	0x555555b5,
+	0x55555b5b,
+	0x55b5b5b5,
+	0x5b5b5b55,
+	0xb5b5b5b5,
+	0x5b555b5b,
+};
 const u32 stage1_bga_b_478[] = {
-	0x66666555,
-	0x66666555,
-	0x66666555,
-	0x66665555,
-	0x66665555,
-	0x66665555,
-	0x66655555,
-	0x66655555,
+	0xb5b555b5,
+	0x5b5b555b,
+	0xb5b5b555,
+	0x5b5b5555,
+	0xb5b555b5,
+	0x55555bbb,
+	0xb555b5bb,
+	0x5b555b5b,
 };
 const u32 stage1_bga_b_479[] = {
-	0x55550000,
-	0x55550000,
-	0x55550000,
-	0x55550000,
-	0x55550000,
-	0x55550000,
-	0x55550000,
-	0x55550000,
+	0xb5b5bbb5,
+	0x5b5b5b5b,
+	0x555555b5,
+	0x5b55555b,
+	0xb5b5b555,
+	0xbb5b5555,
+	0xbbb5b555,
+	0x5b5b555b,
 };
 const u32 stage1_bga_b_480[] = {
+	0xbbb5bbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0x5b5bbbbb,
+	0x555555bb,
 	0x55555555,
-	0x55555599,
-	0x55555999,
-	0x55559999,
-	0x55999999,
-	0x59999995,
-	0x99999999,
-	0x99555999,
+	0xb5b5b5b5,
+	0xbbbbbb5b,
 };
 const u32 stage1_bga_b_481[] = {
-	0x999555b9,
-	0x9999955b,
-	0x99999955,
-	0x99999555,
-	0x99955999,
-	0x55559999,
-	0x95559999,
-	0x99559999,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0x5bbbbbbb,
+	0x5bbbbbbb,
 };
 const u32 stage1_bga_b_482[] = {
-	0x99999999,
-	0xb9999999,
-	0x55555b99,
-	0x999555bb,
-	0x99999555,
-	0x99999555,
-	0x99999555,
-	0x99995559,
+	0xbbb5b5b5,
+	0xbbbbbb55,
+	0xb5bbb5b5,
+	0xbbbbbb5b,
+	0xbbb5bbb5,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
 };
 const u32 stage1_bga_b_483[] = {
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x55555bb9,
-	0x55555555,
-	0x99999995,
-	0x99999999,
+	0xbbb5bbb5,
+	0x5bbb5bbb,
+	0xb5bbb5b5,
+	0x5bbbbb5b,
+	0xbbb5b5b5,
+	0xbbbbbbbb,
+	0xbbbbb5bb,
+	0xbbbbbbbb,
 };
 const u32 stage1_bga_b_484[] = {
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x59999999,
-	0x99999999,
+	0xbbb5b5b5,
+	0xbbbbbb5b,
+	0xb5b5b5b5,
+	0x5b5b5b5b,
+	0x55b5b5b5,
+	0x5b5b5b55,
+	0xbb555555,
+	0xbb555b5b,
 };
 const u32 stage1_bga_b_485[] = {
-	0x9999b9b9,
-	0xb99b9b9b,
-	0xbb9999b9,
-	0xbb9b9b9b,
-	0x9b9999b9,
-	0x999bbbbb,
-	0x99999bbb,
-	0x99b9b9bb,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0x55555555,
+	0xb555b5b5,
+	0x5b5b5b5b,
 };
 const u32 stage1_bga_b_486[] = {
-	0xbbbbb9b9,
-	0x9bb9bb9b,
-	0xbbb999b9,
-	0x9bb99999,
-	0xbbb99999,
-	0xbb999999,
-	0xb9999999,
-	0xbb99999b,
-};
-const u32 stage1_bga_b_487[] = {
-	0xb9999999,
-	0x99999999,
-	0xb9999999,
-	0x9b999999,
-	0xb9b9b9b9,
-	0x9bbb9b9b,
-	0x9bb99999,
-	0xbb999999,
-};
-const u32 stage1_bga_b_488[] = {
-	0x9999b9bb,
-	0x9b9b9b9b,
-	0x9999b9bb,
-	0x999b9b9b,
-	0x9999b9bb,
-	0x999b9b9b,
-	0xb9b999bb,
-	0x9b9b9bbb,
-};
-const u32 stage1_bga_b_489[] = {
-	0xbbbbbbbb,
-	0x9bbbbbbb,
-	0xbbbbbbbb,
-	0x9bbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-};
-const u32 stage1_bga_b_490[] = {
-	0xbbbbbbb5,
-	0xbbbbbbb5,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbb9b9,
-};
-const u32 stage1_bga_b_491[] = {
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xb9bbbbbb,
-	0xb99bbbb5,
-	0xbb999955,
-	0xbbb9bbbb,
-	0xb9b99bbb,
-};
-const u32 stage1_bga_b_492[] = {
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0x5bbbbbb5,
-	0x555bbb55,
-	0xbb555555,
-	0xbbb55bbb,
-};
-const u32 stage1_bga_b_493[] = {
-	0x55555555,
-	0x55555555,
-	0x55555555,
-	0x55555555,
-	0x55555555,
-	0x55555555,
-	0x55555555,
-	0x555555bb,
-};
-const u32 stage1_bga_b_494[] = {
-	0x55555555,
-	0x55555555,
-	0x55555555,
-	0x55555555,
-	0x55555555,
-	0x55555555,
-	0xb555bbb5,
-	0xbb5bbbbb,
-};
-const u32 stage1_bga_b_495[] = {
-	0x55bbbbbb,
+	0x55b5b5b5,
 	0x5555555b,
 	0x55555555,
-	0x5bbbbbb5,
-	0x5bbbbbbb,
-	0x55bbbbbb,
+	0x5b5b5b55,
+	0x55b5b5b5,
 	0x555bbbbb,
-	0xb55bbbbb,
-};
-const u32 stage1_bga_b_496[] = {
-	0xbbbbbbbb,
-	0xbbb55555,
-	0xbb55bbbb,
+	0x5555b5bb,
 	0x555bbbbb,
-	0x55bbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbb99bbb,
 };
-const u32 stage1_bga_b_497[] = {
-	0xbbb555bb,
+const u32 stage1_bga_b_487[] = {
+	0xbbbbbbb5,
+	0x5bb55555,
+	0xb555b5b5,
+	0x555b5bbb,
+	0x55b5bbb5,
+	0x5b5bbbbb,
+	0xb5bbbbbb,
+	0xbbbbbbbb,
+};
+const u32 stage1_bga_b_488[] = {
+	0xb5b555b5,
 	0x5bbbb55b,
-	0x55bbbb5b,
-	0xbbbbbb55,
-	0xbbbb555b,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xb999bbbb,
+	0x55bbb555,
+	0x5b5b5b55,
+	0xb5b55555,
+	0xbb5bbbbb,
+	0xb5b5bbb5,
+	0xbbbbbb5b,
 };
-const u32 stage1_bga_b_498[] = {
+const u32 stage1_bga_b_489[] = {
 	0xbbbbbb66,
 	0xbbbbbbb6,
 	0xbbbbbbb6,
 	0x5555bbb5,
-	0xbb55bbb6,
-	0xbbbbbb56,
-	0xbbbbb565,
-	0xbb5665bb,
+	0xb555bbb6,
+	0x5bbbbb56,
+	0xb5bbb565,
+	0x5b5665bb,
 };
-const u32 stage1_bga_b_499[] = {
+const u32 stage1_bga_b_490[] = {
 	0x5bbbbbbb,
 	0x5bbbbbbb,
 	0x6bbbbbbb,
@@ -4998,7 +4908,7 @@ const u32 stage1_bga_b_499[] = {
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 };
-const u32 stage1_bga_b_500[] = {
+const u32 stage1_bga_b_491[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 	0xaaaaaaaa,
@@ -5008,7 +4918,7 @@ const u32 stage1_bga_b_500[] = {
 	0xbbbbbaaa,
 	0xbbbbbaaa,
 };
-const u32 stage1_bga_b_501[] = {
+const u32 stage1_bga_b_492[] = {
 	0xaaaaaaaa,
 	0xaaaaa555,
 	0xaaaaaaaa,
@@ -5018,7 +4928,7 @@ const u32 stage1_bga_b_501[] = {
 	0xaaaaaaaa,
 	0xaaaaaaaa,
 };
-const u32 stage1_bga_b_502[] = {
+const u32 stage1_bga_b_493[] = {
 	0xa5aaaaaa,
 	0x55aaaaaa,
 	0xaa55aaaa,
@@ -5028,7 +4938,7 @@ const u32 stage1_bga_b_502[] = {
 	0xaaa5555a,
 	0xaa555aaa,
 };
-const u32 stage1_bga_b_503[] = {
+const u32 stage1_bga_b_494[] = {
 	0xaaaa5a55,
 	0xaaaa55aa,
 	0xaaaaaaaa,
@@ -5038,7 +4948,7 @@ const u32 stage1_bga_b_503[] = {
 	0xaaaa5566,
 	0xaaaaa556,
 };
-const u32 stage1_bga_b_504[] = {
+const u32 stage1_bga_b_495[] = {
 	0xaaaaa566,
 	0xaaaa5665,
 	0xaa55665e,
@@ -5048,7 +4958,7 @@ const u32 stage1_bga_b_504[] = {
 	0x55555555,
 	0xe5e5e5e5,
 };
-const u32 stage1_bga_b_505[] = {
+const u32 stage1_bga_b_496[] = {
 	0x5e5e5e5e,
 	0xe5e5e5e5,
 	0x5e5e5e5e,
@@ -5058,7 +4968,7 @@ const u32 stage1_bga_b_505[] = {
 	0x55555555,
 	0xe5e5e5e5,
 };
-const u32 stage1_bga_b_506[] = {
+const u32 stage1_bga_b_497[] = {
 	0x5e5e5e5d,
 	0xe5e5e5ed,
 	0x5e5e5e5d,
@@ -5068,7 +4978,7 @@ const u32 stage1_bga_b_506[] = {
 	0x555555dd,
 	0xe5e5e5dd,
 };
-const u32 stage1_bga_b_507[] = {
+const u32 stage1_bga_b_498[] = {
 	0xdddddddd,
 	0xdddddddd,
 	0xdddddddd,
@@ -5078,7 +4988,7 @@ const u32 stage1_bga_b_507[] = {
 	0x5ddddddd,
 	0xe5dddddd,
 };
-const u32 stage1_bga_b_508[] = {
+const u32 stage1_bga_b_499[] = {
 	0xdd5edddd,
 	0xddd5dddd,
 	0xdddedddd,
@@ -5086,29 +4996,29 @@ const u32 stage1_bga_b_508[] = {
 	0xdddddddd,
 	0xdddddddd,
 	0xdddddddd,
-	0xdddddddd,
-};
-const u32 stage1_bga_b_509[] = {
-	0xddddddde,
 	0xddddddd5,
-	0xdddddddd,
-	0xdddddddd,
-	0xdd5ddddd,
-	0xdde5dddd,
-	0xd5555ddd,
-	0xe5e5eddd,
 };
-const u32 stage1_bga_b_510[] = {
+const u32 stage1_bga_b_500[] = {
+	0xddddddee,
+	0xddddddd5,
+	0xddddddde,
+	0xddeddddd,
+	0xd55ddddd,
+	0x5555dddd,
+	0x55555ddd,
+	0x55e5eddd,
+};
+const u32 stage1_bga_b_501[] = {
 	0x5e5e5e5e,
 	0xe5e5e5e5,
 	0x5e5e5e5e,
 	0xe5e5e5e5,
 	0x5e5e5e5e,
-	0xd5e5e5e5,
+	0xe5e5e5e5,
 	0xd5555555,
-	0xdde5e5e5,
+	0xdee5e5e5,
 };
-const u32 stage1_bga_b_511[] = {
+const u32 stage1_bga_b_502[] = {
 	0x55566666,
 	0x55666666,
 	0x55555665,
@@ -5118,7 +5028,7 @@ const u32 stage1_bga_b_511[] = {
 	0x55555555,
 	0x55555555,
 };
-const u32 stage1_bga_b_512[] = {
+const u32 stage1_bga_b_503[] = {
 	0x65565555,
 	0x66666555,
 	0x55666555,
@@ -5128,7 +5038,7 @@ const u32 stage1_bga_b_512[] = {
 	0x55555556,
 	0x55555556,
 };
-const u32 stage1_bga_b_513[] = {
+const u32 stage1_bga_b_504[] = {
 	0x55565555,
 	0x55556655,
 	0x55556655,
@@ -5138,7 +5048,7 @@ const u32 stage1_bga_b_513[] = {
 	0x65566666,
 	0x66666655,
 };
-const u32 stage1_bga_b_514[] = {
+const u32 stage1_bga_b_505[] = {
 	0x66666666,
 	0x66666666,
 	0x66666666,
@@ -5148,7 +5058,7 @@ const u32 stage1_bga_b_514[] = {
 	0x66666666,
 	0x55666666,
 };
-const u32 stage1_bga_b_515[] = {
+const u32 stage1_bga_b_506[] = {
 	0x66666666,
 	0x66666666,
 	0x66666655,
@@ -5158,7 +5068,7 @@ const u32 stage1_bga_b_515[] = {
 	0x66655555,
 	0x55666555,
 };
-const u32 stage1_bga_b_516[] = {
+const u32 stage1_bga_b_507[] = {
 	0x66666666,
 	0x66666666,
 	0x55556666,
@@ -5168,7 +5078,7 @@ const u32 stage1_bga_b_516[] = {
 	0x55555555,
 	0x56655555,
 };
-const u32 stage1_bga_b_517[] = {
+const u32 stage1_bga_b_508[] = {
 	0x66655555,
 	0x66555555,
 	0x66555555,
@@ -5178,187 +5088,127 @@ const u32 stage1_bga_b_517[] = {
 	0x55555555,
 	0x55555555,
 };
-const u32 stage1_bga_b_518[] = {
-	0x55555559,
-	0x55555555,
-	0x55555555,
-	0x55555555,
-	0x55555555,
-	0x55555555,
-	0x55555555,
-	0x55555555,
-};
-const u32 stage1_bga_b_519[] = {
-	0x99959999,
-	0x99999999,
-	0x99999999,
-	0x55599999,
-	0x55559999,
-	0x55555999,
-	0x55555599,
+const u32 stage1_bga_b_509[] = {
+	0xb5b5b5b5,
+	0x5b5b5b5b,
+	0xb5b5b5b5,
+	0x555b5b5b,
+	0x5555b5bb,
+	0x55555b5b,
+	0x555555b5,
 	0x55555555,
 };
-const u32 stage1_bga_b_520[] = {
-	0x99555999,
-	0x95555555,
-	0x99999955,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x55599555,
+const u32 stage1_bga_b_510[] = {
+	0xb55555bb,
+	0x55555555,
+	0xb5b5b555,
+	0xbbbb5b5b,
+	0xbbbbbbb5,
+	0xbbbb5b5b,
+	0xb5b5b5b5,
+	0x555b5555,
 };
-const u32 stage1_bga_b_521[] = {
-	0x99999999,
-	0x99999995,
-	0x59999955,
-	0x55999959,
-	0x95555559,
-	0x99555999,
-	0x99599999,
-	0x55599999,
+const u32 stage1_bga_b_511[] = {
+	0xbbbbbbb5,
+	0x5bbbbb55,
+	0x55b5b555,
+	0x555b5b5b,
+	0xb5555555,
+	0x5b555b5b,
+	0xbb55b5bb,
+	0x555bbbbb,
 };
-const u32 stage1_bga_b_522[] = {
-	0x99999b9b,
-	0x99b9b9b9,
-	0x9999999b,
-	0x9999b9b9,
-	0x9999999b,
-	0x999999b9,
-	0x99999999,
-	0x999999b9,
-};
-const u32 stage1_bga_b_523[] = {
-	0x9bb99bbb,
-	0xb9bbbbbb,
-	0x9bbb9999,
-	0xbbbb9999,
-	0x9bbb9999,
-	0xb9bb9999,
-	0x999bbbbb,
-	0xb9b9bbbb,
-};
-const u32 stage1_bga_b_524[] = {
-	0xbb999999,
-	0xbbbb9999,
-	0x9bbbb999,
-	0x999bb999,
-	0x9999bb99,
-	0x99999b99,
-	0x99999bb9,
+const u32 stage1_bga_b_512[] = {
 	0xbbbbbbbb,
-};
-const u32 stage1_bga_b_525[] = {
-	0x99b999bb,
-	0x9b9bbbbb,
-	0x9bbbbbbb,
-	0xbbb9999b,
-	0xb999999b,
-	0x999999bb,
-	0x999999bb,
-	0xbb999bbb,
-};
-const u32 stage1_bga_b_526[] = {
+	0x5bbbbbbb,
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 	0xbbbbbbbb,
-	0xbbbbb9b9,
 	0xbbbbbbbb,
-	0xbbb9b9b9,
 };
-const u32 stage1_bga_b_527[] = {
+const u32 stage1_bga_b_513[] = {
+	0xbbbbbbb5,
 	0xbbbbbbbb,
-	0xbbb9b9b9,
-	0xbbbbbb9b,
-	0xb9b9b9b9,
-	0xbbbbbb9b,
-	0xb9b9b9b9,
-	0xbbbb9b9b,
-	0xb9b9b999,
-};
-const u32 stage1_bga_b_528[] = {
-	0xbb999bbb,
-	0xb9bbbbbb,
-	0x9b999999,
-	0xb9999999,
-	0x99999999,
-	0xb9999999,
-	0x99999999,
-	0x99999999,
-};
-const u32 stage1_bga_b_529[] = {
-	0xbbb55bbb,
-	0xbbb55bbb,
 	0xbbbbbbbb,
-	0x99bbbbbb,
-	0x99bbbbbb,
-	0x9999bbbb,
-	0x999999bb,
-	0x9999999b,
+	0xbbbbbbbb,
+	0xbbbbbbb5,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
 };
-const u32 stage1_bga_b_530[] = {
-	0x55555bbb,
+const u32 stage1_bga_b_514[] = {
+	0xbbb555b5,
+	0xbb555b5b,
+	0xb5b5b5b5,
+	0xbb5b5b5b,
+	0xbbb5bbb5,
+	0xbb5bbbbb,
+	0xb5b5b5bb,
+	0xbbbbbbbb,
+};
+const u32 stage1_bga_b_515[] = {
+	0x555555b5,
+	0x555b5bbb,
+	0xb5b5b5bb,
+	0x5b5bbbbb,
+	0xb5b5bbb5,
+	0x5b5bbbbb,
+	0xb5bbb5bb,
+	0xbbbbbbbb,
+};
+const u32 stage1_bga_b_516[] = {
+	0xb5b5bbb5,
+	0x5b5bbbbb,
+	0xb5b5b5bb,
+	0xbb5bbbbb,
+	0xbbb5bbb5,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+};
+const u32 stage1_bga_b_517[] = {
+	0xb555bbb5,
+	0x5b5bbbbb,
+	0xb555b5bb,
+	0xbb5bbbbb,
+	0xbbb5bbb5,
+	0xbb5bbbbb,
 	0xb5bbbbbb,
 	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xb9bbbbb9,
-	0xb999bbb9,
-	0xbb999999,
-	0xbbbbbb99,
 };
-const u32 stage1_bga_b_531[] = {
+const u32 stage1_bga_b_518[] = {
+	0xbbbbbbb5,
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 	0xbbbbbbbb,
+	0xbbbbbbb5,
 	0xbbbbbbbb,
-	0x9999bbbb,
-	0x99999999,
-	0x99999999,
-	0x9999999a,
-};
-const u32 stage1_bga_b_532[] = {
-	0xb55bbbbb,
-	0xbb5bb99b,
-	0xbb5bb99b,
-	0xbbbb999b,
-	0xbbbb999b,
-	0x99999a99,
-	0x999aaaa9,
-	0xaaaaaaaa,
-};
-const u32 stage1_bga_b_533[] = {
-	0xbbb99999,
-	0xbbbb9999,
-	0xbbbbbb99,
-	0xbbbbbbb9,
-	0xbbbbbb99,
-	0x9bbb999b,
-	0x999999bb,
-	0xaa99a9bb,
-};
-const u32 stage1_bga_b_534[] = {
-	0x99bbbbb5,
-	0x9bbbb555,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0x99bbbbbb,
-	0xb999bbbb,
-	0xbbb99bbb,
+	0xbbbbb5bb,
 	0xbbbbbbbb,
 };
-const u32 stage1_bga_b_535[] = {
+const u32 stage1_bga_b_519[] = {
+	0xbbb5b5b5,
+	0xbb5b5555,
+	0xb5b5b5b5,
+	0xbb5bbbbb,
+	0xb5b5bbb5,
+	0x5b5bbbbb,
+	0xb5bbbbbb,
+	0xbbbbbbbb,
+};
+const u32 stage1_bga_b_520[] = {
 	0x5665bbbb,
 	0x55565bbb,
 	0xb5556bbb,
-	0xbb556bbb,
-	0xbb556bbb,
-	0xbbb5bbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
+	0x5b556bbb,
+	0xb5556bbb,
+	0xbb555bbb,
+	0xb5b5b5b5,
+	0xbbbb5b5b,
 };
-const u32 stage1_bga_b_536[] = {
+const u32 stage1_bga_b_521[] = {
 	0xbbbbbaaa,
 	0xbbbbbbaa,
 	0xbbbbbbba,
@@ -5368,7 +5218,7 @@ const u32 stage1_bga_b_536[] = {
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 };
-const u32 stage1_bga_b_537[] = {
+const u32 stage1_bga_b_522[] = {
 	0xaaaaaabb,
 	0xaaaabbbb,
 	0xaaaabbbb,
@@ -5378,7 +5228,7 @@ const u32 stage1_bga_b_537[] = {
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 };
-const u32 stage1_bga_b_538[] = {
+const u32 stage1_bga_b_523[] = {
 	0xbbaaaaaa,
 	0xbbbaaaaa,
 	0xbbbbaaaa,
@@ -5388,7 +5238,7 @@ const u32 stage1_bga_b_538[] = {
 	0xbbbbbaaa,
 	0xbbbbaaa5,
 };
-const u32 stage1_bga_b_539[] = {
+const u32 stage1_bga_b_524[] = {
 	0xaa5aaa56,
 	0xaa5aaa56,
 	0xaa5aaa55,
@@ -5398,7 +5248,7 @@ const u32 stage1_bga_b_539[] = {
 	0x5aaaa555,
 	0x5aaaaaa5,
 };
-const u32 stage1_bga_b_540[] = {
+const u32 stage1_bga_b_525[] = {
 	0x55555555,
 	0xe5e5e5e5,
 	0x66555555,
@@ -5408,7 +5258,7 @@ const u32 stage1_bga_b_540[] = {
 	0xaaaaaa55,
 	0x55aaaa55,
 };
-const u32 stage1_bga_b_541[] = {
+const u32 stage1_bga_b_526[] = {
 	0x55555555,
 	0xe5e5e5e5,
 	0x55555555,
@@ -5418,7 +5268,7 @@ const u32 stage1_bga_b_541[] = {
 	0x56555555,
 	0x66555555,
 };
-const u32 stage1_bga_b_542[] = {
+const u32 stage1_bga_b_527[] = {
 	0x55555555,
 	0xe5e5e5e5,
 	0x55555555,
@@ -5428,7 +5278,7 @@ const u32 stage1_bga_b_542[] = {
 	0x55555555,
 	0x55555555,
 };
-const u32 stage1_bga_b_543[] = {
+const u32 stage1_bga_b_528[] = {
 	0x555555dd,
 	0xe5e5e5ed,
 	0x5555555d,
@@ -5438,7 +5288,7 @@ const u32 stage1_bga_b_543[] = {
 	0x55555555,
 	0x55555555,
 };
-const u32 stage1_bga_b_544[] = {
+const u32 stage1_bga_b_529[] = {
 	0x55dddddd,
 	0xe5dddddd,
 	0x55dddddd,
@@ -5448,17 +5298,17 @@ const u32 stage1_bga_b_544[] = {
 	0x55dddddd,
 	0x55dddddd,
 };
-const u32 stage1_bga_b_545[] = {
-	0xdddddddd,
-	0xddddddd5,
-	0xddddd555,
+const u32 stage1_bga_b_530[] = {
+	0xddd55555,
+	0xddd55555,
+	0xddd55555,
 	0xddd55555,
 	0xddd55555,
 	0xddd55555,
 	0xdd555555,
 	0xdd555555,
 };
-const u32 stage1_bga_b_546[] = {
+const u32 stage1_bga_b_531[] = {
 	0x555555dd,
 	0xe5e5eddd,
 	0x5555dddd,
@@ -5468,9 +5318,9 @@ const u32 stage1_bga_b_546[] = {
 	0x5555dddd,
 	0x555555dd,
 };
-const u32 stage1_bga_b_547[] = {
-	0xdd555555,
-	0xdde5e5e5,
+const u32 stage1_bga_b_532[] = {
+	0xde555555,
+	0xdee5e5e5,
 	0xdd555555,
 	0xdde5e5e5,
 	0xdd555555,
@@ -5478,7 +5328,7 @@ const u32 stage1_bga_b_547[] = {
 	0xd5555555,
 	0x55555555,
 };
-const u32 stage1_bga_b_548[] = {
+const u32 stage1_bga_b_533[] = {
 	0x55555555,
 	0xe5e5e5e5,
 	0x55555555,
@@ -5488,7 +5338,7 @@ const u32 stage1_bga_b_548[] = {
 	0x55555555,
 	0x55555555,
 };
-const u32 stage1_bga_b_549[] = {
+const u32 stage1_bga_b_534[] = {
 	0x55555555,
 	0x55555555,
 	0x55555555,
@@ -5498,7 +5348,7 @@ const u32 stage1_bga_b_549[] = {
 	0x55555555,
 	0x55555555,
 };
-const u32 stage1_bga_b_550[] = {
+const u32 stage1_bga_b_535[] = {
 	0x55555555,
 	0x55555555,
 	0x55555555,
@@ -5508,7 +5358,7 @@ const u32 stage1_bga_b_550[] = {
 	0x55555566,
 	0x55555555,
 };
-const u32 stage1_bga_b_551[] = {
+const u32 stage1_bga_b_536[] = {
 	0x66655555,
 	0x56655555,
 	0x66555555,
@@ -5518,7 +5368,7 @@ const u32 stage1_bga_b_551[] = {
 	0x65666555,
 	0x66655555,
 };
-const u32 stage1_bga_b_552[] = {
+const u32 stage1_bga_b_537[] = {
 	0x55556666,
 	0x55555666,
 	0x55555555,
@@ -5528,7 +5378,7 @@ const u32 stage1_bga_b_552[] = {
 	0x55666555,
 	0x55566655,
 };
-const u32 stage1_bga_b_553[] = {
+const u32 stage1_bga_b_538[] = {
 	0x66666555,
 	0x66565555,
 	0x66665556,
@@ -5538,7 +5388,7 @@ const u32 stage1_bga_b_553[] = {
 	0x55555555,
 	0x55555555,
 };
-const u32 stage1_bga_b_554[] = {
+const u32 stage1_bga_b_539[] = {
 	0x55566665,
 	0x56666666,
 	0x66555555,
@@ -5548,7 +5398,7 @@ const u32 stage1_bga_b_554[] = {
 	0x55556555,
 	0x55666655,
 };
-const u32 stage1_bga_b_555[] = {
+const u32 stage1_bga_b_540[] = {
 	0x55666555,
 	0x65556655,
 	0x65666665,
@@ -5558,7 +5408,7 @@ const u32 stage1_bga_b_555[] = {
 	0x55566665,
 	0x55665555,
 };
-const u32 stage1_bga_b_556[] = {
+const u32 stage1_bga_b_541[] = {
 	0x55555555,
 	0x55555555,
 	0x56555555,
@@ -5568,7 +5418,7 @@ const u32 stage1_bga_b_556[] = {
 	0x66555555,
 	0x56666665,
 };
-const u32 stage1_bga_b_557[] = {
+const u32 stage1_bga_b_542[] = {
 	0x55555555,
 	0x55555555,
 	0x55555555,
@@ -5578,207 +5428,67 @@ const u32 stage1_bga_b_557[] = {
 	0x55555555,
 	0xffffffff,
 };
-const u32 stage1_bga_b_558[] = {
+const u32 stage1_bga_b_543[] = {
 	0x55555555,
-	0x55555599,
-	0x55555999,
-	0x55555999,
-	0x55559999,
-	0x55599999,
-	0x99999999,
+	0x5555555b,
+	0x555555bb,
+	0x55555bbb,
+	0x5555b5bb,
+	0x555b5bbb,
+	0xbbbbbbbb,
 	0xffffffff,
 };
-const u32 stage1_bga_b_559[] = {
-	0x95559999,
-	0x99955999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0xffffffff,
-};
-const u32 stage1_bga_b_560[] = {
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0xffffffff,
-};
-const u32 stage1_bga_b_561[] = {
-	0x999b9b9b,
-	0xb9b999b9,
-	0x999b9b9b,
-	0x999999b9,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0xffffffff,
-};
-const u32 stage1_bga_b_562[] = {
-	0xbb999bbb,
-	0xbbb99bbb,
-	0x9bbb9999,
-	0xbbb99999,
-	0x99b99999,
-	0x9bb99999,
-	0x9bb9aaaa,
-	0xffffffff,
-};
-const u32 stage1_bga_b_563[] = {
-	0xbbbbbbb9,
-	0x99bbb999,
-	0x999bbb99,
-	0x99999b99,
-	0x9bbbbb99,
-	0x99999bbb,
-	0xaaa9999b,
-	0xffffffff,
-};
-const u32 stage1_bga_b_564[] = {
-	0x999bbbbb,
-	0x999bbbbb,
-	0x9999bbbb,
-	0x9999bbbb,
-	0x9999bbbb,
+const u32 stage1_bga_b_544[] = {
+	0xb555bbbb,
+	0x5b555bbb,
+	0xbbb5bbbb,
+	0xbb5b5bbb,
+	0xbbb5bbbb,
 	0xbbbbbbbb,
 	0xbbbbbbbb,
 	0xffffffff,
 };
-const u32 stage1_bga_b_565[] = {
-	0xbb9b9b9b,
-	0xb9b9b999,
-	0xbb999999,
-	0xb9999999,
-	0xb9999999,
-	0xb999999b,
-	0xbb999bbb,
+const u32 stage1_bga_b_545[] = {
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
 	0xffffffff,
 };
-const u32 stage1_bga_b_566[] = {
-	0x9b9b9b99,
-	0x99999bb9,
-	0x999999bb,
-	0x999999bb,
-	0x99999bbb,
-	0xbbbb9bbb,
-	0xbbbbbb99,
+const u32 stage1_bga_b_546[] = {
+	0xbbb5bbb5,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
 	0xffffffff,
 };
-const u32 stage1_bga_b_567[] = {
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0xbbbb9999,
-	0xbb9bb999,
-	0xb9999aa9,
-	0x99999aaa,
+const u32 stage1_bga_b_547[] = {
+	0xbbb5bbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
 	0xffffffff,
 };
-const u32 stage1_bga_b_568[] = {
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0xa9999999,
+const u32 stage1_bga_b_548[] = {
+	0xbbbbbbb5,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
+	0xbbbbbbbb,
 	0xffffffff,
 };
-const u32 stage1_bga_b_569[] = {
-	0x99bbb999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0xffffffff,
-};
-const u32 stage1_bga_b_570[] = {
-	0x9999999a,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0xffffffff,
-};
-const u32 stage1_bga_b_571[] = {
-	0xaaaaaaaa,
-	0x99999aaa,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0xffffffff,
-};
-const u32 stage1_bga_b_572[] = {
-	0xaa99a999,
-	0xaa999aa9,
-	0x9a999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0x99999999,
-	0xffffffff,
-};
-const u32 stage1_bga_b_573[] = {
-	0xbbb9bbbb,
-	0x999bbbbb,
-	0x999bbbbb,
-	0x99bbbbb9,
-	0x999bbbb9,
-	0x9999bbb9,
-	0x99999999,
-	0xffffffff,
-};
-const u32 stage1_bga_b_574[] = {
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbab,
-	0x99bbbaaa,
-	0x9999aaaa,
-	0xffffffff,
-};
-const u32 stage1_bga_b_575[] = {
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbaaaab,
-	0xbbbaaaaa,
-	0xbbaaaaaa,
-	0xffffffff,
-};
-const u32 stage1_bga_b_576[] = {
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xabbbbbbb,
-	0xaabbbbbb,
-	0xffffffff,
-};
-const u32 stage1_bga_b_577[] = {
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbbbbbbb,
-	0xbbaaaabb,
-	0xffffffff,
-};
-const u32 stage1_bga_b_578[] = {
+const u32 stage1_bga_b_549[] = {
 	0xbbbbbaaa,
 	0xbbbbbaaa,
 	0xbbbbbbbb,
@@ -5788,7 +5498,7 @@ const u32 stage1_bga_b_578[] = {
 	0xbbbbbbbb,
 	0xffffffff,
 };
-const u32 stage1_bga_b_579[] = {
+const u32 stage1_bga_b_550[] = {
 	0xaaaaaaaa,
 	0xaaa555aa,
 	0xaaaaa555,
@@ -5798,7 +5508,7 @@ const u32 stage1_bga_b_579[] = {
 	0xbbbbbbbb,
 	0xffffffff,
 };
-const u32 stage1_bga_b_580[] = {
+const u32 stage1_bga_b_551[] = {
 	0x555aaa56,
 	0xa5555555,
 	0xa5555aaa,
@@ -5808,7 +5518,7 @@ const u32 stage1_bga_b_580[] = {
 	0xaa5a5555,
 	0xffffffff,
 };
-const u32 stage1_bga_b_581[] = {
+const u32 stage1_bga_b_552[] = {
 	0x55555555,
 	0x55555555,
 	0xa5555555,
@@ -5818,27 +5528,27 @@ const u32 stage1_bga_b_581[] = {
 	0x55aa5555,
 	0xffffffff,
 };
-const u32 stage1_bga_b_582[] = {
+const u32 stage1_bga_b_553[] = {
 	0xdddddddd,
 	0xdddddddd,
-	0xdddddddd,
-	0x5ddddddd,
-	0x5ddddddd,
-	0x5ddddddd,
-	0x5ddddddd,
+	0xddddddd5,
+	0x5dddddd5,
+	0x5dddddd5,
+	0x5dddddd5,
+	0x5dddddd5,
 	0xffffffff,
 };
-const u32 stage1_bga_b_583[] = {
-	0x55dddddd,
+const u32 stage1_bga_b_554[] = {
 	0x555ddddd,
 	0x555ddddd,
 	0x555ddddd,
+	0x5555dddd,
 	0x5555dddd,
 	0x5555dddd,
 	0x5555dddd,
 	0xffffffff,
 };
-const u32 stage1_bga_b_584[] = {
+const u32 stage1_bga_b_555[] = {
 	0xdd555555,
 	0xdd555555,
 	0xd5555555,
@@ -5848,7 +5558,7 @@ const u32 stage1_bga_b_584[] = {
 	0xddd55555,
 	0xffffffff,
 };
-const u32 stage1_bga_b_585[] = {
+const u32 stage1_bga_b_556[] = {
 	0x55555dd5,
 	0x55555555,
 	0x55555555,
@@ -5858,7 +5568,7 @@ const u32 stage1_bga_b_585[] = {
 	0x55555555,
 	0xffffffff,
 };
-const u32 stage1_bga_b_586[] = {
+const u32 stage1_bga_b_557[] = {
 	0x55555555,
 	0x55555555,
 	0x55555555,
@@ -5868,7 +5578,7 @@ const u32 stage1_bga_b_586[] = {
 	0x55555585,
 	0xffffffff,
 };
-const u32 stage1_bga_b_587[] = {
+const u32 stage1_bga_b_558[] = {
 	0x55555555,
 	0x55555566,
 	0x55555666,
@@ -5878,7 +5588,7 @@ const u32 stage1_bga_b_587[] = {
 	0x55555555,
 	0xffffffff,
 };
-const u32 stage1_bga_b_588[] = {
+const u32 stage1_bga_b_559[] = {
 	0x65555555,
 	0x65555555,
 	0x66555555,
@@ -5888,7 +5598,7 @@ const u32 stage1_bga_b_588[] = {
 	0x55555555,
 	0xffffffff,
 };
-const u32 stage1_bga_b_589[] = {
+const u32 stage1_bga_b_560[] = {
 	0x55555665,
 	0x55555665,
 	0x55555665,
@@ -5898,7 +5608,7 @@ const u32 stage1_bga_b_589[] = {
 	0x55555665,
 	0xffffffff,
 };
-const u32 stage1_bga_b_590[] = {
+const u32 stage1_bga_b_561[] = {
 	0x55555555,
 	0x55555555,
 	0x55555555,
@@ -5908,7 +5618,7 @@ const u32 stage1_bga_b_590[] = {
 	0x66655666,
 	0xffffffff,
 };
-const u32 stage1_bga_b_591[] = {
+const u32 stage1_bga_b_562[] = {
 	0x55555665,
 	0x66555565,
 	0x56666666,
@@ -5918,7 +5628,7 @@ const u32 stage1_bga_b_591[] = {
 	0x66666665,
 	0xffffffff,
 };
-const u32 stage1_bga_b_592[] = {
+const u32 stage1_bga_b_563[] = {
 	0x66665666,
 	0x55566556,
 	0x65556655,
@@ -5928,7 +5638,7 @@ const u32 stage1_bga_b_592[] = {
 	0x55566665,
 	0xffffffff,
 };
-const u32 stage1_bga_b_593[] = {
+const u32 stage1_bga_b_564[] = {
 	0x55665555,
 	0x55655555,
 	0x56555555,
@@ -5938,7 +5648,7 @@ const u32 stage1_bga_b_593[] = {
 	0x55555555,
 	0xffffffff,
 };
-const u32 stage1_bga_b_594[] = {
+const u32 stage1_bga_b_565[] = {
 	0x55550000,
 	0x55550000,
 	0x55550000,
@@ -5948,7 +5658,7 @@ const u32 stage1_bga_b_594[] = {
 	0x55550000,
 	0xffff0000,
 };
-const u32 stage1_bga_b_595[] = {
+const u32 stage1_bga_b_566[] = {
 	0xffffffff,
 	0x66ff6666,
 	0xeeeeee66,
@@ -5958,7 +5668,7 @@ const u32 stage1_bga_b_595[] = {
 	0xdddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_596[] = {
+const u32 stage1_bga_b_567[] = {
 	0xffffffff,
 	0x66666666,
 	0xeee66eee,
@@ -5968,7 +5678,7 @@ const u32 stage1_bga_b_596[] = {
 	0xdddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_597[] = {
+const u32 stage1_bga_b_568[] = {
 	0xffffffff,
 	0xff666666,
 	0xeeeeee66,
@@ -5978,7 +5688,7 @@ const u32 stage1_bga_b_597[] = {
 	0xdddddddd,
 	0xdddcccdd,
 };
-const u32 stage1_bga_b_598[] = {
+const u32 stage1_bga_b_569[] = {
 	0xffffffff,
 	0x666666ff,
 	0xeeeeeeee,
@@ -5988,7 +5698,7 @@ const u32 stage1_bga_b_598[] = {
 	0xdcccdddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_599[] = {
+const u32 stage1_bga_b_570[] = {
 	0xffffffff,
 	0x66666ff6,
 	0xeeeeeeee,
@@ -5998,7 +5708,7 @@ const u32 stage1_bga_b_599[] = {
 	0xdddddddd,
 	0xdcccdddd,
 };
-const u32 stage1_bga_b_600[] = {
+const u32 stage1_bga_b_571[] = {
 	0xffffffff,
 	0x66666666,
 	0xe66eeeee,
@@ -6008,7 +5718,7 @@ const u32 stage1_bga_b_600[] = {
 	0xcccddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_601[] = {
+const u32 stage1_bga_b_572[] = {
 	0xffffffff,
 	0xff666666,
 	0xeeeeeee6,
@@ -6018,7 +5728,7 @@ const u32 stage1_bga_b_601[] = {
 	0xdddddccc,
 	0xcccccddd,
 };
-const u32 stage1_bga_b_602[] = {
+const u32 stage1_bga_b_573[] = {
 	0xffffffff,
 	0x6666ff66,
 	0x6eeeeeee,
@@ -6028,7 +5738,7 @@ const u32 stage1_bga_b_602[] = {
 	0xdddddddd,
 	0xdddddccc,
 };
-const u32 stage1_bga_b_603[] = {
+const u32 stage1_bga_b_574[] = {
 	0xffffffff,
 	0x6666666f,
 	0xe66eeeee,
@@ -6038,7 +5748,7 @@ const u32 stage1_bga_b_603[] = {
 	0xdddddddc,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_604[] = {
+const u32 stage1_bga_b_575[] = {
 	0xffffffff,
 	0xf6666666,
 	0xeeeeeeee,
@@ -6048,7 +5758,7 @@ const u32 stage1_bga_b_604[] = {
 	0xccdddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_605[] = {
+const u32 stage1_bga_b_576[] = {
 	0xffffffff,
 	0x6ff66666,
 	0xeeeee66e,
@@ -6058,7 +5768,7 @@ const u32 stage1_bga_b_605[] = {
 	0xdddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_606[] = {
+const u32 stage1_bga_b_577[] = {
 	0xffffffff,
 	0x6666666f,
 	0xee66eeee,
@@ -6068,7 +5778,7 @@ const u32 stage1_bga_b_606[] = {
 	0xdddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_607[] = {
+const u32 stage1_bga_b_578[] = {
 	0xffffffff,
 	0xf6666666,
 	0xeeeee66e,
@@ -6078,7 +5788,7 @@ const u32 stage1_bga_b_607[] = {
 	0xdddddddd,
 	0xddcccddd,
 };
-const u32 stage1_bga_b_608[] = {
+const u32 stage1_bga_b_579[] = {
 	0xffffffff,
 	0x66666ff6,
 	0xeeeeeeee,
@@ -6088,7 +5798,7 @@ const u32 stage1_bga_b_608[] = {
 	0xcccddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_609[] = {
+const u32 stage1_bga_b_580[] = {
 	0xffffffff,
 	0x6666ff66,
 	0xeeeeeeee,
@@ -6098,7 +5808,7 @@ const u32 stage1_bga_b_609[] = {
 	0xdddddddc,
 	0xcccddddd,
 };
-const u32 stage1_bga_b_610[] = {
+const u32 stage1_bga_b_581[] = {
 	0xffffffff,
 	0x6666666f,
 	0x66eeeeee,
@@ -6108,7 +5818,7 @@ const u32 stage1_bga_b_610[] = {
 	0xccdddddd,
 	0xdddddddc,
 };
-const u32 stage1_bga_b_611[] = {
+const u32 stage1_bga_b_582[] = {
 	0xffffffff,
 	0xf6666666,
 	0xeeeeee66,
@@ -6118,7 +5828,7 @@ const u32 stage1_bga_b_611[] = {
 	0xddddcccd,
 	0xccccdddd,
 };
-const u32 stage1_bga_b_612[] = {
+const u32 stage1_bga_b_583[] = {
 	0xffffffff,
 	0x666ff666,
 	0xeeeeeeee,
@@ -6128,7 +5838,7 @@ const u32 stage1_bga_b_612[] = {
 	0xdddddddd,
 	0xddddcccd,
 };
-const u32 stage1_bga_b_613[] = {
+const u32 stage1_bga_b_584[] = {
 	0xffffffff,
 	0x666666ff,
 	0x66eeeeee,
@@ -6138,7 +5848,7 @@ const u32 stage1_bga_b_613[] = {
 	0xddddddcc,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_614[] = {
+const u32 stage1_bga_b_585[] = {
 	0xffffffff,
 	0x66666666,
 	0xeeeeeeee,
@@ -6148,7 +5858,7 @@ const u32 stage1_bga_b_614[] = {
 	0xcddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_615[] = {
+const u32 stage1_bga_b_586[] = {
 	0xffffffff,
 	0xff666666,
 	0xeeee66ee,
@@ -6158,7 +5868,7 @@ const u32 stage1_bga_b_615[] = {
 	0xdddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_616[] = {
+const u32 stage1_bga_b_587[] = {
 	0xffffffff,
 	0x666666ff,
 	0xe66eeeee,
@@ -6168,7 +5878,7 @@ const u32 stage1_bga_b_616[] = {
 	0xdddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_617[] = {
+const u32 stage1_bga_b_588[] = {
 	0xffffffff,
 	0x66666666,
 	0xeeee66ee,
@@ -6178,7 +5888,7 @@ const u32 stage1_bga_b_617[] = {
 	0xdddddddc,
 	0xdcccdddd,
 };
-const u32 stage1_bga_b_618[] = {
+const u32 stage1_bga_b_589[] = {
 	0xffffffff,
 	0x6666ff66,
 	0xeeeeeeee,
@@ -6188,7 +5898,7 @@ const u32 stage1_bga_b_618[] = {
 	0xccdddddd,
 	0xdddddddc,
 };
-const u32 stage1_bga_b_619[] = {
+const u32 stage1_bga_b_590[] = {
 	0xffffffff,
 	0x666ff666,
 	0xeeeeeee6,
@@ -6198,7 +5908,7 @@ const u32 stage1_bga_b_619[] = {
 	0xddddddcc,
 	0xccdddddd,
 };
-const u32 stage1_bga_b_620[] = {
+const u32 stage1_bga_b_591[] = {
 	0xffffffff,
 	0x666666ff,
 	0x6eeeeeee,
@@ -6208,7 +5918,7 @@ const u32 stage1_bga_b_620[] = {
 	0xcddddddd,
 	0xddddddcc,
 };
-const u32 stage1_bga_b_621[] = {
+const u32 stage1_bga_b_592[] = {
 	0xffffffff,
 	0x66666666,
 	0xeeeee66e,
@@ -6218,7 +5928,7 @@ const u32 stage1_bga_b_621[] = {
 	0xdddcccdd,
 	0xcccddddd,
 };
-const u32 stage1_bga_b_622[] = {
+const u32 stage1_bga_b_593[] = {
 	0xffffffff,
 	0x66ff6666,
 	0xeeeeeee6,
@@ -6228,7 +5938,7 @@ const u32 stage1_bga_b_622[] = {
 	0xdddddddd,
 	0xdddcccdd,
 };
-const u32 stage1_bga_b_623[] = {
+const u32 stage1_bga_b_594[] = {
 	0xffffffff,
 	0x66666ff6,
 	0x6eeeeeee,
@@ -6238,7 +5948,7 @@ const u32 stage1_bga_b_623[] = {
 	0xdddddccc,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_624[] = {
+const u32 stage1_bga_b_595[] = {
 	0xffffffff,
 	0x6666666f,
 	0xeeeeeeee,
@@ -6248,7 +5958,7 @@ const u32 stage1_bga_b_624[] = {
 	0xdddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_625[] = {
+const u32 stage1_bga_b_596[] = {
 	0xffffffff,
 	0xf6666666,
 	0xeee66eee,
@@ -6258,7 +5968,7 @@ const u32 stage1_bga_b_625[] = {
 	0xdddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_626[] = {
+const u32 stage1_bga_b_597[] = {
 	0xffffffff,
 	0x66666ff6,
 	0x66eeeeee,
@@ -6268,7 +5978,7 @@ const u32 stage1_bga_b_626[] = {
 	0xdddddddd,
 	0xdddddddd,
 };
-const u32 stage1_bga_b_627[] = {
+const u32 stage1_bga_b_598[] = {
 	0xffffffff,
 	0x66666666,
 	0xeee66eee,
@@ -6278,7 +5988,7 @@ const u32 stage1_bga_b_627[] = {
 	0xddddddcc,
 	0xcccddddd,
 };
-const u32 stage1_bga_b_628[] = {
+const u32 stage1_bga_b_599[] = {
 	0xffffffff,
 	0x666ff666,
 	0xeeeeeeee,
@@ -6288,7 +5998,7 @@ const u32 stage1_bga_b_628[] = {
 	0xcddddddd,
 	0xddddddcc,
 };
-const u32 stage1_bga_b_629[] = {
+const u32 stage1_bga_b_600[] = {
 	0xffffffff,
 	0x66ff6666,
 	0xeeeeee66,
@@ -6298,7 +6008,7 @@ const u32 stage1_bga_b_629[] = {
 	0xdddddccc,
 	0xcddddddd,
 };
-const u32 stage1_bga_b_630[] = {
+const u32 stage1_bga_b_601[] = {
 	0xffffffff,
 	0x66666ff6,
 	0xeeeeeeee,
@@ -6308,7 +6018,7 @@ const u32 stage1_bga_b_630[] = {
 	0xdddddddd,
 	0xdddddccc,
 };
-const u32 stage1_bga_b_631[] = {
+const u32 stage1_bga_b_602[] = {
 	0xffffffff,
 	0x66666666,
 	0xeeee66ee,
@@ -6318,7 +6028,7 @@ const u32 stage1_bga_b_631[] = {
 	0xddcccddd,
 	0xccdddddd,
 };
-const u32 stage1_bga_b_632[] = {
+const u32 stage1_bga_b_603[] = {
 	0xffff0000,
 	0x6ff60000,
 	0xeeee0000,

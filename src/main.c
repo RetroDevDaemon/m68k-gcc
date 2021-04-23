@@ -38,6 +38,8 @@ static u16 last_joyState1;
 static u16 joyState2;
 static u16 last_joyState2;
 
+bool facingLeft = false;
+
 bool REORDER_SPRITES = false;
 u8 sprites_destroyed = 0;
 
@@ -45,21 +47,31 @@ u8 sprites_destroyed = 0;
 static Sprite player1sprite[3];
 static Sprite playerBullets[27];
 static Sprite enemySprites[15];
-static Sprite enemyBullets[30];
 static Sprite moon;
-static Sprite empty[4];
-// 4 left
+static Sprite sunn;
+static Sprite enemyBullets[30];
+static Sprite empty[3];
+// 3 left
 // 80 = end of active sprite data
-static Sprite* p1ship[3];
-static Sprite* playerBulletPtrs[27*2];
 static Sprite playerBulletsTwo[27];
+
+static Sprite* p1ship[3];
+
 typedef struct {
     Sprite* ptr;    // fill when adding the sprite
     u16 tile_attr;  // tile start and pal etc. <- swap for animation
     u8 size;        // size macro 
-    u8 nop;
+    //u8 nop;
 } EnemyType;
 static EnemyType Enemies[15];
+
+typedef struct 
+{ 
+    s8 timer;
+    s8 spd;
+    Sprite* myspr;
+} bullet;
+static bullet playerBulletObj[27*2];
 
 u8 num_p_bullets = 0;
 u8 sixtyFrameCounter = 0;
@@ -80,11 +92,6 @@ u16 bg_a_map[64*32];
 // player bullets - 29 (flicker=58)
 // enemies - 15
 // e. bullets - 35 (flicker = 70)
-struct bullet 
-{ 
-    signed char timer;
-    Sprite* myspr;
-};
 
 void __attribute__((optimize("Os"))) stdcpy(u32* src, u32* dst, u32 siz)
 {
@@ -117,6 +124,7 @@ void main()
     // Copy in our font!
     // Tile number 32 (start of ascii table) * 32 bytes per tile = 1024 = $400
     //WriteVDPRegister(WRITE|REG(0xf)|4);
+#define ASCIIBASETILE 32
     SetVRAMWriteAddress(0x400);
     for(c = 0; c < 0x300; c++) 
     {
@@ -126,6 +134,7 @@ void main()
     }
     // + c00 = 1000
     // Copy in ship
+#define PSHIPBASETILE 128
     SetVRAMWriteAddress(0x1000); // 128
     for(c = 0; c < (12*8); c++) 
     {
@@ -133,56 +142,69 @@ void main()
         cr += c;
         WRITE_DATAREG32(*cr);
     }
+#define BULLETTILE 140
     // Copy in bullet - ID 140
     for(c = 0; c < (8 * 4); c++) {
         cr = (u32*)&pbullet1_0;
         cr += c;
         WRITE_DATAREG32(*cr);
     }
+#define ASTEROIDTILE 144
     // asteroid - ID 144
     for(c = 0; c < (8 * 20); c++) {
         cr = (u32*)&asteroid_0;
         cr += c;
         WRITE_DATAREG32(*cr);
     } // to 164
+#define SLIME1_TILE 164
     for(c = 0; c < (8 * 20); c++) { // 5 frames
         cr = (u32*)&slime1_sheet_0;
         cr += c;
         WRITE_DATAREG32(*cr);
     } // to 184
-    for(c = 0; c < (16*3*8); c++) { // phaes only
-    //for(c = 0; c < (16*5*8); c++) { // phaesta and hairb +harc
+#define PHAESTATILE 184
+    for(c = 0; c < (8 * 80); c++) { // phaes - +80
         cr = (u32*)&phaes1_rows_0;
         cr += c;
         WRITE_DATAREG32(*cr);
-    } //232:
-    for(c = 0; c < (8 * 633); c++) { 
+    } //232+32:
+#define STAGE1BGATILE 232+32
+    for(c = 0; c < (8 * 604); c++) { 
         cr = (u32*)&stage1_bga_b_0;
         cr += c;
         WRITE_DATAREG32(*cr);
     } // 865:
+#define STAGE1BGBTMTILE 865+32-29
     for(c = 0; c < (8 * 216); c++) { 
         cr = (u32*)&stage1_bottombg_0;
         cr += c;
         WRITE_DATAREG32(*cr);
     } // 1081:
+#define MOONTILE 1084
     for(c = 0; c < (8 * 16); c++) { // moon
         cr = (u32*)&moons_0;
         cr += c;
         WRITE_DATAREG32(*cr);
     }
+#define SUNTILE 1084+16
+        for(c = 0; c < (8 * 16); c++) { // sun
+        cr = (u32*)&sun_0;
+        cr += c;
+        WRITE_DATAREG32(*cr);
+    }
 ///
-    AddSprite(&moon, 150, SPRSIZE(4,4), SPR_ATTR(1081, 0, 0, 0, 0), 300);
+    AddSprite(&moon, 260, SPRSIZE(4,4), SPR_ATTR(SUNTILE, 0, 0, 0, 0), 350);
+    AddSprite(&sunn, 150, SPRSIZE(4,4), SPR_ATTR(MOONTILE, 0, 0, 0, 0), 300);
     // draw map test
     // FRONT LAYER
-    DrawTile(BG_A, TILEATTR(865, 0, 0, 0, 0), 0, 21, 27, 8);
-    DrawTile(BG_A, TILEATTR(865, 0, 0, 0, 0), 27, 21, 27, 8);
-    DrawTile(BG_A, TILEATTR(865, 0, 0, 0, 0), 64-27, 21, 27, 8);
+    DrawTile(BG_A, TILEATTR(STAGE1BGBTMTILE, 0, 0, 0, 0), 0, 19, 27, 8);
+    DrawTile(BG_A, TILEATTR(STAGE1BGBTMTILE, 0, 0, 0, 0), 27, 19, 27, 8);
+    DrawTile(BG_A, TILEATTR(STAGE1BGBTMTILE, 0, 0, 0, 0), 64-27, 19, 27, 8);
     // BG LAYER
     for(u8 y = 0; y < 25; y++){
         SetVRAMWriteAddress(VRAM_BG_B + (0x80 * y));
         for(c = 0; c < 48; c++) {
-            WRITE_DATAREG16((u16)(232 + stage1_bga_b_map[(y*48)+c])|(pal_no(2)));
+            WRITE_DATAREG16((u16)(STAGE1BGATILE + stage1_bga_b_map[(y*48)+c])|(pal_no(2)));
         }
     }
     // set ship as 4x3 sprite
@@ -202,21 +224,17 @@ void main()
     //DrawTile(BG_B, TILEATTR(144, 0, 0, 2, 0), 10, 10, 5, 4);
     //DrawTile(BG_B, TILEATTR(144, 0, 0, 2, 0), 12, 17, 5, 4);
 
-    // BG plane A
-    //print(BG_A, 0, 0, hw);
-    //print(BG_A, 1, 1, hw2);
-    //print(BG_A, 2, 2, hw3);
 
 #define PLAYER_BULLET_MAX 27
         
     // clear bullets
-    for(i = 0; i < PLAYER_BULLET_MAX*2; i++) playerBulletPtrs[i] = null;
+    for(i = 0; i < PLAYER_BULLET_MAX*2; i++) playerBulletObj[i].myspr = null;
 
     // Enable VBlank on VDP 
     WriteVDPRegister(WRITE|REG(1)|0x64);
     num_p_bullets = 0;
     bgb_vscroll_pos += 24;
-    bgb_hscroll_pos += 250;
+    bgb_hscroll_pos += 0;
     while(1)
     { 
         WaitVBlank();       // Wait until draw is done
@@ -232,19 +250,19 @@ void main()
         // BULLET HELL!
         for(i = 0; i < PLAYER_BULLET_MAX * 2; i++)
         { 
-            if(playerBulletPtrs[i]->spr_attr != 0)
+            if(playerBulletObj[i].myspr->spr_attr != 0)
             {
-                //process bullet's code 
-                playerBulletPtrs[i]->x_pos += 16;
+                //process bullet's code
+                playerBulletObj[i].myspr->x_pos += playerBulletObj[i].spd;
                 // out of bounds?
-                if((playerBulletPtrs[i]->x_pos > 480))
+                if((playerBulletObj[i].myspr->x_pos > 480))
                 { 
                     // ...destroy the bullet
                     num_p_bullets--;
-                    playerBulletPtrs[i]->y_pos = 0;
-                    playerBulletPtrs[i]->spr_attr = 0;
-                    playerBulletPtrs[i]->size = 0;
-                    playerBulletPtrs[i] = null;
+                    playerBulletObj[i].myspr->y_pos = 0;
+                    playerBulletObj[i].myspr->spr_attr = 0;
+                    playerBulletObj[i].myspr->size = 0;
+                    playerBulletObj[i].myspr= null;
                 }
             }
         }
@@ -258,24 +276,7 @@ void main()
             if(twentyFrameCounter == 10) {
                 Enemies[i].ptr->spr_attr = TILEATTR(BLOB1_SPR, 0, 0, 1, 0);
             }  
-            //enemySprites[i].spr_attr = Enemies[i].tile_attr;
         }
-        
-
-        // Player animation
-        /*
-        if(twentyFrameCounter == 0) {
-            player1sprite[0].spr_attr = TILEATTR(196, 0, 0, 1, 0);
-        }
-        else if (twentyFrameCounter == 5){
-            player1sprite[0].spr_attr = TILEATTR(196+48, 0, 0, 1, 0);
-        }
-        else if (twentyFrameCounter == 10){
-            player1sprite[0].spr_attr = TILEATTR(196, 0, 0, 1, 0);
-        }
-        else if (twentyFrameCounter == 15){
-            player1sprite[0].spr_attr = TILEATTR(196+64, 0, 0, 1, 0);
-        }*/
 
         // BG scrolling test 
         sixtyFrameCounter++;
@@ -316,10 +317,12 @@ void GAME_DRAW()
     spr = (u32*)&enemySprites;
     for(i = 0; i < 15 * 2; i++) 
         WRITE_DATAREG32(*spr++); 
-    // moon!
+    // moon and sun!
     spr = (u32*)&moon;
-    WRITE_DATAREG32(*spr++);
-    WRITE_DATAREG32(*spr++);
+    for(i = 0; i < 2; i++) WRITE_DATAREG32(*spr++);
+    spr = (u32*)&sunn;
+    for(i = 0; i < 2; i++) WRITE_DATAREG32(*spr++);
+
     // write scroll ram
     UpdateBGScroll();
 }
@@ -358,18 +361,32 @@ u8 __attribute__((optimize("Os"))) FindFirstEmptyBullet()
     {
         for(pp = 0; pp < PLAYER_BULLET_MAX; pp++)
         {
-            if(playerBulletPtrs[pp] == null) return pp;
+            if(playerBulletObj[pp].myspr == null) return pp;
         }
     }
     else {
         for(pp = PLAYER_BULLET_MAX; pp < PLAYER_BULLET_MAX*2; pp++)
         {
-            if(playerBulletPtrs[pp] == null) return pp;
+            if(playerBulletObj[pp].myspr == null) return pp;
         }
     }
     
     return 0xFF;
 }
+
+#define Joy1Down(b) (bool)\
+    (!(last_joyState1 & b) && \
+    (joyState1 & b))
+#define Joy1Up(b) (bool)\
+    ((last_joyState1 & b) &&\
+    !(joyState1 & b))
+#define Joy2Down(b) (bool)\
+    (!(last_joyState2 & b) && \
+    (joyState2 & b))
+#define Joy2Up(b) (bool)\
+    ((last_joyState2 & b) &&\
+    !(joyState2 & b))
+
 
 void ProcessInput()
 {
@@ -393,11 +410,12 @@ void ProcessInput()
     if(joyState1 & BTN_A_PRESSED) 
     {   // Fire test
         // find first empty ptr
+        // todo: check optimization here
         u8 nextBulletSpot = FindFirstEmptyBullet();
         if(nextBulletSpot != 0xff)
         {
             volatile Sprite* bulletsat;
-            u16 x_ofs = p1ship[2]->x_pos + 4;
+            s16 x_ofs = p1ship[2]->x_pos + 4;
             if(frameFlip) {
                 bulletsat = &playerBullets[nextBulletSpot];
                 //bullet level 0
@@ -407,12 +425,33 @@ void ProcessInput()
                 //bullet level 0
                 bulletsat = &playerBulletsTwo[nextBulletSpot-PLAYER_BULLET_MAX];
             }
-            playerBulletPtrs[nextBulletSpot] = AddSprite(bulletsat, \
+            x_ofs += (facingLeft * -24);
+            playerBulletObj[nextBulletSpot].myspr = AddSprite(bulletsat, \
                     p1ship[2]->y_pos + 8,\
                     SPRSIZE(1,1), \
-                    SPR_ATTR(140, 0, 0, 1, 0), \
+                    SPR_ATTR(140, facingLeft, 0, 1, 0), \
                     x_ofs);
+            if(facingLeft) playerBulletObj[nextBulletSpot].spd = -16;
+            else playerBulletObj[nextBulletSpot].spd = 16;
         }
     }
 
+
+    if(Joy1Down(BTN_C_PRESSED))
+    {
+        if(facingLeft == false)
+        {
+            facingLeft = true;
+            p1ship[0]->spr_attr = SPR_ATTR(PLAYER1_SPR + 48, 0, 0, 0, 0);
+            p1ship[0]->x_pos -= 16;
+            p1ship[2]->spr_attr = SPR_ATTR(PLAYER1_SPR + 64, 0, 0, 0, 0);
+            p1ship[2]->x_pos -= 16;
+        } else { 
+            facingLeft = false;
+            p1ship[0]->spr_attr = SPR_ATTR(PLAYER1_SPR, 0, 0, 0, 0);
+            p1ship[0]->x_pos += 16;
+            p1ship[2]->spr_attr = SPR_ATTR(PLAYER1_SPR + 32, 0, 0, 0, 0);
+            p1ship[2]->x_pos += 16;
+        }
+    }
 }

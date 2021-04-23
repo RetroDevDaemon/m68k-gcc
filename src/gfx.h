@@ -25,6 +25,7 @@
 #include "level1_bga_palette2.h"
 #include "stage1_bottombg.h"
 #include "moons.h"
+#include "sun.h"
 #include "enemy_palette1.h"
 
 #endif
