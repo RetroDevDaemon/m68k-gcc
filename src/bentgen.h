@@ -5,6 +5,7 @@
 typedef unsigned long u32;
 typedef unsigned short u16;
 typedef unsigned char u8;
+// fix me 
 typedef u8 bool;
 typedef const char String[];
 typedef signed long s32;

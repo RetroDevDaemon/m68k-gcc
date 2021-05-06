@@ -12,7 +12,21 @@
 // Tile format is: e.g. 0x0077BB77
 // 2 Pixels per byte, left to right, color 0-f. Easy to plot
 #include "gfx.h"
-//#include "xgm.h"
+
+#define Joy1Down(b) (bool)\
+    (!(last_joyState1 & b) && \
+    (joyState1 & b))
+#define Joy1Up(b) (bool)\
+    ((last_joyState1 & b) &&\
+    !(joyState1 & b))
+#define Joy2Down(b) (bool)\
+    (!(last_joyState2 & b) && \
+    (joyState2 & b))
+#define Joy2Up(b) (bool)\
+    ((last_joyState2 & b) &&\
+    !(joyState2 & b))
+#define elseif else if 
+
 // game function defs 
 void main();
 void GAME_INPUT();
@@ -39,21 +53,27 @@ static u16 joyState2;
 static u16 last_joyState2;
 
 bool facingLeft = false;
+bool focused = false;
 
 bool REORDER_SPRITES = false;
 u8 sprites_destroyed = 0;
 
+#define PLAYER_BULLET_MAX 10
+        
 // Sprite definitions
+static Sprite hitbox;
 static Sprite player1sprite[3];
-static Sprite playerBullets[27];
-static Sprite enemySprites[15];
-static Sprite moon;
+static Sprite playerBullets[PLAYER_BULLET_MAX]; 
+static Sprite enemySprites[15]; 
+static Sprite moon; //30
 static Sprite sunn;
-static Sprite enemyBullets[30];
-static Sprite empty[3];
-// 3 left
+static Sprite enemyBullets[15]; //46
+static Sprite empty[34];
+
 // 80 = end of active sprite data
-static Sprite playerBulletsTwo[27];
+static Sprite playerBulletsTwo[PLAYER_BULLET_MAX];
+static Sprite playerBulletsThree[PLAYER_BULLET_MAX];
+static Sprite playerBulletsFour[PLAYER_BULLET_MAX];
 
 static Sprite* p1ship[3];
 
@@ -71,7 +91,7 @@ typedef struct
     s8 spd;
     Sprite* myspr;
 } bullet;
-static bullet playerBulletObj[27*2];
+static bullet playerBulletObj[PLAYER_BULLET_MAX*2];
 
 u8 num_p_bullets = 0;
 u8 sixtyFrameCounter = 0;
@@ -101,16 +121,15 @@ void __attribute__((optimize("Os"))) stdcpy(u32* src, u32* dst, u32 siz)
 
 void main()
 {   
-    //XGM_setLoopNumber(-1);
     WaitVBlank();
     //stdcpy(0x00ff0000, 0x00ff0001, 100);
-    spriteRamBase = &player1sprite;
+    spriteRamBase = &hitbox;
     LinkAllSpriteData();
     LinkBulletsTwo();
     LoadPalette(1, (u16*)&enemy_palette1);
     LoadPalette(0, (u16*)&level1_bga_palette);
-    LoadPalette(2, (u16*)&level1_bga_palette2);
-    LoadPalette(3, (u16*)&slime1_palette);
+    LoadPalette(2, (u16*)&stage1_palette);
+    //LoadPalette(3, (u16*)&slime1_palette);
     
     u8 i = 0;
     u16 c = 0; 
@@ -168,43 +187,74 @@ void main()
         cr += c;
         WRITE_DATAREG32(*cr);
     } //232+32:
-#define STAGE1BGATILE 232+32
-    for(c = 0; c < (8 * 604); c++) { 
+#define STAGE1BGATILE 264
+    for(c = 0; c < (8 * 744); c++) { 
         cr = (u32*)&stage1_bga_b_0;
         cr += c;
         WRITE_DATAREG32(*cr);
-    } // 865:
-#define STAGE1BGBTMTILE 865+32-29
+    } 
+#define STAGE1BGBTMTILE 1008
     for(c = 0; c < (8 * 216); c++) { 
         cr = (u32*)&stage1_bottombg_0;
         cr += c;
         WRITE_DATAREG32(*cr);
     } // 1081:
-#define MOONTILE 1084
+#define MOONTILE 1224
     for(c = 0; c < (8 * 16); c++) { // moon
         cr = (u32*)&moons_0;
         cr += c;
         WRITE_DATAREG32(*cr);
     }
-#define SUNTILE 1084+16
+#define SUNTILE 1224+16
         for(c = 0; c < (8 * 16); c++) { // sun
         cr = (u32*)&sun_0;
+        cr += c;
+        WRITE_DATAREG32(*cr);
+    }
+#define HITBOXTILE 1224+32
+    for(c = 0; c < (8 * 2); c++) // 2 tiles for hb
+    {
+        cr = (u32*)&hitbox_0;
+        cr += c;
+        WRITE_DATAREG32(*cr);
+    }
+#define ENEMY1TILE 1224+32+2
+    for(c = 0; c < (8 * 16); c++)
+    {
+        cr = (u32*)&enemy1_0;
+        cr += c;
+        WRITE_DATAREG32(*cr);
+    }
+#define ENEMY2TILE 1224+32+2+16
+    for(c = 0; c < (8 * 16); c++)
+    {
+        cr = (u32*)&enemy2_0;
+        cr += c;
+        WRITE_DATAREG32(*cr);
+    }
+#define ENEMY3TILE 1290 // cap: 1536 (c000)
+    for(c = 0; c < (8 * 16); c++)
+    {
+        cr = (u32*)&enemy3_0;
         cr += c;
         WRITE_DATAREG32(*cr);
     }
 ///
     AddSprite(&moon, 260, SPRSIZE(4,4), SPR_ATTR(SUNTILE, 0, 0, 0, 0), 350);
     AddSprite(&sunn, 150, SPRSIZE(4,4), SPR_ATTR(MOONTILE, 0, 0, 0, 0), 300);
+    AddSprite(&hitbox, 511, SPRSIZE(1,1), SPR_ATTR(HITBOXTILE, 0, 0, 0, 0), 511);
     // draw map test
     // FRONT LAYER
     DrawTile(BG_A, TILEATTR(STAGE1BGBTMTILE, 0, 0, 0, 0), 0, 19, 27, 8);
     DrawTile(BG_A, TILEATTR(STAGE1BGBTMTILE, 0, 0, 0, 0), 27, 19, 27, 8);
     DrawTile(BG_A, TILEATTR(STAGE1BGBTMTILE, 0, 0, 0, 0), 64-27, 19, 27, 8);
     // BG LAYER
-    for(u8 y = 0; y < 25; y++){
+#define STAGE1BGWID 376/8
+#define STAGE1BGHEI 256/8
+    for(u8 y = 0; y < STAGE1BGHEI; y++){
         SetVRAMWriteAddress(VRAM_BG_B + (0x80 * y));
-        for(c = 0; c < 48; c++) {
-            WRITE_DATAREG16((u16)(STAGE1BGATILE + stage1_bga_b_map[(y*48)+c])|(pal_no(2)));
+        for(c = 0; c < STAGE1BGWID; c++) {
+            WRITE_DATAREG16((u16)(STAGE1BGATILE + stage1_bga_b_map[(y*STAGE1BGWID)+c])|(pal_no(2)));
         }
     }
     // set ship as 4x3 sprite
@@ -215,26 +265,30 @@ void main()
     p1ship[2] = AddSprite(&player1sprite[2], 200, SPRSIZE(4,4), SPR_ATTR(PLAYER1_SPR+32, 0, 0, 0, 0), 232);
 
 #define BLOB1_SPR 164
-    Enemies[0].size = SPRSIZE(2,2);
-    Enemies[0].tile_attr = SPR_ATTR(BLOB1_SPR, 0, 0, 1, 0);
+    Enemies[0].size = SPRSIZE(4,4);
+    Enemies[0].tile_attr = SPR_ATTR(ENEMY1TILE, 0, 0, 1, 0);
     Enemies[0].ptr = AddSprite(&enemySprites[0], 180, Enemies[0].size, Enemies[0].tile_attr, 400);
-    Enemies[1].ptr = AddSprite(&enemySprites[1], 200, Enemies[0].size, Enemies[0].tile_attr, 420);
+    Enemies[1].size = SPRSIZE(4,4);
+    Enemies[1].tile_attr = SPR_ATTR(ENEMY2TILE, 0, 0, 1, 0);
+    Enemies[1].ptr = AddSprite(&enemySprites[1], 210, Enemies[1].size, Enemies[1].tile_attr, 385);
+    
+    //Enemies[1].ptr = AddSprite(&enemySprites[1], 200, Enemies[0].size, Enemies[0].tile_attr, 420);
     
 #define ASTEROID_A 144
     //DrawTile(BG_B, TILEATTR(144, 0, 0, 2, 0), 10, 10, 5, 4);
     //DrawTile(BG_B, TILEATTR(144, 0, 0, 2, 0), 12, 17, 5, 4);
 
 
-#define PLAYER_BULLET_MAX 27
-        
     // clear bullets
     for(i = 0; i < PLAYER_BULLET_MAX*2; i++) playerBulletObj[i].myspr = null;
 
     // Enable VBlank on VDP 
     WriteVDPRegister(WRITE|REG(1)|0x64);
     num_p_bullets = 0;
-    bgb_vscroll_pos += 24;
+    bgb_vscroll_pos = 0;//p1ship[0]->y_pos / 16;
     bgb_hscroll_pos += 0;
+    focused = false;
+
     while(1)
     { 
         WaitVBlank();       // Wait until draw is done
@@ -270,13 +324,30 @@ void main()
         // Enemy behavior
         for(i = 0; i < 2; i++) {
             Enemies[i].ptr->x_pos --;
+            /**
             if(twentyFrameCounter == 0) {
                 Enemies[i].ptr->spr_attr = TILEATTR(BLOB1_SPR + 4, 0, 0, 1, 0);
             }
             if(twentyFrameCounter == 10) {
                 Enemies[i].ptr->spr_attr = TILEATTR(BLOB1_SPR, 0, 0, 1, 0);
             }  
+            **/
         }
+
+        // flash hitbox
+        
+        if(focused)
+        {
+            if(tenFrameCounter == 5) {
+                hitbox.spr_attr = SPR_ATTR(HITBOXTILE+1, 0, 0, 0, 0);
+            }
+            elseif (tenFrameCounter == 0) {
+                hitbox.spr_attr = SPR_ATTR(HITBOXTILE, 0, 0, 0, 0);
+            }
+            hitbox.x_pos = p1ship[0]->x_pos + 20 + (facingLeft * 16);
+            hitbox.y_pos = p1ship[0]->y_pos + 20;
+        }
+        
 
         // BG scrolling test 
         sixtyFrameCounter++;
@@ -284,10 +355,18 @@ void main()
             sixtyFrameCounter = 0;
             bgb_hscroll_pos--;
         }
-        //bgb_hscroll_pos -= 6;
-        //bgb_vscroll_pos -= 8;
+        bga_vscroll_pos = 0;//64;
+        if(p1ship[0]->y_pos > 128) {
+            bgb_vscroll_pos = (p1ship[0]->y_pos/4) - 16;
+            bga_vscroll_pos = (p1ship[0]->y_pos/8) - 56;
+            if(bgb_vscroll_pos < 0) bgb_vscroll_pos = 0;
+            //if(bga_vscroll_pos > 192) bga_vscroll_pos = 192;
+        }
+        else 
+        {
+            bga_vscroll_pos = (128/8)-56;
+        }
         bga_hscroll_pos -= 2;
-        //bgb_vscroll_pos++;
     }
 }
 
@@ -301,11 +380,11 @@ void GAME_DRAW()
 
     // Sprite shit
     // TODO: Convert this to DMA
-    u32* spr = spriteRamBase;
+    volatile u32* spr = spriteRamBase;
     u8 i = 0;
     SetVRAMWriteAddress(VRAM_SAT);
     // player1
-    for(i = 0; i < 3 * 2; i++) WRITE_DATAREG32(*spr++);
+    for(i = 0; i < 4 * 2; i++) WRITE_DATAREG32(*spr++);
     // bullet flicker
     if(frameFlip) 
         spr = (u32*)&playerBullets; 
@@ -322,6 +401,11 @@ void GAME_DRAW()
     for(i = 0; i < 2; i++) WRITE_DATAREG32(*spr++);
     spr = (u32*)&sunn;
     for(i = 0; i < 2; i++) WRITE_DATAREG32(*spr++);
+
+    // hitbox (always)
+    //spr = (u32*)&hitbox;
+    //for(i = 0; i < 2; i++) WRITE_DATAREG32(*spr++);
+    
 
     // write scroll ram
     UpdateBGScroll();
@@ -354,7 +438,7 @@ void __attribute__((optimize("Os"))) LinkBulletsTwo()
     }
 }
 
-u8 __attribute__((optimize("Os"))) FindFirstEmptyBullet()
+u8 __attribute__((optimize("O3"))) FindFirstEmptyBullet()
 {
     u8 pp = 0;
     if(frameFlip)
@@ -374,18 +458,6 @@ u8 __attribute__((optimize("Os"))) FindFirstEmptyBullet()
     return 0xFF;
 }
 
-#define Joy1Down(b) (bool)\
-    (!(last_joyState1 & b) && \
-    (joyState1 & b))
-#define Joy1Up(b) (bool)\
-    ((last_joyState1 & b) &&\
-    !(joyState1 & b))
-#define Joy2Down(b) (bool)\
-    (!(last_joyState2 & b) && \
-    (joyState2 & b))
-#define Joy2Up(b) (bool)\
-    ((last_joyState2 & b) &&\
-    !(joyState2 & b))
 
 
 void ProcessInput()
@@ -436,7 +508,23 @@ void ProcessInput()
         }
     }
 
+    // FOCUS MODE
+    if(Joy1Down(BTN_B_PRESSED))
+    {
+        pSpeed = 1;
+        focused = true;
+        hitbox.x_pos = p1ship[0]->x_pos + 20;
+        hitbox.y_pos = p1ship[0]->y_pos + 20;
+    }
+    else if(Joy1Up(BTN_B_PRESSED))
+    {
+        pSpeed = 3;
+        focused = false;
+        hitbox.x_pos = 511;
+        hitbox.y_pos = 511;
+    }
 
+    // SWITCH FACING
     if(Joy1Down(BTN_C_PRESSED))
     {
         if(facingLeft == false)

@@ -11,7 +11,14 @@
 *    of using this software, even if they result from defects in it.
 *
 *------------------------------------------------
+* These are all arithmetic functions. 
+*  Signed and unsigned supported. 
+*  Result is always 32bit.
 .align 2
+* Testing libgcc compatibility:
+__divsi3:
+__udivsi3:
+*
 ldiv:
         move.l  4(%a7),%d0
         bpl     ld1
@@ -203,3 +210,9 @@ ltuns:
         move.l  %d3,%d0
         move.l  %a2,%d3           /* restore d3 */
         rts
+
+SYS_getInterruptMaskLevel:
+    move.w  %sr,%d0
+    andi.w  #0x0700,%d0
+    lsr.w   #8,%d0
+    rts
