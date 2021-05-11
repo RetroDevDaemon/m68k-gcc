@@ -107,6 +107,8 @@ void main()
         cr += c;
         WRITE_DATAREG32(*cr);
     }
+    SetVRAMWriteAddress(0xc000);
+    WRITE_DATAREG16("A");
     // + c00 = 1000
 ///
     //AddSprite(&moon, 260, SPRSIZE(4,4), SPR_ATTR(SUNTILE, 0, 0, 0, 0), 350);
