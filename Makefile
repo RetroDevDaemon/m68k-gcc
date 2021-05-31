@@ -16,7 +16,7 @@ LINKSCR=rom.ld
 
 # Link order should be sega.s, main.s, everything else
 main: DIRs
-	${CC} ${CFLAGS} -v -Isrc -Ires -S ${SRCDIR}/main.c -o ${BUILDDIR}/main.s
+	${CC} ${CFLAGS} -v -Isrc -Ires -Ires/maps -S ${SRCDIR}/main.c -o ${BUILDDIR}/main.s
 	${AS} ${ASFLAGS} -als=${OUTDIR}/listing.lst -o ${BUILDDIR}/main.o ${SRCDIR}/sega.s ${BUILDDIR}/main.s ${SRCDIR}/68kmath.s  
 	${LD} -s -Tsrc/${LINKSCR} -o ${OUTDIR}/_main.rom ${BUILDDIR}/main.o 
 	${PYTHON} tools/padrom.py ${OUTDIR}/_main.rom

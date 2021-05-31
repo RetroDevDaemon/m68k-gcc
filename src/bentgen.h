@@ -5,6 +5,7 @@
 typedef unsigned long u32;
 typedef unsigned short u16;
 typedef unsigned char u8;
+typedef volatile u8 vu8;
 // fix me 
 typedef u8 bool;
 typedef const char String[];
@@ -94,6 +95,37 @@ typedef signed char s8;
 #define pal_no(n) (n<<13)
 
 
+// Roll a die:
+#define roll(y) ((random() & (y-1)) + 1)
+
+// Color word in vram format, 0-30 even only
+#define CRAMRGB(R, G, B) (u16)((B<<8)|(G<<4)|(R<<0)) 
+
+/*
+Sprite Attribute Table
+----------------------
+
+All sprite data is stored in a region of VRAM called sprite attribute table.
+The table is 640 bytes in size. Each 8-byte entry has the following format:
+
+Index + 0 : ------yy yyyyyyyy
+Index + 2 : ----hhvv
+Index + 3 : -lllllll
+Index + 4 : pccvhnnn nnnnnnnn
+Index + 6 : ------xx xxxxxxxx
+
+y = Vertical coordinate of sprite
+h = Horizontal size in cells (00b=1 cell, 11b=4 cells)
+v = Vertical size in cells (00b=1 cell, 11b=4 cells)
+l = Link field
+p = Priority
+c = Color palette
+v = Vertical flip
+h = Horizontal flip
+n = Sprite pattern start index
+x = Horizontal coordinate of sprite
+*/
+
 // 0-1: Y position (9 bits, 0-511, or 0-1023 in double mode)
 // 2: 'next' sprite. final sprite = 0
 // 3: bits 0-1 Y size, bits 2-3 X size.
@@ -124,6 +156,7 @@ void SetVDPPlaneAddress(u8 plane, u16 addr);
 void SetVRAMWriteAddress(u16 address);
 void SetVRAMReadAddress(u16 address);
 void print(u8 plane, u8 x, u8 y, String str);
+u16 VDPLoadTiles(u16 ti, u32* src, u16 numTiles);
 //
 Sprite* AddSprite(Sprite* as, u16 ypos, u8 size, u16 attr, u16 xpos);
 u16 strsize(String* s);
@@ -131,6 +164,12 @@ void LinkAllSpriteData();
 void DrawSpriteAsTile(u8 plane, u16 tileNo, u8 x, u8 y, u8 w, u8 h);
 void DrawTile(u8 plane, u16 TILEATTR, u8 x, u8 y, u8 w, u8 h);
 void UpdateBGScroll();
+
+//void FlipTileRegionH(VDPPlane plane, u8 x1, u8 y1, u8 x2, u8 y2);
+//void FlipTileRegionV(VDPPlane plane, u8 x1, u8 y1, u8 x2, u8 y2);
+//void CopyMapRect(Map* source, VDPPlane tgtplane, u8 palNo, u16 tileIndex, u8 x1, u8 y1, u8 w, u8 h, u8 x2, u8 y2, BOOL p);
+//void ChangeTileRectPalette(VDPPlane plane, u8 x1, u8 y1, u8 x2, u8 y2, u8 palNo);
+void FlashAllPalettes();
 
 
 #define LOADPAL(pal) asm("move.l %1, (0xc00004).l\n\t"\
@@ -188,6 +227,20 @@ void UpdateBGScroll();
         "move.b (0xa10005).l,%%d0   | read byte 2\n\t"\
         "move.w %%d0,%0             | copy to output"\
         :"=g"(n)::"d0"); n ^= 0xffff; // OR result
+
+#define Joy1Down(b) (bool)\
+    (!(last_joyState1 & b) && \
+    (joyState1 & b))
+#define Joy1Up(b) (bool)\
+    ((last_joyState1 & b) &&\
+    !(joyState1 & b))
+#define Joy2Down(b) (bool)\
+    (!(last_joyState2 & b) && \
+    (joyState2 & b))
+#define Joy2Up(b) (bool)\
+    ((last_joyState2 & b) &&\
+    !(joyState2 & b))
+#define elseif else if 
 
 
 void catch()
@@ -388,5 +441,33 @@ u16 strsize(String* s)
     return sz;
 }
 
+
+u16 VDPLoadTiles(u16 ti, u32* src, u16 numTiles)
+{
+    u16 c;
+    u32* cr;
+    SetVRAMWriteAddress(ti * 32);
+    cr = src;
+    for(c = 0; c < (8*numTiles); c++)
+    {
+        WRITE_DATAREG32(*cr++);
+    }
+    ti += numTiles;
+    return ti;
+}
+
+void FlashAllPalettes()
+{
+    for (u8 i = 0; i < 64; i++){
+        u16 p1 = PAL_getColor(i);
+        u16 b = (p1 & 0b111100000000) >> 8;
+        u16 g = (p1 & 0b11110000) >> 4;
+        u8 r = (p1 & 0b1111);
+        b = min(b + 2, 15); // increase each by 0b10
+        g = min(g + 2, 15);
+        r = min(r + 2, 15);
+        PAL_setColor(i, CRAMRGB(r, g, b));
+    }
+}
 
 #endif
