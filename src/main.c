@@ -9,21 +9,8 @@
 
 // My own genesis stuff 
 #include "bentgen.h"
-
-// required defs
-typedef s32 fp32;
-typedef s16 fp16;
-typedef unsigned char Map[]; // FIXME
-typedef u8 TileSet[];
-typedef u8 SpriteDefinition[];
-
-typedef s32 fix32;
-typedef s16 fix16;
-#define fp(n) (fix16)(n*(1<<8))
-#define fp32(n) (fix32)(n*(1<<16))
-
 // Assets
-#include "gfx.h"
+
 // Game stuff
 #include "starthrall.h"
 #include "characterdata.h"
@@ -50,13 +37,6 @@ static u16 last_joyState2;
 
 bool REORDER_SPRITES = false;
 u8 sprites_destroyed = 0;
-
-static u16 tempPalette[] = { \
-    0x00, 0x00, 0x00, 0x00, 
-    0x00, 0x00, 0x00, 0x00, 
-    0x00, 0x00, 0x00, 0x00, 
-    0x00, 0x00, 0x00, 0x00 
-};     
 
 // Sprite definitions
 static Sprite empty[80];
@@ -86,20 +66,26 @@ void __attribute__((optimize("Os"))) stdfill(u32 chr, u32* dst, u32 siz)
 
 void InitGameStuff()
 {
+    u8 i;
     stdcpy(&party[0], &pex, sizeof(struct Player));
     stdcpy(&party[1], &pex2, sizeof(struct Player));
     stdcpy(&party[2], &pex3, sizeof(struct Player));
     stdcpy(&party[3], &pex4, sizeof(struct Player));
+    u32* d = &tempPalettes[0];
+    for(i = 0; i < 32; i++)
+    {
+        *d++ = 0;
+    }
 }
 
-void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr)
+void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 pal)
 {
     for(u8 y = 0; y < height; y++)
     {
         SetVRAMWriteAddress(startaddr + (0x40 * y));
         for(u8 c = 0; c < width; c++)
         {
-            WRITE_DATAREG16((u16)ti + tiledefs[(y*40)+c]|(pal_no(1)));
+            WRITE_DATAREG16((u16)ti + tiledefs[(y*40)+c]|(pal_no(pal)));
         }
     }
 }
@@ -114,13 +100,13 @@ void InitTitleScreen()
     LoadDungeonMap(&maptest2);
     CUR_SCREEN_MODE = TITLE;
 
-    LoadPalette(1, (u16*)&titlePalette);    
+    LoadPalette(2, (u16*)&titlePalette);    
     // Make map
     tileindex = 128;
     tileindex = VDPLoadTiles(tileindex, (u32*)&title_test_0, 605);
-    DrawBGMap(128, &title_test_map, 40, 28, (u16*)VRAM_BG_B);
+    DrawBGMap(128, &title_test_map, 40, 28, (u16*)VRAM_BG_B, 3);
 
-    timer_3 = 192;
+    timer_3 = 0;
     // scroll map
     bgb_hscroll_pos = timer_3;
     //vbl once

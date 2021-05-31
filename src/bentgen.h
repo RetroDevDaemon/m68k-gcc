@@ -34,13 +34,13 @@ typedef signed char s8;
 #define WRITE_PAL2 (u32)(0xc0400000)
 #define WRITE_PAL3 (u32)(0xc0600000)
 #define SPRSIZE(x,y) (u8)(((x-1)<<2)|(y-1))
-#define asm asm volatile    
 
 #define WRITE_CTRLREG(n) asm("move.l %0,(0xc00004).l"::"g"(n))
 #define WRITE_DATAREG8(n) asm("move.b %0,(0xC00000).l"::"g"(n))
 #define WRITE_DATAREG16(n) asm("move.w %0,(0xc00000).l"::"g"(n))
 #define WRITE_DATAREG32(n) asm("move.l %0,(0xc00000).l"::"g"(n))
 #define READ_DATAREG32(n) asm("move.l (0xc00000).l,%0":"=g"(n):)
+#define READ_DATAREG16(n) asm("move.w (0xc00000).l,%0":"=g"(n):)
 #define BREAKPOINT asm("BRK%=:\n\t""jra BRK%=":::);
 
 //; 68k memory map
@@ -61,7 +61,7 @@ typedef signed char s8;
 #define Z80_BUS 0x00A11100
 #define Z80_RESET 0x00A11200
 //; VDP access modes
-#define VDP_CRAM_READ 0x20000000
+#define VDP_CRAM_READ 0x20000000 // 0x200000 ++..
 #define VDP_CRAM_WRITE WRITE_PAL0
 #define VDP_VRAM_READ 0x00000000
 #define VDP_VRAM_WRITE 0x40000000
@@ -170,6 +170,20 @@ void UpdateBGScroll();
 //void CopyMapRect(Map* source, VDPPlane tgtplane, u8 palNo, u16 tileIndex, u8 x1, u8 y1, u8 w, u8 h, u8 x2, u8 y2, BOOL p);
 //void ChangeTileRectPalette(VDPPlane plane, u8 x1, u8 y1, u8 x2, u8 y2, u8 palNo);
 void FlashAllPalettes();
+
+static u16 tempPalettes[4][16];     
+
+// required defs
+typedef s32 fp32;
+typedef s16 fp16;
+typedef unsigned char Map[]; // FIXME
+typedef u8 TileSet[];
+typedef u8 SpriteDefinition[];
+
+typedef s32 fix32;
+typedef s16 fix16;
+#define fp(n) (fix16)(n*(1<<8))
+#define fp32(n) (fix32)(n*(1<<16))
 
 
 #define LOADPAL(pal) asm("move.l %1, (0xc00004).l\n\t"\
@@ -456,18 +470,49 @@ u16 VDPLoadTiles(u16 ti, u32* src, u16 numTiles)
     return ti;
 }
 
+#include "gfx.h"
+
+#define GFX_READ_CRAM_ADDR(adr)     (((0x0000 + ((adr) & 0x7F)) << 16) + 0x20)
+
+// cram 0,0 is at vram 0x0000.
+// pal 01 is at +32, or 0b0000000000100000
+//BBAA AAAA AAAA AAAA 0000 0000 BBBB 00AA
+//AA = Address
+//--DC BA98 7654 3210 ---- ---- ---- --FE
+//BB = command
+//10-- ---- ---- ---- ---- ---- 5432 ----
+//0000 0000 0010 0000 0000 0000 0010 0000
+
+//000000 – VRAM Read
+//000001 – VRAM Write
+//001000 – CRAM Read (!!)
+//000011 – CRAM Write(!!)
+//000100 – VSRAM Read
+//000101 – VSRAM Write
+#define read_cram 0b00000000000000000000000000100000
+#define cram_pal0 0                                     // 0
+#define cram_pal1 0b00000000001000000000000000000000    // 0x20
+#define cram_pal2 0b00000000010000000000000000000000    // 0x40
+#define cram_pal3 0b00000000011000000000000000000000    // 0x60
+//
+
 void FlashAllPalettes()
 {
-    for (u8 i = 0; i < 64; i++){
-        u16 p1 = PAL_getColor(i);
-        u16 b = (p1 & 0b111100000000) >> 8;
-        u16 g = (p1 & 0b11110000) >> 4;
-        u8 r = (p1 & 0b1111);
-        b = min(b + 2, 15); // increase each by 0b10
-        g = min(g + 2, 15);
-        r = min(r + 2, 15);
-        PAL_setColor(i, CRAMRGB(r, g, b));
+    u32 a;
+    u8 f;
+    u32* p = &tempPalettes[3][0];
+    WRITE_CTRLREG(read_cram | cram_pal2);
+    for(f = 0; f < 8; f++)
+    {
+        READ_DATAREG32(a);
+        *p++ = a;
     }
+
+    LoadPalette(3, &tempPalettes[3]);
+    
+    // increase the current palette values by 2
+    // store in temp palettes
+    // flush all temp palletes
 }
 
 #endif
