@@ -299,32 +299,31 @@ SetupValues:
 .byte		0x80			/* VDP 0x97 - DMA fill VRAM		*/
 .long		0x40000080		/* VRAM address 0		*/
 .even
-.byte		0xAF			/* xor	a		*/
-.byte		0x01, 0xD9, 0x1F	/* ld	bc,1fd9h		*/
-.byte		0x11, 0x27, 0x00	/* ld	de,0027h		*/
-.byte		0x21, 0x26, 0x00	/* ld	hl,0026h		*/
-.byte		0xF9			/* ld	sp,hl		*/
-.byte		0x77			/* ld	(hl),a		*/
-.byte		0xED, 0xB0		/* ldir		*/
-.byte		0xDD, 0xE1		/* pop	ix		*/
-.byte		0xFD, 0xE1		/* pop	iy		*/
-.byte		0xED, 0x47		/* ld	i,a		*/
-.byte		0xED, 0x4F		/* ld	r,a		*/
-.byte		0xD1			/*pop	de		*/
-.byte		0xE1			/* pop	hl		*/
-.byte		0xF1			/* pop	af		*/
-.byte		0x08			/* ex	af,af'		*/
-.byte		0xD9			/* exx		*/
-.byte		0xC1			/* pop	bc		*/
-.byte		0xD1			/* pop	de		*/
-.byte		0xE1			/* pop	hl		*/
-.byte		0xF1			/* pop	af		*/
-.byte		0xF9			/* ld	sp,hl		*/
-.byte		0xF3			/* di		*/
-.byte		0xED, 0x56		/* im1		*/
-.byte		0x36, 0xE9		/* ld	(hl),e9h		*/
-.byte		0xE9			/* jp	(hl)		*/
-
+*.byte		0xAF			/* xor	a		*/
+*.byte		0x01, 0xD9, 0x1F	/* ld	bc,1fd9h		*/
+*.byte		0x11, 0x27, 0x00	/* ld	de,0027h		*/
+*.byte		0x21, 0x26, 0x00	/* ld	hl,0026h		*/
+*.byte		0xF9			/* ld	sp,hl		*/
+*.byte		0x77			/* ld	(hl),a		*/
+*.byte		0xED, 0xB0		/* ldir		*/
+*.byte		0xDD, 0xE1		/* pop	ix		*/
+*.byte		0xFD, 0xE1		/* pop	iy		*/
+*.byte		0xED, 0x47		/* ld	i,a		*/
+*.byte		0xED, 0x4F		/* ld	r,a		*/
+*.byte		0xD1			/*pop	de		*/
+*.byte		0xE1			/* pop	hl		*/
+*.byte		0xF1			/* pop	af		*/
+*.byte		0x08			/* ex	af,af'		*/
+*.byte		0xD9			/* exx		*/
+*.byte		0xC1			/* pop	bc		*/
+*.byte		0xD1			/* pop	de		*/
+*.byte		0xE1			/* pop	hl		*/
+*.byte		0xF1			/* pop	af		*/
+*.byte		0xF9			/* ld	sp,hl		*/
+*.byte		0xF3			/* di		*/
+*.byte		0xED, 0x56		/* im1		*/
+*.byte		0x36, 0xE9		/* ld	(hl),e9h		*/
+*.byte		0xE9			/* jp	(hl)		*/
 .word		0x8104			/* VDP display mode		*/
 .word		0x8F02			/* VDP increment		*/
 .long		0xC0000000		/* CRAM write mode		*/

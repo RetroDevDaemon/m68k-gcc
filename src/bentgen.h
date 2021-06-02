@@ -182,8 +182,8 @@ typedef u8 SpriteDefinition[];
 
 typedef s32 fix32;
 typedef s16 fix16;
-#define fp(n) (fix16)(n*(1<<8))
-#define fp32(n) (fix32)(n*(1<<16))
+#define fp16(n) (fix16)((n)*(1<<8))
+#define fp32(n) (fix32)((n)*(1<<16))
 
 
 #define LOADPAL(pal) asm("move.l %1, (0xc00004).l\n\t"\
@@ -472,8 +472,6 @@ u16 VDPLoadTiles(u16 ti, u32* src, u16 numTiles)
 
 #include "gfx.h"
 
-#define GFX_READ_CRAM_ADDR(adr)     (((0x0000 + ((adr) & 0x7F)) << 16) + 0x20)
-
 // cram 0,0 is at vram 0x0000.
 // pal 01 is at +32, or 0b0000000000100000
 //BBAA AAAA AAAA AAAA 0000 0000 BBBB 00AA
@@ -495,24 +493,5 @@ u16 VDPLoadTiles(u16 ti, u32* src, u16 numTiles)
 #define cram_pal2 0b00000000010000000000000000000000    // 0x40
 #define cram_pal3 0b00000000011000000000000000000000    // 0x60
 //
-
-void FlashAllPalettes()
-{
-    u32 a;
-    u8 f;
-    u32* p = &tempPalettes[3][0];
-    WRITE_CTRLREG(read_cram | cram_pal2);
-    for(f = 0; f < 8; f++)
-    {
-        READ_DATAREG32(a);
-        *p++ = a;
-    }
-
-    LoadPalette(3, &tempPalettes[3]);
-    
-    // increase the current palette values by 2
-    // store in temp palettes
-    // flush all temp palletes
-}
 
 #endif
