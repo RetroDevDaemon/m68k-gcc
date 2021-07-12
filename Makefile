@@ -12,7 +12,13 @@ MKDIR=mkdir
 BUILDDIR=build
 OUTDIR=out
 PYTHON=python3
-PROJECT=projects/starthrall
+PROJECT=
+ifeq ($(PROJECT),)
+.ONESHELL:
+default:
+	$(info PROJECT var not set!)
+	@$(exit)
+endif
 SRCDIR=${PROJECT}
 LINKSCR=rom.ld
 
