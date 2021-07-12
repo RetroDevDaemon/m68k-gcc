@@ -859,34 +859,45 @@ void LoadPalettestoTemp()
     }
 }
 
-void UnflashAllPalettes()
+void UnflashAllPalettes() 
 {
     LoadPalettestoTemp();
     
-    u8 f;
-    u16* pr = &tempPalettes[0];
-    u16* tr = curPaletteSet[0];
-    for(f = 0; f < 32; f++)
-    {
-        u16 c = *pr;
-        if(c != *tr) // if its not the same...
+    u8 f, s;
+    u16 a = 0;
+    u16 c = 0;
+    
+    for(s = 0; s < 4; s++){
+        u16* tr = (u16*)curPaletteSet[s];
+        for(f = 0; f < 16; f++)
         {
-            s16 b = (c>>8);
-            s16 g = (c>>4)&0b1110;
-            s8 r = c & 0b1110;
-            b -= 2;
-            g -= 2;
-            r -= 2;
-            if(b < 0) b = 0;
-            if(g < 0) g = 0;
-            if(r < 0) r = 0;   
-            *pr = CRAMRGB(r, g, b);
+            if((tempPalettes[s][f] & 0x0f00) > (*tr & 0x0f00))
+            {
+                s8 t = (tempPalettes[s][f] & 0x0f00) >> 8;
+                t -= 2;
+                if (t < 0) t = 0;
+                tempPalettes[s][f] = (tempPalettes[s][f] & 0x00ff) | (t << 8);
+            }
+            if((tempPalettes[s][f] & 0x00f0) > (*tr & 0x00f0))
+            {
+                s8 t = (tempPalettes[s][f] & 0x00f0) >> 4;
+                t -= 2;
+                if (t < 0) t = 0;
+                tempPalettes[s][f] = (tempPalettes[s][f] & 0x0f0f) | (t << 4);
+            }
+            if((tempPalettes[s][f] & 0x000f) > (*tr & 0x000f))
+            {
+                s8 t = tempPalettes[s][f] & 0x000f;
+                t -= 2;
+                if (t < 0) t = 0;
+                tempPalettes[s][f] = (tempPalettes[s][f] & 0x0ff0) | (t);
+            }
+            tr++;
         }
-        pr++;
-        tr++;
     }
-    for(f = 0; f < 4; f++)
+    for(f = 0; f < 4; f++){
         LoadPalette(f, &tempPalettes[f]);
+    }
 }
 
 void FlashAllPalettes()
@@ -894,6 +905,7 @@ void FlashAllPalettes()
     // increase the current palette values by 2
     // store in temp palettes
     // flush all temp palletes
+    LoadPalettestoTemp();
     u16 a;
     u8 f;
     u16* p = &tempPalettes[0][0];
@@ -914,6 +926,7 @@ void FlashAllPalettes()
         a = (b << 8) | (g << 4) | r;
         *p++ = a;
     }
+    
     for(f = 0; f < 4; f++)
         LoadPalette(f, &tempPalettes[f]);
 
@@ -923,7 +936,7 @@ void FlashAllPalettes()
 #define QSYS
 
 #define QUEUE_SIZE 50
-vu8* function_q[QUEUE_SIZE];
+void* function_q[QUEUE_SIZE];
 void* q_args[QUEUE_SIZE];
 u8 q_in = 0;
 u8 q_ofs = 0;
@@ -942,8 +955,9 @@ void AddQueue(void *q, void* a)
 }
 void DoQ()
 {
-    void(*f)() = function_q[q_in];
-    if(f != NULL){ 
+
+    void(*f)() = (void*)function_q[q_in];
+    if(function_q[q_in] != NULL){ 
         f(q_args[q_in]);
         function_q[q_in] = null;
         q_args[q_in] = null;

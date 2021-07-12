@@ -97,6 +97,9 @@ void InitTitleScreen()
     u32* cr;
     // start title music
     // TODO 
+    // scroll map
+    bgb_hscroll_pos = 180;
+    UpdateBGScroll();
 
     LoadDungeonMap(&maptest2);
     CUR_SCREEN_MODE = TITLE;
@@ -108,8 +111,6 @@ void InitTitleScreen()
     DrawBGMap(128, &title_test_map, 40, 28, (u16*)VRAM_BG_B, 3);
 
     timer_3 = 0;
-    // scroll map
-    bgb_hscroll_pos = timer_3;
 
 }
 
@@ -126,18 +127,10 @@ void main()
     ////////
     //////////////////////////////
 
-    //stdcpy(0x00ff0000, 0x00ff0001, 100);
-
     u8 i = 0;
     u16 c = 0; 
     u32* cr;
     u8 r = 0;
-
-    //stdfill((u32)0, &function_q[0], 25);   // clear the function queue
-    for(i = 0; i < QUEUE_SIZE; i++)
-    {
-        function_q[i] = NULL;
-    }
 
     spriteRamBase = &empty[0];
     LinkAllSpriteData();
@@ -161,8 +154,6 @@ void main()
     // TODO
 
     // INIT TITLE SCREEN
-
-
 /// INITIALIZE VRAM GRAPHICS ///
     // 0-400h is empty for now
     // Copy in our font!
@@ -172,7 +163,6 @@ void main()
 
     InitTitleScreen();
 
-
     // Enable VBlank on VDP 
     WriteVDPRegister(WRITE|REG(1)|0x64);
 
@@ -181,62 +171,36 @@ void main()
     bga_vscroll_pos = 0;
     bga_hscroll_pos = 0;
     //WaitVBlank();
-    //flashAnimPlaying = true;
-    //unflashAnimPlaying = false;
+    flashAnimPlaying = true;
+    //unflashAnimPlaying = true;
     fix32 frameDelta;
+    flashStepTimer = 0;
+    flashStep = 0;
 
 #define realFrameDelta 0.0167
 #define FrameDelta5 
     flashStepTimer = 0;
-    frameDelta = fp32(0.0167);
+    frameDelta = fp32(realFrameDelta);
+    
+    // Clear and reset queue
+    q_in = 0;
+    for(i = 0; i < QUEUE_SIZE; i++) function_q[i] = (void*)NULL;
 
     while(TRUE)
     { 
         ticker = ticker + 1;
         if (ticker > framerate) ticker = 0;
         //Fade in/out - Make me less ugly, please!
-        if(flashAnimPlaying)
-        {
-            flashStepTimer += frameDelta;
-            if ((flashStepTimer - fp32(0.5)) > fp32(0.0834))
-            {
-                FlashAllPalettes();
-                flashStepTimer -= fp32(0.0834);
-                flashStep++;
-            }
-        }
         
-        if(unflashAnimPlaying){
-            flashStepTimer += frameDelta;
-            if((flashStepTimer - fp32(0.5)) > fp32(0.0834)) {
-                UnflashAllPalettes();
-                flashStepTimer -= fp32(0.0834);
-                flashStep++;
-            }
-        }
-        if(flashDarkAnimPlaying){
-            flashStepTimer += 1;
-            if(flashStepTimer > 5) { 
-                UnflashAllPalettes();
-                flashStepTimer = 0;
-                flashStep++;
-            }
-        }
-        if(unflashDarkAnimPlaying){
-            flashStepTimer += 1;
-            if(flashStepTimer > 1) { 
-                UndarkAllPalettes();
-                flashStepTimer = 0;
-                flashStep++;
-            }
-        }
         UPDATE:
         if(GLOBALWAIT > 0)
         {
             GLOBALWAIT--;
             goto DRAW;
         }
+
         DoQ();
+        
         if (CUR_SCREEN_MODE == BATTLE){
             ///////////////////////////
             ////      BATTLE CODE 
@@ -275,6 +239,36 @@ void main()
         tenFrameCounter++;
         if(tenFrameCounter > 9) tenFrameCounter = 0;
         
+        if(flashAnimPlaying)
+        {
+            flashStepTimer ++;
+            if (flashStepTimer > 5)
+            {
+                FlashAllPalettes();
+                flashStepTimer = 0;
+                flashStep++;
+            }
+            if(flashStep > 7) {
+                flashAnimPlaying = false;
+                unflashAnimPlaying = true;
+                flashStepTimer = 0;
+            }
+        }
+        if(unflashAnimPlaying)
+        {
+            flashStepTimer++;
+            if(flashStepTimer > 5)
+            {
+                UnflashAllPalettes();
+                flashStepTimer = 0;
+                flashStep--;
+            }
+            if(flashStep == 0) {
+                unflashAnimPlaying = false;
+                for(i = 0; i < 4; i++) LoadPalette(i, curPaletteSet[i]);
+            }
+        }
+
         if (CUR_SCREEN_MODE == TITLE)
         {
             if(timer_3 <= 160) { 
@@ -282,7 +276,7 @@ void main()
                 //if(titleScr != null)
                 //    MAP_scrollTo(titleScr, timer_3, 0);
                 timer_3 += 20;
-                bgb_hscroll_pos = timer_3;
+                bgb_hscroll_pos = 180 - timer_3;
                 bgb_vscroll_pos = 0;
                 //bgb_vscroll_pos = (u16)timer_3;
             }
@@ -299,15 +293,17 @@ void main()
             }
             if ((flashAnimPlaying) && (flashStep > 6)) { 
                 if ( NEXT_SCREEN_MODE == WORLDMAP)
-                {    //InitWorldMapState();
+                {    
+                    //InitWorldMapState();
                 }
                 else if ( NEXT_SCREEN_MODE == INTRO)
-                {    //InitIntro();
+                {    
+                    //InitIntro();
                 }
-                flashAnimPlaying = false;    
-                unflashAnimPlaying = true;
-                flashStep = 0;
-                flashStepTimer = 0;
+                //flashAnimPlaying = false;    
+                //unflashAnimPlaying = true;
+                //flashStep = 0;
+                //flashStepTimer = 0;
             }
         }
         VBL_DONE = false;
