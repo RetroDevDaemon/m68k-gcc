@@ -133,8 +133,12 @@ void main()
     u32* cr;
     u8 r = 0;
 
-    stdfill((u32)0, &function_q[0], 202);   // clear the function queue
-    
+    //stdfill((u32)0, &function_q[0], 25);   // clear the function queue
+    for(i = 0; i < QUEUE_SIZE; i++)
+    {
+        function_q[i] = NULL;
+    }
+
     spriteRamBase = &empty[0];
     LinkAllSpriteData();
     curPaletteSet[0] = (u16*)&palette;
@@ -168,18 +172,15 @@ void main()
 
     InitTitleScreen();
 
-// PRINT HW
-    SetVRAMWriteAddress(0xc000); // Screen address
-    u8* chp = (u8*)&hw[0];       // String address
-    for(c = 0; c < sizeof(hw); c++) WRITE_DATAREG16((u16)*chp++); // Loop
-    // + c00 = 1000
-///
 
     // Enable VBlank on VDP 
-    //WriteVDPRegister(WRITE|REG(1)|0x64);
+    WriteVDPRegister(WRITE|REG(1)|0x64);
 
     bgb_vscroll_pos = 0;
-    bgb_hscroll_pos += 0;
+    bgb_hscroll_pos = 160;
+    bga_vscroll_pos = 0;
+    bga_hscroll_pos = 0;
+    //WaitVBlank();
     //flashAnimPlaying = true;
     //unflashAnimPlaying = false;
     fix32 frameDelta;
@@ -262,7 +263,8 @@ void main()
         //   VBLANK
         // ****
         DRAW:
-        WaitVBlank();       // Wait until draw is done
+        //WaitVBlank();       // Wait until draw is done DONT DO THIS IF VBL IRQ IS ON!
+        while(!VBL_DONE){ };
 
         // MAIN GAME LOOP 
         ProcessInput();     // Process last frame's buttons
@@ -275,14 +277,24 @@ void main()
         
         if (CUR_SCREEN_MODE == TITLE)
         {
-            if(timer_3 <= 320) { 
+            if(timer_3 <= 160) { 
                 // scroll the map in!
                 //if(titleScr != null)
                 //    MAP_scrollTo(titleScr, timer_3, 0);
                 timer_3 += 20;
+                bgb_hscroll_pos = timer_3;
+                bgb_vscroll_pos = 0;
+                //bgb_vscroll_pos = (u16)timer_3;
             }
             else { 
                 // if done, print :
+
+                // PRINT HW
+                    SetVRAMWriteAddress(0xc000); // Screen address
+                    u8* chp = (u8*)&hw[0];       // String address
+                    for(c = 0; c < sizeof(hw); c++) WRITE_DATAREG16((u16)*chp++); // Loop
+                    // + c00 = 1000
+                ///
                 //VDP_drawText("Press START", 9 + (320/8), 21);
             }
             if ((flashAnimPlaying) && (flashStep > 6)) { 
@@ -298,7 +310,8 @@ void main()
                 flashStepTimer = 0;
             }
         }
-
+        VBL_DONE = false;
+        // end draw
     }
 }
 
@@ -321,6 +334,7 @@ void GAME_DRAW()
     //for(i = 0; i < 4 * 2; i++) WRITE_DATAREG32(*spr++);
 
     // write scroll ram
+    // why is this broken?
     UpdateBGScroll();
 }
 

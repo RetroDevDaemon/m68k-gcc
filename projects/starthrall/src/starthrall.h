@@ -927,7 +927,7 @@ vu8* function_q[QUEUE_SIZE];
 void* q_args[QUEUE_SIZE];
 u8 q_in = 0;
 u8 q_ofs = 0;
-u16 GLOBALWAIT = 0;
+s16 GLOBALWAIT = 0;
 void AddQueue(void *q, void* a);
 #define AddQ(s) AddQueue(s, null)
 void DoQ();
