@@ -270,9 +270,12 @@ void HBlank()
 }
 
 // Vertical blank requires EnableIRQLevel(5) and VDP reg 1 set
+static bool VBL_DONE = false;
 void VBlank()
 {
+    if(VBL_DONE) return;
     GAME_DRAW();
+    VBL_DONE = true;
     return;
 }
 
@@ -409,14 +412,15 @@ static u16 bga_vscroll_pos = 0;
 static u16 bgb_hscroll_pos = 0;
 static u16 bgb_vscroll_pos = 0;
 // Ensure VRAM_SCROLL is defined first: default 0xf800
+///// WARNING: THIS ONLY WORKS FOR FC00
 void UpdateBGScroll()
 {
     //WriteVDPRegister(WRITE|REG(0xf)|4);
     SetVRAMWriteAddress(VRAM_SCROLL);
-    WRITE_DATAREG32((bga_hscroll_pos << 16) | bgb_hscroll_pos);
+    WRITE_DATAREG32((u32)(bga_hscroll_pos << 16) | (u16)(bgb_hscroll_pos));
     asm("move.l %0,(0xc00004).l":
-        :"g"(0x40000010 + (VRAM_SCROLL << 14)):);
-    WRITE_DATAREG32((bga_vscroll_pos << 16) | bgb_vscroll_pos);
+        :"g"(0x7c000013):); // i think this is broke
+    WRITE_DATAREG32((u32)(bga_vscroll_pos << 16) | (u16)(bgb_vscroll_pos));
 }
 
 // Usage: 
@@ -475,23 +479,24 @@ u16 VDPLoadTiles(u16 ti, u32* src, u16 numTiles)
 // cram 0,0 is at vram 0x0000.
 // pal 01 is at +32, or 0b0000000000100000
 //BBAA AAAA AAAA AAAA 0000 0000 BBBB 00AA
-//AA = Address
+//AA = Address 16 bit
 //--DC BA98 7654 3210 ---- ---- ---- --FE
 //BB = command
 //10-- ---- ---- ---- ---- ---- 5432 ----
-//0000 0000 0010 0000 0000 0000 0010 0000
+//01                            0001
 
 //000000 – VRAM Read
 //000001 – VRAM Write
 //001000 – CRAM Read (!!)
 //000011 – CRAM Write(!!)
 //000100 – VSRAM Read
-//000101 – VSRAM Write
+//000101 – VSRAM Write (testing)
 #define read_cram 0b00000000000000000000000000100000
 #define cram_pal0 0                                     // 0
 #define cram_pal1 0b00000000001000000000000000000000    // 0x20
 #define cram_pal2 0b00000000010000000000000000000000    // 0x40
 #define cram_pal3 0b00000000011000000000000000000000    // 0x60
+#define vsram_write 0b01111100000000000000000000010011 //fc00 -> 7c000013
 //
 
 #endif
