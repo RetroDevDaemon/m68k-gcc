@@ -9,7 +9,7 @@
 *       Modified by Charles Coty
 *       Modified by Stephane Dallongeville
 *       Modified by Chris McClelland
-*		Modified by Chris Smith: 02/12/2015.
+*	Modified by Chris Smith: 02/12/2015.
 *       Modified by Ben Ferguson 4/15/2021.
 *
 *-------------------------------------------------------
@@ -29,18 +29,20 @@ _Vectors_68K:
         dc.l    _Trace
         dc.l    _Line_1010_Emulation
         dc.l    _Line_1111_Emulation
-        dc.l     catch, catch, catch, catch
-        dc.l     catch, catch, catch, catch
-        dc.l     catch, catch, catch, catch
-        dc.l    catch, _INT, _EXTINT, _INT
+        dc.l    0, 0, 0							/* unused (3*4) */
+        dc.l	 _Uninitialized
+        dc.l    0, 0, 0, 0, 0, 0, 0, 0					/* unused (8*4) */
+        dc.l    _Spurious
+        dc.l	_IRQL1, _EXTINT, _IRQL3
         dc.l    HBlank                                                  /* LEVEL4 */
-        dc.l    _INT
+        dc.l    _IRQL5
         dc.l    VBlank                                                  /* LEVEL6 */
-        dc.l    _INT
-        dc.l    _Reset,_INT,_INT,_INT,_INT,_INT,_INT,_INT
-        dc.l    _INT,_INT,_INT,_INT,_INT,_INT,_INT,_INT
-        dc.l    _INT,_INT,_INT,_INT,_INT,_INT,_INT,_INT
-        dc.l    _INT,_INT,_INT,_INT,_INT,_INT,_INT,_INT
+        dc.l    _IRQL7
+        dc.l    _Reset
+        dc.l	_TRAP1,_TRAP2,_TRAP3,_TRAP4,_TRAP5,_TRAP6,_TRAP7
+        dc.l    _TRAP8,_TRAP9,_TRAP10,_TRAP11,_TRAP12,_TRAP13,_TRAP14,_TRAP15
+        dc.l    0, 0, 0, 0, 0, 0, 0, 0					 /* unused (16*4) */
+        dc.l    0, 0, 0, 0, 0, 0, 0, 0
 
 	.ascii	"SEGA MEGA DRIVE " 					/* Console Name (16) */
 	.ascii	"(C)2021         "					/* Copyright Information (16) */
@@ -134,6 +136,7 @@ CopyVar:
         move.w  (%a0)+,(%a1)+
         dbra    %d0,CopyVar
 NoCopy:
+   
 
 * Jump to initialisation process...
 .even
@@ -200,7 +203,7 @@ _Trapv_Instruction:
         movem.l (%sp)+,%d0-%d1/%a0-%a1
         rte
 	
-
+_TRAP0:
 _Reset:
 	    move.w	#0x2700, %sr
 	    reset
@@ -237,7 +240,28 @@ _Error_Exception:
         movem.l (%sp)+,%d0-%d1/%a0-%a1
         rte
 
-_INT:
+_Spurious:
+_TRAP1:
+_TRAP2:
+_TRAP3:
+_TRAP4:
+_TRAP5:
+_TRAP6:
+_TRAP7:
+_TRAP8:
+_TRAP9:
+_TRAP10:
+_TRAP11:
+_TRAP12:
+_TRAP13:
+_TRAP14:
+_TRAP15:
+_Uninitialized:
+_catch:
+_IRQL1:
+_IRQL3:
+_IRQL5:
+_IRQL7:
         movem.l %d0-%d1/%a0-%a1,-(%sp)
         jsr    (%a0)
         movem.l (%sp)+,%d0-%d1/%a0-%a1

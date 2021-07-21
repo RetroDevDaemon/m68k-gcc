@@ -1,0 +1,23 @@
+00000000                                     1  * test.x68
+00000000                                     2  **********
+00000000                                     3  
+00010000                                     4  	ORG 	$10000
+00010000                                     5  	
+00010000  =0001C000                          6  sbss 	equ 	$1c000
+00010000  =0001C1FF                          7  ebss	equ 	$1c1ff
+00010000                                     8  
+00010000                                     9  *	move.l 	#sbss,d0
+00010000                                    10  *	move.l 	#ebss,d1
+00010000                                    11  *	sub.l 	d0,d1		d1 has size 
+00010000                                    12  	move.l  #(ebss - sbss),d1
+ERROR: Invalid syntax
+00010000  E441                              13  	asr.w 	#2,d1		divide by 4 (longword)
+00010002  207C 0001C000                     14  	movea.l	#sbss,a0 	
+00010008                                    15  ClrLoop
+00010008  20FC 00000000                     16  	move.l	#$0,(a0)+
+0001000E  51C9 FFF8                         17  	dbra	d1,ClrLoop
+00010012                                    18  
+00010012                                    19  	END	$10000
+
+1 error detected
+No warnings generated

@@ -12,6 +12,7 @@
 // Assets
 
 // Game stuff
+#include "gfx.h"
 #include "starthrall.h"
 #include "characterdata.h"
 
@@ -58,12 +59,12 @@ void __attribute__((optimize("Os"))) stdcpy(u32* src, u32* dst, u32 siz)
 {
     for(u32 cs = 0; cs < siz; cs++) *dst++ = *src++;
 }
-
+/*
 void __attribute__((optimize("Os"))) stdfill(u32 chr, u32* dst, u32 siz)
 {
     for(u32 a = 0; a < siz; a++) *dst++ = chr;
 }
-
+*/
 
 void InitGameStuff()
 {
@@ -100,7 +101,6 @@ void InitTitleScreen()
     // scroll map
     bgb_hscroll_pos = 180;
     UpdateBGScroll();
-
     LoadDungeonMap(&maptest2);
     CUR_SCREEN_MODE = TITLE;
     curPaletteSet[3] = (u16*)&titlePalette;
@@ -119,6 +119,7 @@ void UndarkAllPalettes()
 
 }
 
+
 void main()
 {   
     /////////////////////////////
@@ -131,7 +132,7 @@ void main()
     u16 c = 0; 
     u32* cr;
     u8 r = 0;
-
+    
     spriteRamBase = &empty[0];
     LinkAllSpriteData();
     curPaletteSet[0] = (u16*)&palette;
@@ -183,7 +184,7 @@ void main()
     frameDelta = fp32(realFrameDelta);
     
     // Clear and reset queue
-    q_in = 0;
+    //q_in = 0;
     for(i = 0; i < QUEUE_SIZE; i++) function_q[i] = (void*)NULL;
 
     while(TRUE)

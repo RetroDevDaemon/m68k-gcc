@@ -21,6 +21,7 @@ default:
 endif
 SRCDIR=${PROJECT}
 LINKSCR=rom.ld
+ROMFILE=out.md
 
 # Link order should be sega.s, main.s, everything else
 main: DIRs
@@ -37,11 +38,11 @@ main: DIRs
 		${BUILDDIR}/main.s \
 		lib/68kmath.s  
 	${LD} -s -Tlib/${LINKSCR} -o ${OUTDIR}/_main.rom ${BUILDDIR}/main.o 
-	${PYTHON} tools/padrom.py ${OUTDIR}/_main.rom
+	${PYTHON} tools/padrom.py ${OUTDIR}/_main.rom ./$(ROMFILE)
 	rm -rf ${OUTDIR}/_main.rom 
 
 run: main 
-	dgen out.md 
+	dgen $(ROMFILE)
 
 # Create build directory	
 DIRs:
@@ -53,4 +54,4 @@ DIRs:
 clean:
 	rm -rf ${BUILDDIR} 
 	rm -rf ${OUTDIR}
-	rm -rf out.md
+	rm -rf $(ROMFILE)

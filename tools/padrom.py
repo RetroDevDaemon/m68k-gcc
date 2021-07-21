@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # padrom.py
 import sys  
-ALIGN = 131072
+ALIGN = 524288
 f = open(sys.argv[1], 'rb')
 by = f.read()
 f.close()
@@ -13,7 +13,11 @@ else:
     banks = 0
 ofs = ALIGN - (fsiz % ALIGN) 
 ofs = ofs + (banks * ALIGN)
-f = open('out.md', 'wb')
+f = None
+if(len(sys.argv) > 2):
+	f = open(sys.argv[2], 'wb')
+else:
+	f = open('out.md', 'wb')
 f.write(by)
 i = ofs 
 while i > 0:

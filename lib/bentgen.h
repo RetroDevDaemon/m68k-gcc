@@ -279,9 +279,63 @@ void VBlank()
     return;
 }
 
+extern char _sbss[];
+extern char _ebss[];
+
+void memset(char* start, u32 val, unsigned int length)
+{
+    // length is between 0-65000.
+    for(unsigned int i = 0; i < length; i++) *start++ = val;
+    /*
+    u8 div;
+    div = length % 4;
+    switch(div){
+        case(0): // remainder 0, longword
+            asm("\n"
+            "move.l     %0,%%d1\n\t"\
+            "asr.w 	    #2,%%d1		;| divide by 4 (longword)\n\t"
+            "movea.l	%1,%%a0 ;| address of what to erase	\n\t"
+        "ClrLoop%=:\n\t"
+            "move.l	    %2,(%%a0)+\n\t"
+            "dbra	    d1,ClrLoop%="
+            :                  // outputs
+            :"g"(length), "m"(start), "g"(val) // inputs
+            :"d0", "d1", "a0"); // used registers
+        break;
+
+        case(2):
+            asm("\n"
+            "move.l     %0,%%d1\n\t"\
+            "asr.w 	    #2,%%d1		;| divide by 2 (word)\n\t"
+            "movea.l	%1,%%a0 ;| address of what to erase	\n\t"
+        "ClrLoop%=:\n\t"
+            "move.w	    %2,(%%a0)+\n\t"
+            "dbra	    d1,ClrLoop%="
+            :                  // outputs
+            :"g"(length), "m"(start), "g"((u16)(val & 0xffff)) // inputs
+            :"d0", "d1", "a0"); // used registers
+                    
+        case(3):
+        case(1): //remainder 1, byte 
+            asm("\n"
+            "move.l     %0,%%d1\n\t"\
+            //"asr.w 	    #2,%%d1		;| divide by 4 (longword)\n\t"
+            "movea.l	%1,%%a0 ;| address of what to erase	\n\t"
+        "ClrLoop%=:\n\t"
+            "move.b	    %2,(%%a0)+\n\t"
+            "dbra	    d1,ClrLoop%="
+            :                  // outputs
+            :"g"(length), "m"(start), "g"(val) // inputs
+            :"d0", "d1", "a0"); // used registers
+        break;
+    }
+    */
+}
 
 void _start() {
     //asm("movea.l 0x00FFF000,%%sp":::"sp"); // set stack pointer if its not
+    // Important!! Clear BSS!!
+    memset(_sbss, 0, _ebss - _sbss);
     // enable VBL IRQ
     EnableIRQLevel(5);
     main(); 
@@ -474,7 +528,7 @@ u16 VDPLoadTiles(u16 ti, u32* src, u16 numTiles)
     return ti;
 }
 
-#include "gfx.h"
+//#include "gfx.h"
 
 // cram 0,0 is at vram 0x0000.
 // pal 01 is at +32, or 0b0000000000100000
