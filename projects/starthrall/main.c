@@ -20,7 +20,9 @@
 
 // game function defs 
 void main();
-void ProcessInput();
+int (*ProcessInput)(void);
+// test
+int GetInput();
 
 // Global Vars
 u8 fq;
@@ -29,8 +31,9 @@ u32 frameCounter;
 bool frameFlip;
 u16 vdpstat;
 u32 hcount;
-String hw = "Hello STARTHRALL!";
-String okstr = "Okay";
+//String hw = "Press START!\x00";
+//String okstr = "Okay\x00";
+const char hw[] = "Press Start! ";
 
 static u16 joyState1;
 static u16 last_joyState1;
@@ -66,6 +69,12 @@ void __attribute__((optimize("Os"))) stdfill(u32 chr, u32* dst, u32 siz)
 }
 */
 
+int TitleInputHandler()
+{
+    //FlashAllPalettes();
+    return 0;
+}
+
 void InitGameStuff()
 {
     u8 i;
@@ -82,6 +91,7 @@ void InitGameStuff()
 
 void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 pal)
 {
+    //WriteVDPRegister(WRITE|REG(0xf)|2);
     for(u8 y = 0; y < height; y++)
     {
         SetVRAMWriteAddress(startaddr + (0x40 * y));
@@ -91,6 +101,7 @@ void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 
         }
     }
 }
+
 
 void InitTitleScreen()
 {
@@ -111,13 +122,19 @@ void InitTitleScreen()
     DrawBGMap(128, &title_test_map, 40, 28, (u16*)VRAM_BG_B, 3);
 
     timer_3 = 0;
-
+    // sprite engine (already on)
+    // set joy handler
+    ProcessInput = TitleInputHandler;
 }
 
 void UndarkAllPalettes()
 {
 
 }
+
+    
+s16 second_counter_a = 0;
+bool title_intro_done = false;
 
 
 void main()
@@ -127,12 +144,11 @@ void main()
     ///          GAME SETUP
     ////////
     //////////////////////////////
-
     u8 i = 0;
     u16 c = 0; 
     u32* cr;
     u8 r = 0;
-    
+    timer_3 = 0;
     spriteRamBase = &empty[0];
     LinkAllSpriteData();
     curPaletteSet[0] = (u16*)&palette;
@@ -182,15 +198,29 @@ void main()
 #define FrameDelta5 
     flashStepTimer = 0;
     frameDelta = fp32(realFrameDelta);
-    
+    title_intro_done = false;
+    ticker = 0;
     // Clear and reset queue
     //q_in = 0;
     for(i = 0; i < QUEUE_SIZE; i++) function_q[i] = (void*)NULL;
 
+    
     while(TRUE)
     { 
+        
         ticker = ticker + 1;
-        if (ticker > framerate) ticker = 0;
+        if (ticker > 60) 
+        {
+            second_counter_a++;
+            ticker = 0;
+        }
+
+        // Counter-y stuff
+        twentyFrameCounter++;
+        if(twentyFrameCounter > 19) twentyFrameCounter = 0;
+        tenFrameCounter++;
+        if(tenFrameCounter > 9) tenFrameCounter = 0;
+
         //Fade in/out - Make me less ugly, please!
         
         UPDATE:
@@ -222,93 +252,23 @@ void main()
             //WorldMapUpdate();
             ////////////////////////////
         }
-                
-
+        else if (CUR_SCREEN_MODE == TITLE)
+        {
+            //if(second_counter_a > 1) title_intro_done = true;
+        }
+        
+        // MAIN GAME LOOP 
+        ProcessInput();
+        
         // ****
         //   VBLANK
         // ****
         DRAW:
         //WaitVBlank();       // Wait until draw is done DONT DO THIS IF VBL IRQ IS ON!
+        VBL_DONE = false;
         while(!VBL_DONE){ };
 
-        // MAIN GAME LOOP 
-        ProcessInput();     // Process last frame's buttons
-
-        // Counter-y stuff
-        twentyFrameCounter++;
-        if(twentyFrameCounter > 19) twentyFrameCounter = 0;
-        tenFrameCounter++;
-        if(tenFrameCounter > 9) tenFrameCounter = 0;
         
-        if(flashAnimPlaying)
-        {
-            flashStepTimer ++;
-            if (flashStepTimer > 5)
-            {
-                FlashAllPalettes();
-                flashStepTimer = 0;
-                flashStep++;
-            }
-            if(flashStep > 7) {
-                flashAnimPlaying = false;
-                unflashAnimPlaying = true;
-                flashStepTimer = 0;
-            }
-        }
-        if(unflashAnimPlaying)
-        {
-            flashStepTimer++;
-            if(flashStepTimer > 5)
-            {
-                UnflashAllPalettes();
-                flashStepTimer = 0;
-                flashStep--;
-            }
-            if(flashStep == 0) {
-                unflashAnimPlaying = false;
-                for(i = 0; i < 4; i++) LoadPalette(i, curPaletteSet[i]);
-            }
-        }
-
-        if (CUR_SCREEN_MODE == TITLE)
-        {
-            if(timer_3 <= 160) { 
-                // scroll the map in!
-                //if(titleScr != null)
-                //    MAP_scrollTo(titleScr, timer_3, 0);
-                timer_3 += 20;
-                bgb_hscroll_pos = 180 - timer_3;
-                bgb_vscroll_pos = 0;
-                //bgb_vscroll_pos = (u16)timer_3;
-            }
-            else { 
-                // if done, print :
-
-                // PRINT HW
-                    SetVRAMWriteAddress(0xc000); // Screen address
-                    u8* chp = (u8*)&hw[0];       // String address
-                    for(c = 0; c < sizeof(hw); c++) WRITE_DATAREG16((u16)*chp++); // Loop
-                    // + c00 = 1000
-                ///
-                //VDP_drawText("Press START", 9 + (320/8), 21);
-            }
-            if ((flashAnimPlaying) && (flashStep > 6)) { 
-                if ( NEXT_SCREEN_MODE == WORLDMAP)
-                {    
-                    //InitWorldMapState();
-                }
-                else if ( NEXT_SCREEN_MODE == INTRO)
-                {    
-                    //InitIntro();
-                }
-                //flashAnimPlaying = false;    
-                //unflashAnimPlaying = true;
-                //flashStep = 0;
-                //flashStepTimer = 0;
-            }
-        }
-        VBL_DONE = false;
-        // end draw
     }
 }
 
@@ -317,11 +277,11 @@ void GAME_DRAW()
 {   
     if(frameFlip == 0) frameFlip = 1;
     else frameFlip = 0;
-
+    u16 c = 0;
     last_joyState1 = joyState1;
     GETJOYSTATE1(joyState1);
-    last_joyState2 = joyState2;
-    GETJOYSTATE2(joyState2);
+    //last_joyState2 = joyState2;
+    //GETJOYSTATE2(joyState2);
     // Sprite shit
     // TODO: Convert this to DMA
     volatile u32* spr = spriteRamBase;
@@ -330,49 +290,88 @@ void GAME_DRAW()
     // player1
     //for(i = 0; i < 4 * 2; i++) WRITE_DATAREG32(*spr++);
 
-    // write scroll ram
-    // why is this broken?
+    if(flashAnimPlaying)
+    {
+        flashStepTimer ++;
+        if (flashStepTimer > 5)
+        {
+            FlashAllPalettes();
+            flashStepTimer = 0;
+            flashStep++;
+        }
+        if(flashStep > 7) {
+            flashAnimPlaying = false;
+            unflashAnimPlaying = true;
+            flashStepTimer = 0;
+        }
+    }
+    if(unflashAnimPlaying)
+    {
+        flashStepTimer++;
+        if(flashStepTimer > 5)
+        {
+            UnflashAllPalettes();
+            flashStepTimer = 0;
+            flashStep--;
+        }
+        if(flashStep == 0) {
+            unflashAnimPlaying = false;
+            for(i = 0; i < 4; i++) LoadPalette(i, curPaletteSet[i]);
+        }
+    }
+
+    if (CUR_SCREEN_MODE == TITLE)
+    {
+        if(timer_3 <= 160) { 
+            // scroll the map in!
+            //if(titleScr != null)
+            //    MAP_scrollTo(titleScr, timer_3, 0);
+            timer_3 += 20;
+            bgb_hscroll_pos = 180 - timer_3;
+            bgb_vscroll_pos = 0;
+            //bgb_vscroll_pos = (u16)timer_3;
+        }
+        else { 
+            if(!flashAnimPlaying){
+                // if done, print :
+                SetVRAMWriteAddress(0xc000 + (64*21*2) + (9*2)); // Screen address + 21 Y, 9 X (BG_A)
+                // (16bit, 64 chars/map)
+                u8* chp = (u8*)&hw[0];       // String address
+                for(c = 0; c < sizeof(hw); c++) WRITE_DATAREG16((u16)*chp++); // Loop
+                //SetInputCallback(&GetInput);
+            }
+        }
+        if ((flashAnimPlaying) && (flashStep > 6)) { 
+            if ( NEXT_SCREEN_MODE == WORLDMAP)
+            {    
+                //InitWorldMapState();
+            }
+            else if ( NEXT_SCREEN_MODE == INTRO)
+            {    
+                //InitIntro();
+            }
+        }
+    }
+    VBL_DONE = true;
+        // end draw
     UpdateBGScroll();
 }
 
 
-void ProcessInput()
-{
-    u8 ps = 0;
-    if(joyState1 & BTN_UP_PRESSED) // Up
-    {
 
-    }
-    if(joyState1 & BTN_DOWN_PRESSED) // Down
-    {
+//int GetInput()
+//{
+    //FlashAllPalettes();
+//    return 0;
+//}
 
-    }
-    if(joyState1 & BTN_LEFT_PRESSED) // Left
-    {
+//void SetInputCallback(void(* f)())
+//{
+//    void(*ProcessInput)() = &f;
+//}
 
-    }
-    if(joyState1 & BTN_RIGHT_PRESSED) // Right
-    {
-
-    }
-    if(joyState1 & BTN_A_PRESSED) 
-    {   // Fire test
-
-    }
-
-    // FOCUS MODE
-    if(Joy1Down(BTN_B_PRESSED))
-    {
-
-    }
-    else if(Joy1Up(BTN_B_PRESSED))
-    {
-
-    }
-
-    // SWITCH FACING
-    if(Joy1Down(BTN_C_PRESSED))
-    {
-
-    }
-}
+//void ProcessInput()
+//{
+ //   void(*f)() = &function;
+ //   f();
+//}

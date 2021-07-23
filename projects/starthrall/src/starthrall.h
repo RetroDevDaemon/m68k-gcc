@@ -159,7 +159,7 @@ Sprite* wm_player;
 enum screenModes { DUNGEON, BATTLE, TITLE, WORLDMAP, INTRO, ADVENTURE, MUSICTEST };
 enum screenModes CUR_SCREEN_MODE;// = DUNGEON;
 enum screenModes NEXT_SCREEN_MODE;
-fp32 ticker;
+s32 ticker;
 fp32 spriteSlideTimer;
 u8 spriteSlideTick;
 bool scrollInCombatants;

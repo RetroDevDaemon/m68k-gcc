@@ -475,6 +475,7 @@ void UpdateBGScroll()
     asm("move.l %0,(0xc00004).l":
         :"g"(0x7c000013):); // i think this is broke
     WRITE_DATAREG32((u32)(bga_vscroll_pos << 16) | (u16)(bgb_vscroll_pos));
+    //WriteVDPRegister(WRITE|REG(0xf)|2);
 }
 
 // Usage: 
