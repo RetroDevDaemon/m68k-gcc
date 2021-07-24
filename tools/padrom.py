@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # padrom.py
 import sys  
-ALIGN = 524288
+ALIGN = 131072
 f = open(sys.argv[1], 'rb')
 by = f.read()
 f.close()
@@ -24,4 +24,4 @@ while i > 0:
     f.write(bytes([0]))
     i -= 1
 f.close()
-print(str(fsiz) + ' padded to ' + str(ofs))
+print(str(fsiz) + ' padded by ' + str(ofs))
