@@ -33,7 +33,7 @@ u16 vdpstat;
 u32 hcount;
 //String hw = "Press START!\x00";
 //String okstr = "Okay\x00";
-const char hw[] = "Press Start! ";
+const char hw[] = "Hello Buttons!";
 
 static u16 joyState1;
 static u16 last_joyState1;
