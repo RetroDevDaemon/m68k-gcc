@@ -32,12 +32,12 @@ main: DIRs
 		-I${PROJECT}/res/maps\
 		-S ${SRCDIR}/main.c \
 		-o ${BUILDDIR}/main.s
-	${AS} ${ASFLAGS} -als=${OUTDIR}/listing.lst \
+	${AS} ${ASFLAGS} -g -als=${OUTDIR}/listing.lst \
 		-o ${BUILDDIR}/main.o \
 		lib/sega.s \
 		${BUILDDIR}/main.s \
 		lib/68kmath.s  
-	${LD} -s -Tlib/${LINKSCR} -o ${OUTDIR}/_main.rom ${BUILDDIR}/main.o 
+	${LD} -s -Tlib/${LINKSCR} -o ${OUTDIR}/_main.rom ${BUILDDIR}/main.o -Map=map.txt
 	${PYTHON} tools/padrom.py ${OUTDIR}/_main.rom ./$(ROMFILE)
 	rm -rf ${OUTDIR}/_main.rom 
 

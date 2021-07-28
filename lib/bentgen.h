@@ -461,10 +461,10 @@ void DrawTile(u8 plane, u16 TILEATTR, u8 x, u8 y, u8 w, u8 h)
 }
 
 
-static u16 bga_hscroll_pos = 0;
-static u16 bga_vscroll_pos = 0;
-static u16 bgb_hscroll_pos = 0;
-static u16 bgb_vscroll_pos = 0;
+u16 bga_hscroll_pos = 0;
+u16 bga_vscroll_pos = 0;
+u16 bgb_hscroll_pos = 0;
+u16 bgb_vscroll_pos = 0;
 // Ensure VRAM_SCROLL is defined first: default 0xf800
 ///// WARNING: THIS ONLY WORKS FOR FC00
 void UpdateBGScroll()
