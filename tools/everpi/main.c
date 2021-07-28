@@ -11,6 +11,19 @@
 #define SOFT 1
 #define HARD 2
 #define OFF 0
+typedef int bool;
+#define true 1;
+#define false 0;
+#define TRUE true;
+#define FALSE false;
+
+#define MODE_WRITE_ROMFILE 0
+#define MODE_MEMSET 1
+#define MODE_MEMSET16 2
+#define MODE_MEMSET32 3
+#define MODE_MEMREAD 4
+
+char* rom_filename;
 
 typedef unsigned char u8;
 char buf[64];
@@ -19,13 +32,7 @@ int ed_port;
 char ptstr[] = "/dev/ttyACM0";
 FILE* romfile;
 char* filebuffer;
-char* filebuffer2;
 int filelen;
-
-struct packet
-{
-  
-} pack;
 
 
 int txCmd(u8 cmd)
@@ -62,9 +69,9 @@ int ed_read_mem(int addr, int length)
   if(txCmd(CMD_MEM_RD) != 4) return -1;
   
   // addr32
-  buf[4] = (unsigned char)(addr >> 24);
-  buf[5] = (unsigned char)(addr >> 16);//0x81;
-  buf[6] = (unsigned char)(addr >> 8);//0;
+  if(addr > 0xffffff) buf[4] = (unsigned char)(addr >> 24);
+  if(addr > 0xffff) buf[5] = (unsigned char)(addr >> 16);//0x81;
+  if(addr > 0xff) buf[6] = (unsigned char)(addr >> 8);//0;
   buf[7] = (unsigned char)(addr & 0xff);//0;
   int bw = write(ed_port, &buf[4], 4);
   if(bw != 4) return -1;
@@ -189,13 +196,8 @@ void setup_port()
   tcsetattr(ed_port, TCSANOW, &tty);
 }
 */
-typedef int bool;
-#define true 1;
-#define false 0;
-#define TRUE true;
-#define FALSE false;
 
-int load_rom_file()
+int ed_load_rom()
 {
   int bw;
   clear_buffer();
@@ -226,24 +228,32 @@ int load_rom_file()
   return 0;
 }
 
-#define MODE_WRITE_ROMFILE 0
-#define MODE_MEMSET 1
-#define MODE_MEMSET16 2
-#define MODE_MEMSET32 3
-#define MODE_MEMREAD 4
-
-char* rom_filename;
 
 void usage()
 {
-  printf("everpi\n\n\
-  Debian/Pi tool for Mega EverDrive development\n\n\
+  printf("everpi\n\
+  A Debian/Pi tool for Mega EverDrive development\n\n\
+  USAGE:\n\
   $ everpi rom [romfile]\n\
    or\n\
-  $ everpi memset|memread [address] [value]\n");
+  $ everpi memset|memset16|memset32 [address] [value]\n\
+   or\n\
+  $ everpi memread [address]\n\n\
+\n\
+  EXAMPLES:\n\
+  'everpi rom rom.md' will load and launch a local romfile.\n\
+  'everpi memset16 0x1512 0x0101' will set ROM memory $01512-13 to $0101.\n\
+  'everpi memread 0x405' will print the four bytes at 0x405-0x408.\n\n\
+  NOTES:\n\
+   1. memset* and memread must be ran from the EverDrive interrupt menu!\n\
+   2. memset*/memread do not work on SRAM ($ff0000+)\n\
+   3. memread always reads 32 bits (4 bytes). memset and memset16 will only\n\
+      use the last 8-16 bits of the operand.\n\
+   4. 'ls /dev/*ACM*' will list USB modem devices. (Use port 0)\n\
+   \nHave fun!\n\n");
 }
 
-void load_and_run_file()
+int load_and_run_file()
 {
   // kw_args[1] = file name
     romfile = fopen(rom_filename, "rb");
@@ -254,8 +264,8 @@ void load_and_run_file()
     filebuffer = (char*)malloc(filelen * sizeof(char));
     fread(filebuffer, filelen, 1, romfile);
     fclose(romfile);
-    if(load_rom_file() == -1) {
-      close(&ptstr);
+    if(ed_load_rom() == -1) {
+      close(ed_port);
       return 1;
     }
     // cmd_tx FIFO_WR
@@ -279,20 +289,26 @@ void load_and_run_file()
     ed_write_fifo(&addr[0], 6);
     
     printf("Launching game...\n"); 
+    return 0;
 }
 
-void ed_memread(int memset_addr)
+void read_memory(int memset_addr)
 {
   int i = 0;
   i = ed_read_mem(memset_addr, 4);
-  printf("%d %d %d %d (%d bytes read)\n", buf[0], buf[1], buf[2], buf[3], i);
+  printf(" 0x%x%x%x%x\t|\n %d %d %d %d\t|\n %c %c %c %c \t\t(%d bytes read)\n", \
+    buf[0], buf[1], buf[2], buf[3],\
+    buf[0], buf[1], buf[2], buf[3],\
+    buf[0], buf[1], buf[2], buf[3], i);
+  if(i != 4) printf("probable fail, try again...\n");
 }
 
 void ed_memset(int memset_addr, int memset_val, u8 size)
 {
     //ed_reset(OFF);
     printf("addr %d\n", memset_addr);
-    printf("val%d %d\n", (size*8), memset_val);
+    printf("val%d %d | %c %c %c %c \n", \
+      (size*8), memset_val, memset_val >> 24, memset_val >> 16, memset_val >> 8, memset_val & 0xff);
     char c;
     switch(size)
     {
@@ -320,8 +336,10 @@ void ed_memset(int memset_addr, int memset_val, u8 size)
           ed_write_mem(memset_addr + (3-i), &c, 1);
         }
         ed_read_mem(memset_addr, 4);
-        if((buf[0] << 24 | buf[1] << 16 | buf[2] << 8 | buf[3]) != memset_val) printf("fail\n");
-        else printf("mem set (4 bytes) ok\n");
+        if((buf[0] << 24 | buf[1] << 16 | buf[2] << 8 | buf[3]) != memset_val) 
+          printf("fail\n");
+        else 
+          printf("mem set (4 bytes) ok\n");
         break;
     }
     //ed_reset(SOFT);
@@ -330,8 +348,7 @@ void ed_memset(int memset_addr, int memset_val, u8 size)
 int main(int num_args, char** kw_args)
 {
 
-  if(num_args < 2) return -1;
-
+  if(num_args < 2) { usage(); return 1;}
   /* Parse arguments */
   int mode;
   int memset_addr;
@@ -357,13 +374,23 @@ int main(int num_args, char** kw_args)
   /* Parse secondary arguments */
   if(mode == MODE_WRITE_ROMFILE) 
     rom_filename = kw_args[2];
-  else if ( (mode == MODE_MEMSET) || (mode == MODE_MEMSET16) || (mode == MODE_MEMSET32))
+  else if ( (mode == MODE_MEMSET) || \
+    (mode == MODE_MEMSET16) || \
+    (mode == MODE_MEMSET32))
   {
-    memset_addr = strtol(kw_args[2], &kw_args[2] + sizeof(kw_args[2]), 16);
-    memset_val = atoi(kw_args[3]);
+    if(kw_args[2][1] != 'x') memset_addr = atoi(kw_args[2]);
+    else memset_addr = strtol(kw_args[2], &kw_args[2] + sizeof(kw_args[2]), 16);
+    //if(memset_addr >= 0xff0000) memset_addr += 0x10000; 
+    if(kw_args[3][1] != 'x') memset_val = atoi(kw_args[3]);
+    else memset_val = strtol(kw_args[3], &kw_args[3] + sizeof(kw_args[3]), 16);
   }
   else if ((mode == MODE_MEMREAD))
-    memset_addr = strtol(kw_args[2], &kw_args[2] + sizeof(kw_args[2]), 16);
+  {
+    if(kw_args[2][1] != 'x') memset_addr = atoi(kw_args[2]);
+    else memset_addr = strtol(kw_args[2], &kw_args[2] + sizeof(kw_args[2]), 16);
+    printf("reading from addr %d\n", memset_addr);
+    
+  }
   else 
     return 1;
 
@@ -373,8 +400,7 @@ int main(int num_args, char** kw_args)
   ed_port = open(&ptstr, O_RDWR);
   printf("open() on port: %s\n", &ptstr);
   if(get_error(&ed_port)) {
-    close(&ptstr);
-    printf("error opening port\n");
+    close(ed_port);
     return 1;
   }
   /* Perform command */
@@ -387,7 +413,7 @@ int main(int num_args, char** kw_args)
   else if (mode == MODE_MEMSET32)
     ed_memset(memset_addr, memset_val, 4);
   else if (mode == MODE_MEMREAD) 
-    ed_memread(memset_addr);
+    read_memory(memset_addr);
   
   close(ed_port);
   

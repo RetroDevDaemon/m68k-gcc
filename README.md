@@ -1,3 +1,9 @@
+## New: Mega EverDrive Pro tool 
+If you have USB, the `tools/everpi` tool should allow you to load and launch<br>
+a compiled local .rom file directly to your Genesis/Megaddrive.<br>
+`tools/everpi rom path/to/rom.bin`<br>
+`tools/everpi memread|memset|memset16|memset32` can be run from the MEDP<br>
+interrupt menu while the game is running.<br><br>
 Be sure you are on a brand new install of Raspbian if you can, fully updated<br>
 ## If you want to build yourself:<br>
 <br>

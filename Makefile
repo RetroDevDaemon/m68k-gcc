@@ -37,7 +37,7 @@ main: DIRs
 		lib/sega.s \
 		${BUILDDIR}/main.s \
 		lib/68kmath.s  
-	${LD} -s -Tlib/${LINKSCR} -o ${OUTDIR}/_main.rom ${BUILDDIR}/main.o -Map=map.txt
+	${LD} -s -Tlib/${LINKSCR} -o ${OUTDIR}/_main.rom ${BUILDDIR}/main.o -Map=${BUILDDIR}/rom.map
 	${PYTHON} tools/padrom.py ${OUTDIR}/_main.rom ./$(ROMFILE)
 	rm -rf ${OUTDIR}/_main.rom 
 
