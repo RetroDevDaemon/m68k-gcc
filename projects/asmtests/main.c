@@ -21,8 +21,41 @@ int addr_b;
 
 void main()
 {
-        asm("move.w #$100,$a11100");
-	asm("move.w #$100,$a11200");
+	
+        asm("\n\t"\
+	"movea.l #0xa11100,%%a2\n\t"\
+	"move.w  #0x100,(%%a2)\n\t"\
+	"movea.l #0xa11200,%%a3\n\t"\
+	"move.w  #0x100,(%%a3)\n\t":::"a2","a3");
+	/*
+	asm("\n\t"\
+	"move.w #0x100,0xa11100\n\t"\
+	"move.w #0x100,0xa11200\n\t"\
+	);
+	*/
+	asm(".Z80BUSWAIT:\n\t"\
+	"move.b  (0xa11100),%%d1\n\t"\
+	"btst    #0,%%d1\n\t" 
+	"bne 	 .Z80BUSWAIT\n\t" 
+	"movea.l %0,%%a0\n\t"\
+	"movea.l #0xa00000,%%a1\n\t"\
+	:\
+	:"g"(&z80prg)\
+	:"a2","a0","a1","d1");
+	asm(\
+	"move.l %0,%%d1"::"g"(sizeof(z80prg)):"d1");
+	asm(".Z80COPYLOOP:\n\t"\
+	"move.b (%%a0)+,%%d0\n\t"\
+	"move.b %%d0,(%%a1)+\n\t"\
+	"subq 	#1,%%d1\n\t"\
+	"bne 	.Z80COPYLOOP\n\t"\
+	:::"d0","d1","a0","a1");
+	asm("move.w #0,(%%a3)\n\t"\
+	"move.w #0,(%%a2)\n\t"\
+	"move.w #0x100,(%%a3)\n\t":::"a3","a2");
+	char stringy[4] = "Hw!";
+	print(BG_A, 10, 10, stringy);
+	while(1){}
 	
 }
 

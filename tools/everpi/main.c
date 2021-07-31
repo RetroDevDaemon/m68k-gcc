@@ -22,6 +22,7 @@ typedef int bool;
 #define MODE_MEMSET16 2
 #define MODE_MEMSET32 3
 #define MODE_MEMREAD 4
+#define MODE_DUMPROM 5
 
 char* rom_filename;
 
@@ -58,6 +59,46 @@ int ed_reset(unsigned char mode)
   buf[0] = mode;
   size_t r = write(ed_port, &buf[0], 1);
   return r;
+}
+
+int dump_rom(char* outfile)
+{
+  clear_buffer();
+  char* hdat = (char*)malloc(0x200 * sizeof(char));
+  int br = 0;
+  for(int g = 0; g < 0x200; g += 32)
+  {
+    br = ed_read_mem(g, 32);
+    if(br != 32){
+      printf("read rom header failed\n");
+      return -1;
+    }
+    for(int p = 0; p < 32; p++) 
+      hdat[g + p] = buf[p];
+  }
+  int size = (hdat[0x1a4] << 24) |\
+             (hdat[0x1a5] << 16) |\
+             (hdat[0x1a6] << 8) |\
+              hdat[0x1a7];
+  char* rdat = (char*)malloc(size * sizeof(char));
+  br = 0;
+  for(int g = 0; g < size; g += 32)
+  {
+    br = ed_read_mem(g, 32);
+    if (br != 32) {
+      printf("read failed\n");
+      return -1;
+    }
+    for(int p = 0; p < 32; p++) 
+      rdat[g + p] = buf[p];
+    
+  }
+  FILE* f = fopen(outfile, "wb");
+  fwrite(rdat, 1, size, f);
+  //if(pf != 0x80000) printf("failed write rom\n");
+  fclose(f);
+  printf("%s (%d bytes) written ok\n", outfile, size);
+  printf("WARNING: Addresses 00h - FFh will not be read correctly!\n");
 }
 
 int ed_read_mem(int addr, int length)
@@ -238,7 +279,9 @@ void usage()
    or\n\
   $ everpi memset|memset16|memset32 [address] [value]\n\
    or\n\
-  $ everpi memread [address]\n\n\
+  $ everpi memread [address]\n\
+   or\n\
+  $ everpi dump [filename]\n\n\
 \n\
   EXAMPLES:\n\
   'everpi rom rom.md' will load and launch a local romfile.\n\
@@ -365,6 +408,8 @@ int main(int num_args, char** kw_args)
       mode = MODE_MEMSET32;
     else if (!strcmp(kw_args[1], "memread"))
       mode = MODE_MEMREAD;
+    else if (!strcmp(kw_args[1], "dump"))
+      mode = MODE_DUMPROM;
     else 
     { 
       usage();
@@ -372,7 +417,8 @@ int main(int num_args, char** kw_args)
     }
   }
   /* Parse secondary arguments */
-  if(mode == MODE_WRITE_ROMFILE) 
+  if(mode == MODE_WRITE_ROMFILE || \
+    (mode == MODE_DUMPROM)) 
     rom_filename = kw_args[2];
   else if ( (mode == MODE_MEMSET) || \
     (mode == MODE_MEMSET16) || \
@@ -391,6 +437,7 @@ int main(int num_args, char** kw_args)
     printf("reading from addr %d\n", memset_addr);
     
   }
+  else if ((mode == MODE_DUMPROM)){}
   else 
     return 1;
 
@@ -414,7 +461,8 @@ int main(int num_args, char** kw_args)
     ed_memset(memset_addr, memset_val, 4);
   else if (mode == MODE_MEMREAD) 
     read_memory(memset_addr);
-  
+  else if (mode == MODE_DUMPROM)
+    dump_rom(rom_filename);
   close(ed_port);
   
 }
