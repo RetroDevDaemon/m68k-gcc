@@ -10,56 +10,56 @@
 // My own genesis stuff 
 #include "bentgen.h"
 
-const unsigned char z80prg[] = {
-	0x21, 0x27, 0x0, 0x1, 0x8, 0x0, 0xc5, 0x46, 0x23, 0x4e, 0x23, 0xe5, 0xcd, 0x19, 0x0, 0xe1, 
-	0xc1, 0xb, 0x79, 0xb0, 0x20, 0xf0, 0xc3, 0x16, 0x0, 0x21, 0x0, 0x40, 0x70, 0x23, 0x71, 0x3a, 
-	0x0, 0x40, 0xcb, 0x7f, 0x20, 0xf9, 0xc9, 0x22, 0x0, 0x27, 0x0, 0x28, 0x0, 0x2b, 0x0, 
-};
+#include "z80prg.h"
 
-int addr_a;
-int addr_b;
+int addr_a = 0;
+int addr_b = 0;
+
 
 void main()
 {
-	
+	while(1){}
+    
+	// Z80 START-UP SEQUENCE: 
+	// BUS REQ ON
+	// BUS RESET OFF
         asm("\n\t"\
 	"movea.l #0xa11100,%%a2\n\t"\
 	"move.w  #0x100,(%%a2)\n\t"\
 	"movea.l #0xa11200,%%a3\n\t"\
-	"move.w  #0x100,(%%a3)\n\t":::"a2","a3");
-	/*
-	asm("\n\t"\
-	"move.w #0x100,0xa11100\n\t"\
-	"move.w #0x100,0xa11200\n\t"\
-	);
-	*/
+	"move.w  #0x100,(%%a3)\n\t"\
+	:::"a2","a3");
+	// WAIT FOR BUS TO BE READY
 	asm(".Z80BUSWAIT:\n\t"\
 	"move.b  (0xa11100),%%d1\n\t"\
 	"btst    #0,%%d1\n\t" 
 	"bne 	 .Z80BUSWAIT\n\t" 
 	"movea.l %0,%%a0\n\t"\
 	"movea.l #0xa00000,%%a1\n\t"\
-	:\
-	:"g"(&z80prg)\
-	:"a2","a0","a1","d1");
+	::"g"(&z80prg):"a0","a1","d1");
+	// COPY z80prg[] INTO Z80 MEMORY (A00000+)
 	asm(\
-	"move.l %0,%%d1"::"g"(sizeof(z80prg)):"d1");
+	"move.l %0,%%d1"\
+	::"g"(sizeof(z80prg)):"d1");
 	asm(".Z80COPYLOOP:\n\t"\
 	"move.b (%%a0)+,%%d0\n\t"\
 	"move.b %%d0,(%%a1)+\n\t"\
 	"subq 	#1,%%d1\n\t"\
 	"bne 	.Z80COPYLOOP\n\t"\
 	:::"d0","d1","a0","a1");
+	// BUS RESET ON 
+	// BUS REQ OFF
+	// BUS RESET OFF 
 	asm("move.w #0,(%%a3)\n\t"\
 	"move.w #0,(%%a2)\n\t"\
-	"move.w #0x100,(%%a3)\n\t":::"a3","a2");
-	char stringy[4] = "Hw!";
-	print(BG_A, 10, 10, stringy);
-	while(1){}
+	"move.w #0x100,(%%a3)\n\t"\
+	:::"a3","a2");
+	
+	
 	
 }
 
 void GAME_DRAW()
 {
-
+	
 }

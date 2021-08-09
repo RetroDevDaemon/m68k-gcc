@@ -39,6 +39,7 @@ static u16 joyState1;
 static u16 last_joyState1;
 static u16 joyState2;
 static u16 last_joyState2;
+static bool VBL_DONE = false;
 
 bool REORDER_SPRITES = false;
 u8 sprites_destroyed = 0;

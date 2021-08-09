@@ -1,0 +1,164 @@
+FMREG EQU $4000
+FMDAT EQU $4001
+DATSIZE EQU ENDFMDATA-FMDATA
+
+		org $0
+
+; disable interrupts
+		di 
+
+; clear the stack
+		ld a, 0
+		ld de, $1b00 
+		ld b, 0 
+CLRSTACK:
+		LD (DE),A
+		inc de 
+		djnz CLRSTACK
+
+; set the stack pointer 
+		ld sp,$1b80 
+
+		LD HL,FMDATA            ; LENGTH OF DATA
+		LD BC,DATSIZE
+		srl b 
+		rr c 			; divided by two!
+FMINITLOOP:
+		PUSH BC         ; ++
+		; Store REG# and DATA in B and C
+			LD B,(HL) 
+			INC HL 
+			LD C,(HL) 
+			INC HL 
+		; Write FM1, preserving HL
+			PUSH HL
+			CALL WRITEFMR 
+			POP HL        
+		
+		POP BC          ; --
+		DEC BC
+		LD A,C 
+		OR B            ; quick check for 16bit 0
+		JR NZ,FMINITLOOP
+
+START:
+		LD BC,$B032     ; feedback/alg
+		CALL WRITEFMR 
+		
+		LD BC,$B4C0     ; speakers on
+		CALL WRITEFMR
+		
+		LD BC,$2800     ; KEY OFF
+		CALL WRITEFMR 
+		
+		LD BC,$A422     
+		CALL WRITEFMR   ; SET FREQ
+		LD BC,$A069
+		CALL WRITEFMR 
+
+		LD BC,$28F0    
+		CALL WRITEFMR   ; KEY ON
+
+		LD C, 5
+		CALL WAIT       ; SIMPLE WAIT
+
+		LD BC,$2800 
+		CALL WRITEFMR   ; KEY OFF
+
+LOOP:	
+		JP LOOP			; Done!
+
+;;;;;;;;;;
+WRITEFMR:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;  WRITE FM REGISTER
+; * A, B, C, H, L
+; INPUT:
+; B = REG TO WRITE
+; C = VALUE TO WRITE
+		call ZWAIT 
+		; REG select
+		ld a,b 
+		ld ($4000),a 
+		call ZWAIT
+		; Write DAT
+		ld a,c 
+		ld ($4001),a 
+		RET 
+
+;;;;;;;;;;
+ZWAIT:                 
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Waits until fm bus is ready.
+; * A
+		LD A,($4000) 
+		add a, a 
+		JR c,ZWAIT   
+		ret 
+
+;;;;;;;;;
+WAIT:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;  WAIT FOR FFFF * C CYCLES
+; * A, C, H, L 
+; INPUT: 
+; C = NUM LOOPS 
+
+BIGLOOP:
+		LD HL,$ffff     ; 64K loops
+WAITLOOP:
+		DEC HL 
+		LD A,L 
+		OR H 
+		JR NZ, WAITLOOP
+
+		DEC C 
+		XOR A 
+		OR C 
+		JR NZ,BIGLOOP
+
+		RET 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+FMDATA:
+		defb $22,0      ; lfo and dac
+		defb $27,0
+		defb $28,0 
+		defb $2B,0
+		; 3x channel 0
+		defb $30,$71    ; dt1/mul
+		defb $34,$0D
+		defb $38,$33
+		defb $3c,$01
+		; 4x channel 0
+		defb $40,$23    ; total level
+		defb $44,$2d    
+		defb $48,$26
+		defb $4c,$00
+		; 5x channel 0
+		defb $50,$5f    ; rs/ar
+		defb $54,$99    
+		defb $58,$5f 
+		defb $5c,$94 
+		; 6x channel 0
+		defb $60,5      ; am/d1r
+		defb $64,5
+		defb $68,5
+		defb $6c,7
+		; 7x channel 0
+		defb $70,2      ; d2r
+		defb $74,2 
+		defb $78,2
+		defb $7c,2
+		; 8x channel 0
+		defb $80,$11    ; d1l/rr
+		defb $84,$11
+		defb $88,$11
+		defb $8c,$a6
+		; ??
+		defb $90,0
+		defb $94,0
+		defb $98,0
+		defb $9c,0 
+ENDFMDATA:

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # png2compressed.py
-import numpy,sys,os
-from PIL import Image,ImageDraw
+import sys,os
+from PIL import Image
 
 def FlipX(o):
     ii = 0

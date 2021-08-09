@@ -166,42 +166,42 @@ _Bus_Error:
         movem.l %d0-%d1/%a0-%a1,-(%sp)
         jsr    (%a0)
         movem.l (%sp)+,%d0-%d1/%a0-%a1
-        rte
+        stop #1
 
 _Address_Error:
         jsr busAddressErrorDump
         movem.l %d0-%d1/%a0-%a1,-(%sp)
         jsr    (%a0)
         movem.l (%sp)+,%d0-%d1/%a0-%a1
-        rte
+        stop #2
 
 _Illegal_Instruction:
         jsr exception4WDump
         movem.l %d0-%d1/%a0-%a1,-(%sp)
         jsr    (%a0)
         movem.l (%sp)+,%d0-%d1/%a0-%a1
-        rte
+        stop #3
 
 _Zero_Divide:
         jsr exceptionDump
         movem.l %d0-%d1/%a0-%a1,-(%sp)
         jsr    (%a0)
         movem.l (%sp)+,%d0-%d1/%a0-%a1
-        rte
+        stop #4
 
 _Chk_Instruction:
         jsr exception4WDump
         movem.l %d0-%d1/%a0-%a1,-(%sp)
         jsr    (%a0)
         movem.l (%sp)+,%d0-%d1/%a0-%a1
-        rte
+        stop #5
 
 _Trapv_Instruction:
         jsr exception4WDump
         movem.l %d0-%d1/%a0-%a1,-(%sp)
         jsr    (%a0)
         movem.l (%sp)+,%d0-%d1/%a0-%a1
-        rte
+        stop #6
 	
 _TRAP0:
 _Reset:
@@ -216,14 +216,14 @@ _Privilege_Violation:
         movem.l %d0-%d1/%a0-%a1,-(%sp)
         jsr    (%a0)
         movem.l (%sp)+,%d0-%d1/%a0-%a1
-        rte
+        stop #7
 
 _Trace:
         jsr exceptionDump
         movem.l %d0-%d1/%a0-%a1,-(%sp)
         jsr    (%a0)
         movem.l (%sp)+,%d0-%d1/%a0-%a1
-        rte
+        stop #8
 
 _Line_1010_Emulation:
 _Line_1111_Emulation:
@@ -231,14 +231,14 @@ _Line_1111_Emulation:
         movem.l %d0-%d1/%a0-%a1,-(%sp)
         jsr    (%a0)
         movem.l (%sp)+,%d0-%d1/%a0-%a1
-        rte
+        stop #9
 
 _Error_Exception:
         jsr exceptionDump
         movem.l %d0-%d1/%a0-%a1,-(%sp)
         jsr    (%a0)
         movem.l (%sp)+,%d0-%d1/%a0-%a1
-        rte
+        stop #10
 
 _Spurious:
 _TRAP1:
@@ -265,25 +265,25 @@ _IRQL7:
         movem.l %d0-%d1/%a0-%a1,-(%sp)
         jsr    (%a0)
         movem.l (%sp)+,%d0-%d1/%a0-%a1
-        rte
+        stop #11
 
 _EXTINT:
         movem.l %d0-%d1/%a0-%a1,-(%sp)
         jsr    (%a0)
         movem.l (%sp)+,%d0-%d1/%a0-%a1
-        rte
+        stop #12
 
 _HINT:
         movem.l %d0-%d1/%a0-%a1,-(%sp)
         jsr    (%a0)
         movem.l (%sp)+,%d0-%d1/%a0-%a1
-        rte
+        stop #13
 
 _VINT:
         movem.l %d0-%d1/%a0-%a1,-(%sp)
         jsr    (%a0)
         movem.l (%sp)+,%d0-%d1/%a0-%a1
-        rte
+        stop #14
 
 
 *.data
