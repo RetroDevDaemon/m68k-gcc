@@ -13,7 +13,7 @@
 #include "font.h"
 #include "palette.h"
 #include "vgmplayer.h"
-#include "stbat.h"
+#include "bts.h"
 
 static u16 tileindex;
 static u16 joyState1;

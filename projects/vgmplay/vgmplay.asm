@@ -689,10 +689,16 @@ DacFrequency:
 RealFrequency: 
         defb 0,0,0,0
 
+
+FreqTable:
+        DEFW 134,184,267,368,533
+PALFreqTable:
+        DEFW 160,221,320,441,640
+
 SETDACFREQ: ; 7D00 == 32000
-; 7D00 = 32000 = 533 N 640P
-; 5622 = 22050 = 368 N 441P 
-; 3E80 = 16000 = 267 N 320P
+; 7D00 = 32000 = 533 N 640P ; 
+; 5622 = 22050 = 368 N 441P ; 
+; 3E80 = 16000 = 267 N 320P ; 
 ; 2b11 = 11025 = 184 N 221P
 ; 1f40 = 8000 =  134 N 160P
 ; Right now does nothing. Samplerate hard coded
@@ -701,27 +707,72 @@ SETDACFREQ: ; 7D00 == 32000
         call GetNextSongByte ; LOW BYTE FREQ 
         ld a,(hl) 
         ld (RealFrequency),a 
-        
         call GetNextSongByte ; 8-15
         ld a,(hl) 
-        cp $3e 
-        jp nz, INVALIDFREQ 
-        ld (RealFrequency+1),a 
-        
-        call GetNextSongByte
-        ld a,(hl) 
-        ld (RealFrequency+2),a 
-        
-        call GetNextSongByte 
-        ld a,(hl) 
-        ld (RealFrequency+3),a 
-       ;  ; TODO divide by framerate for PAL support
+        ld (RealFrequency+1),a
+        call GetNextSongByte ; byte 3
+        call GetNextSongByte ; byte 4
+
         push hl 
-         ld hl,267                ; 267  
-         ld (DacFrequency),hl ; typically 16000, or 267 per frame
-        pop hl ; bc = freq, hl = song ptr, DacFrequency = freq
+        push de 
+
+        ld a,(PALFlag)
+        cp 0
+        jr z,__2 
+        ld hl,PALFreqTable
+        jr __1
+__2
+        ld hl,FreqTable
+__1
+
+        ld a,(RealFrequency+1)               ; high byte of real freq is all we care about        
+        cp $1f
+        jr z,_set8
+        cp $2b 
+        jr z,_set11
+        cp $3e 
+        jr z,_set16 
+        cp $56 
+        jr z,_set22 
+        cp $7d 
+        jr z,_set32 
+        jp INVALIDFREQ 
+_set8:
+        jr _endfset
+_set11:
+        or a 
+        ld de,2 
+        adc hl,de 
+        jr _endfset
+_set16:
+        or a 
+        ld de,4 
+        adc hl,de 
+        jr _endfset
+_set22:
+        or a 
+        ld de,6 
+        adc hl,de 
+        jr _endfset
+_set32:
+        or a 
+        ld de,8 
+        adc hl,de 
+
+_endfset
+        ld a,(hl) 
+        ld (DacFrequency),a 
+        inc hl 
+        ld a,(hl) 
+        ld (DacFrequency),a 
+        
+        pop de
+        pop hl 
+
         jp PLAYLOOP 
 
+
+;;;;;;;;;;;;;;;;;
 STARTDACSTREAM:
 ;        inc hl  ; stream id 
         ; TODO NOT USED IN MY EXAMPLES
