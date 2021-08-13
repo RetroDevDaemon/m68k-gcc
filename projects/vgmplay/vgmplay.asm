@@ -288,12 +288,14 @@ GetNextSongByte:
         ret 
 
 
-VOLUMESET: 
+VOLUMESET:
+        JP PLAYLOOP  
         JP VOLUMESET 
-        JP PLAYLOOP 
+        
 
 aaa: defb $11
 WRITEPCM:
+        jp PLAYLOOP  
         JP WRITEPCM 
 bbb: defb $22
 ; Waits 1-16 samples
@@ -311,6 +313,7 @@ _qwl:   ; idk what to do other than skip 256*n cycles
         JP PLAYLOOP 
 ccc: defb $33
 QFMWAIT:
+        jp PLAYLOOP 
         JP QFMWAIT 
 
 ZadrWork: defb 0,0,0,0
@@ -397,6 +400,7 @@ DacWRAM: defb 0, 0
 ; 05-06 - data loc (8000+ offset) <- this is the ptr
 ; 07 - rom bank < remember to update this along with ptr after frame
 DACBLOCKTRANSFER
+        ;JR DACBLOCKTRANSFER
         ; WORKRAM+0 to +2 have RomBank and HL
         ld a,(RomBank)          
         ld (WORKRAM),a 
@@ -427,31 +431,33 @@ DACBLOCKTRANSFER
         ; TODO end of sample playback?
         ;push hl 
         ;push bc 
-        ;ld bc,(ActiveDacCtr) 
-        ;ld a,$0c 
-        ;sub c 
-        ;ld a,1 
-        ;sbc a,b 
-        ;jr c,_norm 
+        ld bc,(ActiveDacCtr) 
+        ld a,(DacFrequency)
+        sub c 
+        ld a,(DacFrequency+1)
+        sbc a,b 
+        jr c,_norm 
         ;ld bc,(ActiveDacCtr) 
         ;jr _nr 
 _wasteme:
-        push hl 
-        push bc 
-        ld bc,(ActiveDacCtr) 
-        jp _enddac 
+        ;push hl 
+        ;push bc 
+        ;ld bc,(ActiveDacCtr) 
+        jr _shortdac 
+        ;jp _nr
 _norm:
         ld bc,(DacFrequency) ;; (DacFrequency) ; hopefully 267: debug me
 _nr:
         ld (DacWRAM),bc 
         ld hl,(ActiveDacLoc) ; already -1!
 dacwriteloop:
-        call ZWAIT 
+        ;call ZWAIT 
         ld a,$2a
         ld ($4000),a
         call GetNextSongByte
-        call ZWAIT  
+        ;call ZWAIT  
         ld a,(hl)
+;BREAKPT: JP BREAKPT 
         ld ($4001),a 
         ; reduce ctr each time and check byte boundary
         ld a,(RomBank) 
@@ -461,7 +467,7 @@ dacwriteloop:
         ld a,c 
         or b 
         jr nz,dacwriteloop 
-        
+_shortdac:        
         ; 3. SUBTRACT DACWRAM FROM ADC (32BIT-16BIT)
         or a ; clc 
         push hl 
@@ -602,6 +608,7 @@ SETDACFREQ: ; 7D00 == 32000
 ; 3E80 = 16000 = 267 N 320P
 ; 5622 = 22050 = 368 N 441P 
 ; 2b11 = 11025 = 184 N 221P
+; 1f40 = 8000 =  134 N 160P
 ; Right now does nothing. Samplerate hard coded
         call GetNextSongByte ; STREAM I
         call GetNextSongByte ; LOW BYTE FREQ 
@@ -610,7 +617,7 @@ SETDACFREQ: ; 7D00 == 32000
         call GetNextSongByte 
        ;  ; TODO divide by framerate for PAL support
         push hl 
-         ld hl,267  
+         ld hl,267                ; 267  
          ld (DacFrequency),hl ; typically 16000, or 267 per frame
         pop hl ; bc = freq, hl = song ptr, DacFrequency = freq
         jp PLAYLOOP 
@@ -795,15 +802,16 @@ _blockok:
         
         ; now store HL, which is right before data start...
         inc bc 
-        ld a,l   ; l...
+        ld a,l   ; dataloc l...
         ld (bc),a 
         ld a,h   ; and h
-        and $7f 
+        ;and $7f 
         inc bc 
         ld (bc),a ;
         
         ld a,(RomBank) 
-        inc bc 
+        inc bc     ; DataBank
+        ; TODO data counter and blockactive 
         ld (bc),a ; and store current rom bank, cuz this must be where it starts
         ; TODO: Check data type
         ; store BANK and HL
