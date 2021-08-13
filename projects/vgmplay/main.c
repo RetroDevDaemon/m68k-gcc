@@ -13,13 +13,13 @@
 #include "font.h"
 #include "palette.h"
 #include "vgmplayer.h"
-#include "village.h"
+#include "def.h"
 
 static u16 tileindex;
 static u16 joyState1;
 static u16 last_joyState1;
 
-const char hw[] = "clessy?";
+const char hw[] = "?Deflemask?";
 
 static bool VBL_DONE = false;
 

@@ -442,9 +442,10 @@ DACBLOCKTRANSFER
 _wasteme:
         ;push hl 
         ;push bc 
-        ;ld bc,(ActiveDacCtr) 
-        jr _shortdac 
-        ;jp _nr
+        ld bc,(ActiveDacCtr) 
+        inc bc 
+        ;jr _shortdac 
+        jp _nr
 _norm:
         ld bc,(DacFrequency) ;; (DacFrequency) ; hopefully 267: debug me
 _nr:
