@@ -240,11 +240,11 @@ PLAYLOOP:
         cp $68 
         JP Z,WRITEPCM   ;  probably not used 
         CP $7C
-        JR Z,VOLUMESET    ; discrete volume control
-        CP $80
-        JP C,QWAIT        ; 69-7f (not 7c) quick wait
+        JP Z,VOLUMESET    ; discrete volume control
+        ;CP $80
+        ;JP C,QWAIT        ; 69-7f (not 7c) quick wait
         CP $90 
-        JP C,QFMWAIT      ; 80-8f quick fm write/wait
+        JP C,ERROR ; QFMWAIT      ; 80-8f quick fm write/wait
         jp z,DACSETUP     ; 90 setup dac stream
         CP $91 
         JP Z,SETDACSTREAM
@@ -282,7 +282,7 @@ ERRDEFB: DEFB $99
 ;  play without crashing!
 ERROR:  
         ;cp $28    ; probably just got lost 
-        ;jr z,_fixsongptr
+        jr _fixsongptr
         jp ERROR 
 
 _fixsongptr: 
@@ -623,12 +623,12 @@ STOPDAC:
         ld (ActiveDacCtr+3),a 
         ld (ActiveDacLoc),a 
         ld (ActiveDacLoc+1),a 
-        call ZWAIT 
-        ld a,$2b 
-        ld ($4000),a 
-        call ZWAIT 
-        xor a 
-        ld ($4001),a 
+        ;call ZWAIT 
+        ;ld a,$2b 
+        ;ld ($4000),a 
+        ;call ZWAIT 
+        ;xor a 
+        ;;ld ($4001),a 
         jp PLAYLOOP  
 ;;;
 
