@@ -46,8 +46,8 @@ _Vectors_68K:
 
 	.ascii	"SEGA MEGA DRIVE " 					/* Console Name (16) */
 	.ascii	"(C)2021         "					/* Copyright Information (16) */
-	.ascii	"Star Thrall                                     "	/* Domestic Name (48) */
-	.ascii	"Star Thrall                                     "	/* Domestic Name (48) */
+	.ascii	"RetroDevDiscord                                 "	/* Domestic Name (48) */
+	.ascii	"RetroDevDiscord                                 "	/* Domestic Name (48) */
 	.ascii	"GM 00000000-00"					/* Serial Number (2, 14) */
 	dc.w	0x0000							/* Checksum (2) */
 	.ascii	"J               "					/* I/O Support (16) */

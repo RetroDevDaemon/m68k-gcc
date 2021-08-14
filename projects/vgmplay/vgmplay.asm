@@ -15,9 +15,13 @@
 ; - Tie z80 to vblank interrupt so it isn't driven by 68000
 ; - Add error checking for vgm 1.60
 ; - weirder bytecodes 
-; - support for non-16000hz samples
 ; - multiple sample streams 
-; - PAL
+; - WIP: multiple data blocks
+
+;;;;;
+; FIXMEs
+; data banks need to be initialized properly
+; copy and paste CurDac stuff within dac loop 
 
 FMREG0 EQU $4000
 FMDAT0 EQU $4001
@@ -259,6 +263,7 @@ FRAMEOVER:
 ;;;;;;;;;;;
 ; * A
 ; Waits until next vblank signal (done via 68k)
+        ;JP FRAMEOVER 
         ; Before checking 68k vbl, we need to see if DAC are queued.
         ;LD A,(DacTransferActive) 
         ;cp 0 
@@ -273,17 +278,27 @@ _framewait:
 ;;;; 
 
 ERRDEFB: DEFB $99
+; This error handling is super rudimentary and only intended to get songs to
+;  play without crashing!
 ERROR:  
+        ;cp $28    ; probably just got lost 
+        ;jr z,_fixsongptr
         jp ERROR 
 
+_fixsongptr: 
+        call GetNextSongByte
+        jp PLAYLOOP 
+
+_songoverb: defb $55
 SONGOVER:
+        
 ;;;;;;;;;;;
 ; * A
 ; Stops the song when hits command byte 0x66
 ;  Or, if looping, jumps to loop
         ld a,(LoopPlay) 
-        cp 1 
-        jr nz, _endsong  
+        cp 0 
+        jr z, _endsong  
 ; LOOP PLAY:
         ; LoopLoc should be all set...
         ld hl,(LoopLoc) 
@@ -430,13 +445,15 @@ DACWORK
 ;_buffer 3 : to align to 16 bytes
 
 DACBLOCKTRANSFER:
+        ret 
+BREAKPOINT: JP BREAKPOINT 
+;; Step through me again
         ; PRESERVE CURRENT ROM BANK AND SONG PTR IN WORKRAM~+3
         ld a,(RomBank)          
         ld (DACWORK),a 
         xor a
         ld (DACWORK+1),a     ; saving me for later!
         ld (DACWORK+2),hl       
-
         ; LOOP THROUGH DATA STRUCT[], SEARCH FOR ACTIVE BYTE == 1
 ;        ld hl,BlockActive-16
 ;        ld b,16   ; 16 data arrays
@@ -481,7 +498,7 @@ _found
         CALL ZWAIT 
         ld a,$80 
         ld ($4001),a 
-        
+
         LD HL,(ActiveDacCtr+2) 
         LD A,H 
         or L 
@@ -493,7 +510,7 @@ _found
         ld a,(DacFrequency+1)
         sbc a,b 
         jr c,_norm 
-        ; short dac 
+        ; else, short dac 
         ld bc,(ActiveDacCtr) 
         ld a,c 
         or b
@@ -505,7 +522,6 @@ _nr:
         ld (DacWRAM),bc 
         ld hl,(ActiveDacLoc) ; already -1!
 dacwriteloop:
-        ;jp dacwriteloop
         ;call ZWAIT 
         ld a,$2a
         ld ($4000),a
@@ -530,7 +546,7 @@ dacwriteloop:
           or a  ; clc 
           sbc hl,bc 
           ld (ActiveDacCtr),hl 
-          ;jp z,_enddac 
+          jp z,_enddac 
           jp p,_nouflow
           jp c,_enddac 
           ; else dec adc+2 
@@ -544,18 +560,8 @@ _enddac:
           xor a 
           ld (DacTransferActive),a 
 _nouflow: 
-          ;ld a,l 
-          ;or h 
-          ;cp 0 
-          ;jr z,_enddac 
          pop bc 
         pop hl 
-       ;
-      ; pop de 
-      ; pop hl 
-      ; pop bc 
-       ; jp _nextdb
-        ;
 _daclpend:
         call ZWAIT 
         ld a,$2b 
@@ -652,7 +658,6 @@ SETDACSTREAM:
 ; 0X91 <STREAM> <DATABANK ID> <STEP SIZE> <STEP BASE>
 ;         0           0            1           0 
 ; Preserves BC 
-
        push bc 
         call GetNextSongByte ; Stream ID is for multiple DAC channels.
         ; Genesis only supports one, so we skip it
@@ -676,6 +681,7 @@ SETDACSTREAM:
         call GetNextSongByte ; always 1? (step)
         call GetNextSongByte ; always 0? (step base)
        pop bc 
+
         jp PLAYLOOP  
 
 _invfreq
@@ -695,14 +701,14 @@ FreqTable:
 PALFreqTable:
         DEFW 160,221,320,441,640
 
+; $92
 SETDACFREQ: ; 7D00 == 32000
 ; 7D00 = 32000 = 533 N 640P ; 
 ; 5622 = 22050 = 368 N 441P ; 
 ; 3E80 = 16000 = 267 N 320P ; 
 ; 2b11 = 11025 = 184 N 221P
 ; 1f40 = 8000 =  134 N 160P
-; Right now does nothing. Samplerate hard coded
-        ;JP SETDACFREQ 
+;BREAKPOINT: JP BREAKPOINT
         call GetNextSongByte ; STREAM I
         call GetNextSongByte ; LOW BYTE FREQ 
         ld a,(hl) 
@@ -717,8 +723,8 @@ SETDACFREQ: ; 7D00 == 32000
         push de 
 
         ld a,(PALFlag)
-        cp 0
-        jr z,__2 
+        cp 1
+        jr nz,__2 
         ld hl,PALFreqTable
         jr __1
 __2
@@ -764,10 +770,11 @@ _endfset
         ld (DacFrequency),a 
         inc hl 
         ld a,(hl) 
-        ld (DacFrequency),a 
+        ld (DacFrequency+1),a 
         
         pop de
         pop hl 
+        ;call GetNextSongByte ; (theres an extra 0?)
 
         jp PLAYLOOP 
 
@@ -809,7 +816,7 @@ LoopDac: defb 0
 DACFASTCALL:
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ; This should start the DAC playback
-; 90 00 
+; 95 00 
 ; for data block info:
 ; data type 1
 ; datasize 4
@@ -817,7 +824,7 @@ DACFASTCALL:
 ; databank 1 (rom)
 ; datacounter 4 (bytes left this loop)
 ; blockactive 1 (gogogo)
-
+; 0X95
         call GetNextSongByte ; STREAM ID - ALWAYS 0 FOR NOW
         
         ;ld a, 1
@@ -825,8 +832,8 @@ DACFASTCALL:
         
         call GetNextSongByte
         ld a,(hl)       ; [A] contains block ID 
-        add a,a 
-        jr nz, _nope  ; FIXME: ONE STREAM FOR NOW
+        ;add a,a 
+        ;jr nz, _nope  ; FIXME: ONE STREAM FOR NOW
         ; warning! only have ram for 0-15!
         ld (ActiveDacBlock),a ; low byte 
         push hl 
@@ -843,10 +850,13 @@ DACFASTCALL:
 
         inc bc 
         ld a,(bc) 
+;        LD E,4 
+;        ADD A,E 
         ld (ActiveDacLoc),a 
         inc bc         
-        ld a,(bc) 
-        ld (ActiveDacLoc+1),a ; 16bit dac offset 
+        ld a,(bc)
+;        ADC A,0 
+        ld (ActiveDacLoc+1),a ; 16bit dac offset ;a1e0
 
         inc bc 
         ld a,(bc) ; data rom bank #
@@ -865,16 +875,19 @@ DACFASTCALL:
         ld a,(bc) 
         ld (ActiveDacCtr+3),a ; store 32bit dac size
 
+        inc bc 
+        ld a,1
+        ld (bc),a 
+
         ;INC HL          ; FLAGS 
         call GetNextSongByte
         ld a, (hl)      ; AM I LOOPING?
         ld (LoopDac),a  ; FIXME - NO LOOP FOR NOW
         ; enable!
-
         jp PLAYLOOP 
 _nope: 
-        call GetNextSongByte
-        call GetNextSongByte
+        ;call GetNextSongByte
+        ;call GetNextSongByte
         jp PLAYLOOP
 
 ; Data Block struct:
@@ -947,6 +960,8 @@ _blockok:
          push hl 
          pop bc ; now BC has block struct pointer. 
         pop hl                  
+
+; FIXME I dont work with empty data blocks.
         call GetNextSongByte
         ld a,(hl) 
         ld (bc),a  ; data type  ; = 0
@@ -1013,6 +1028,7 @@ _blockok:
         ; NEW FUNCTION: Get 68000 address from current bank/HL
         call GETROMADDRESS
         ; ZadrWork = 32bit address of data bank start 
+        ; WORKRAM = data size 
         ; add WORKRAM to ZadrWork
         ld hl,(ZadrWork) ; 
         ld bc,(WORKRAM)  ; data size low 16 
@@ -1028,6 +1044,7 @@ _blockok:
         call SETZADDRESS  ; s
         ; now our song pointer and rom window should be
         ; at the byte following the data block -1.
+
 _compressed: ; TODO do extra stuff for compressed data
 _uncompressed:
         jp PLAYLOOP     
@@ -1142,24 +1159,31 @@ SAMPLEWAIT:
         call GetNextSongByte
         LD A,(HL)
         LD B,A          ; BC = SAMPLE WAIT 16BIT
-        ld a,1 
-        ld (PlayNext),a  ; always do the first frame, otherwise we will lag
 _sampwt:
         LD A,(PlayNext)  ; check the 'play next frame' var
         CP 1             ; is it = 1?
         JR NZ,_sampwt    ; if not, wait until frame is over
+        CALL DACBLOCKTRANSFER
         xor a
         ld (PlayNext),a  ; clear play var
         ; subtract 735 from BC 
         push hl         ; save song pointer
           push bc       ; sample wait value:
           pop hl        ; bc to hl 
-         ld bc,735      ; TODO PAL. 735 = NTSC
+         ld a,(PALFlag) 
+         cp 1 
+         jr nz,_palsize
+         ld bc,735      ; NTSC
+         jr __3
+_palsize 
+         ld bc,882      ; PAL
+__3 
          sbc hl,bc      ; samplewait - 735 -> HL
          push hl 
          pop bc         ; store it back in bc 
         pop hl          ; recover song pointer
         jr nc,_sampwt   ; wait another frame if samplewait is still > 0
+
         JP PLAYLOOP 
 ;;;;
 
