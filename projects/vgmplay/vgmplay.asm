@@ -20,8 +20,9 @@
 
 ;;;;;
 ; FIXMEs
-; data banks need to be initialized properly
 ; copy and paste CurDac stuff within dac loop 
+; dac block transfer should be queued as often as it can be within a frame 
+; start at 735, and 
 
 FMREG0 EQU $4000
 FMDAT0 EQU $4001
@@ -515,16 +516,17 @@ _found
         jp z,_enddac
         jp _nr
 _norm:
+;BREAKPOINT: JP BREAKPOINT 
         ld bc,(DacFrequency) ;; (DacFrequency) ; hopefully 267: debug me
 _nr:
         ld (DacWRAM),bc 
         ld hl,(ActiveDacLoc) ; already -1!
 dacwriteloop:
-        ;call ZWAIT 
+        call ZWAIT 
         ld a,$2a
         ld ($4000),a
         call GetNextSongByte
-        ;call ZWAIT  
+        call ZWAIT  
         ld a,(hl)
         ld ($4001),a 
         
@@ -532,7 +534,6 @@ dacwriteloop:
         ld a,c 
         or b 
         jr nz,dacwriteloop ; a360 bank 0
-;BREAKPOINT: JP BREAKPOINT 
         ; 3. SUBTRACT DACWRAM FROM ADC (32BIT-16BIT)
         ld a,(RomBank) 
         ld (ActiveDacBank),a ; may be unnecessary 
@@ -695,7 +696,7 @@ DacFrequency:
 RealFrequency: 
         defb 0,0,0,0
 
-
+; 
 FreqTable:
         DEFW 134,184,267,368,533
 PALFreqTable:
@@ -767,7 +768,7 @@ _set32:
 
 _endfset
         ld a,(hl) 
-        ld (DacFrequency),a 
+        ld (DacFrequency),a  
         inc hl 
         ld a,(hl) 
         ld (DacFrequency+1),a 
@@ -1194,7 +1195,7 @@ SAMPLEWAIT:
         LD A,(HL)
         LD B,A          ; BC = SAMPLE WAIT 16BIT
 _sw2 
-        ;call DACBLOCKTRANSFER
+        call DACBLOCKTRANSFER
 _sampwt:        
         LD A,(PlayNext)  ; check the 'play next frame' var
         CP 0             ; is it = 1?
@@ -1209,7 +1210,13 @@ _sampwt:
          ld a,(PALFlag) 
          cp 1 
          jr nz,_palsize
-         ld bc,267   ;735      ; NTSC < WTF TODO
+         push hl 
+          ld hl,735
+          ld bc,(DacFrequency) 
+          sbc hl,bc 
+          push hl 
+          pop bc 
+         pop hl ;  bc = 735-dacfreq
          jr __3
 _palsize 
          ld bc,882      ; PAL

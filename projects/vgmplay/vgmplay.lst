@@ -20,1223 +20,1230 @@
 0000               20 
 0000               21 ;;;;;
 0000               22 ; FIXMEs
-0000               23 ; data banks need to be initialized properly
-0000               24 ; copy and paste CurDac stuff within dac loop 
-0000               25 
-0000               26 FMREG0 EQU $4000
-0000               27 FMDAT0 EQU $4001
-0000               28 FMREG1 EQU $4002
-0000               29 FMDAT1 EQU $4003
-0000               30 BANKREG EQU $6000
-0000               31 PSGREG EQU $7F11
-0000               32 
+0000               23 ; copy and paste CurDac stuff within dac loop 
+0000               24 ; dac block transfer should be queued as often as it can be within a frame 
+0000               25 ; start at 735, and 
+0000               26 
+0000               27 FMREG0 EQU $4000
+0000               28 FMDAT0 EQU $4001
+0000               29 FMREG1 EQU $4002
+0000               30 FMDAT1 EQU $4003
+0000               31 BANKREG EQU $6000
+0000               32 PSGREG EQU $7F11
 0000               33 
-0000               34 VGM_START EQU $00 
-0000               35 VGM_END EQU $04       ;*: ; 2004-2005
-0000               36 SSGCLOCK EQU $0C      ; : ; 200c-200f
-0000               37 SAMPLECOUNT EQU $18   ;*:  ; 2018-201b 0X22740
-0000               38 LOOPOFFSET EQU $1c    ;*: 201c-201f
-0000               39 LOOPNUMS EQU $20      ;*:   ; 2020-2023
-0000               40 RATE EQU $24          ;:   ; 2024-2027 = 60
-0000               41 SNFB EQU $28          ;*?:  ; 2028-9 = 0009
-0000               42 SNW EQU $2a           ;*?; 202a = 16
-0000               43 SF EQU $2b            ;*:    ; 202b ; ssg flags all 0
-0000               44 YM2612CLK EQU $2C     ;: ; 202c-202f = 0x750ab6 
-0000               45 VGMDATOFS EQU $34     ;*:  ; 2034-2037
-0000               46 ;SPCMCLK EQU $2038       ;:    ; 2038-203b
-0000               47 ;SPCMI EQU $203C         ;:   ; 203c-203f
-0000               48 VM EQU $7C            ;: volume modifier (default 0) ; 207c
-0000               49 LB EQU $7E            ;: loop base; 207e
-0000               50 LM EQU $7F            ;: loop modifier; 207f
-0000               51         
-0000               52         org $0
-0000               53 
-0000               54 ; disable interrupts
-0000 f3            55         di 
-0001               56 
-0001               57 ; clear the stack
-0001 3e 00         58         ld a, 0
-0003 11 00 1c      59         ld de, $1c00 
-0006 06 00         60         ld b, 0 
-0008               61 _clrstack:
-0008 12            62         LD (DE),A
-0009 13            63         inc de 
-000a 10 fc         64         djnz _clrstack
-000c               65 _clr2
-000c 12            66         ld (de),a 
-000d 13            67         inc de 
-000e 10 fc         68         djnz _clr2
-0010               69 _clr3 
-0010 12            70         ld (de),a 
-0011 13            71         inc de 
-0012 10 fc         72         djnz _clr3
-0014               73 
-0014               74 ; set the stack pointer 
-0014 31 80 1d      75         ld sp,$1d80 
-0017               76 
-0017               77 ; clear and go!
-0017 cd d1 06      78         call CLEARPSG 
-001a cd 33 06      79         call BANKSWAP
-001d               80 
-001d c3 8a 00      81         jp LOADVGM 
-0020               82         
-0020               83 ; +8 and +9 should contain VGM version number.
-0020               84 ;VERSIONCHECK:
-0020               85 ;        ld hl, ($2008) 
-0020               86 ;        cp h, $60
-0020               87 ;        jr nz,WRONGVER
-0020               88 ;        cp l, $01
-0020               89 ;        jr nz,WRONGVER 
-0020               90 ;        jp LOADVGM
-0020               91 ;WRONGVER:
-0020               92 ;        jp WRONGVER
-0020               93 
-0020               94 CLRTB:
-0020 9f bf df ff   95         defb $9f,$bf,$df,$ff
-0024               96 LoopPlay: 
-0024 00            97         defb 0
-0025               98 LoopLoc:        
-0025 00 00 00 00   99         defb 0,0,0,0
-0029              100 
-0029 00 00 00 00  101 WORKRAM: defb 0,0,0,0
-002d              102 
-002d 00 00 00 00  103 SongDataStart: defb 0,0,0,0
-0031              104 
+0000               34 
+0000               35 VGM_START EQU $00 
+0000               36 VGM_END EQU $04       ;*: ; 2004-2005
+0000               37 SSGCLOCK EQU $0C      ; : ; 200c-200f
+0000               38 SAMPLECOUNT EQU $18   ;*:  ; 2018-201b 0X22740
+0000               39 LOOPOFFSET EQU $1c    ;*: 201c-201f
+0000               40 LOOPNUMS EQU $20      ;*:   ; 2020-2023
+0000               41 RATE EQU $24          ;:   ; 2024-2027 = 60
+0000               42 SNFB EQU $28          ;*?:  ; 2028-9 = 0009
+0000               43 SNW EQU $2a           ;*?; 202a = 16
+0000               44 SF EQU $2b            ;*:    ; 202b ; ssg flags all 0
+0000               45 YM2612CLK EQU $2C     ;: ; 202c-202f = 0x750ab6 
+0000               46 VGMDATOFS EQU $34     ;*:  ; 2034-2037
+0000               47 ;SPCMCLK EQU $2038       ;:    ; 2038-203b
+0000               48 ;SPCMI EQU $203C         ;:   ; 203c-203f
+0000               49 VM EQU $7C            ;: volume modifier (default 0) ; 207c
+0000               50 LB EQU $7E            ;: loop base; 207e
+0000               51 LM EQU $7F            ;: loop modifier; 207f
+0000               52         
+0000               53         org $0
+0000               54 
+0000               55 ; disable interrupts
+0000 f3            56         di 
+0001               57 
+0001               58 ; clear the stack
+0001 3e 00         59         ld a, 0
+0003 11 00 1c      60         ld de, $1c00 
+0006 06 00         61         ld b, 0 
+0008               62 _clrstack:
+0008 12            63         LD (DE),A
+0009 13            64         inc de 
+000a 10 fc         65         djnz _clrstack
+000c               66 _clr2
+000c 12            67         ld (de),a 
+000d 13            68         inc de 
+000e 10 fc         69         djnz _clr2
+0010               70 _clr3 
+0010 12            71         ld (de),a 
+0011 13            72         inc de 
+0012 10 fc         73         djnz _clr3
+0014               74 
+0014               75 ; set the stack pointer 
+0014 31 80 1d      76         ld sp,$1d80 
+0017               77 
+0017               78 ; clear and go!
+0017 cd e4 06      79         call CLEARPSG 
+001a cd 39 06      80         call BANKSWAP
+001d               81 
+001d c3 8a 00      82         jp LOADVGM 
+0020               83         
+0020               84 ; +8 and +9 should contain VGM version number.
+0020               85 ;VERSIONCHECK:
+0020               86 ;        ld hl, ($2008) 
+0020               87 ;        cp h, $60
+0020               88 ;        jr nz,WRONGVER
+0020               89 ;        cp l, $01
+0020               90 ;        jr nz,WRONGVER 
+0020               91 ;        jp LOADVGM
+0020               92 ;WRONGVER:
+0020               93 ;        jp WRONGVER
+0020               94 
+0020               95 CLRTB:
+0020 9f bf df ff   96         defb $9f,$bf,$df,$ff
+0024               97 LoopPlay: 
+0024 00            98         defb 0
+0025               99 LoopLoc:        
+0025 00 00 00 00  100         defb 0,0,0,0
+0029              101 
+0029 00 00 00 00  102 WORKRAM: defb 0,0,0,0
+002d              103 
+002d 00 00 00 00  104 SongDataStart: defb 0,0,0,0
 0031              105 
-0031              106 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0031              107 
-0031              108         org $80
-0080              109 
-0080              110 ; Vars
-0080              111 
-0080              112 PlayNext:
-0080 00           113         defb 0          ; 80h
-0081              114 SongPlaying: 
-0081 00           115         defb 0          ; 81h
-0082              116 SongBaseAddress:        ; Set me when loading the song from the 68000!
-0082 00 00 00 00  117         defb $0, $0, 0, 0 ; 82-85h
-0086              118 RomBank:
-0086 00           119         defb 0          ; 86h
-0087              120 StartBank:
-0087 00           121         defb 0          ; --
-0088              122 ; This is 0 if NTSC, and 1 if PAL.
-0088 00           123 PALFlag: defb 0         ; 88h
-0089              124 ; Set this to 1 and the next frame the Z80 will reset (jp 0). 
-0089              125 ; Do this after changing SongBaseAddress to change songs. 
-0089 00           126 ResetFlag: defb 0       ; 89h
-008a              127  
-008a              128 
-008a              129 LOADVGM:
-008a              130 ;;;;;;;;;;;;;;;;
-008a              131         
-008a 3e 01        132         LD A,1 
-008c 32 81 00     133         LD (SongPlaying),A      ; set playing var to ON
-008f 3a 86 00     134         LD A,(RomBank) 
-0092 32 87 00     135         LD (StartBank),A        ; Store the initial ROM bank for looping.
-0095              136         
-0095              137 ; Set the memory window to the song header (+1c)      
-0095 2a 82 00     138         ld hl,(SongBaseAddress)
-0098 01 1c 00     139         ld bc,$001c 
-009b af           140         xor a 
-009c ed 4a        141         adc hl,bc 
-009e 22 e0 01     142         ld (ZadrWork),hl 
-00a1 2a 84 00     143         ld hl,(SongBaseAddress+2)
-00a4 01 00 00     144         ld bc,$0000
-00a7 ed 4a        145         adc hl,bc               ; catch the carry
-00a9 22 e2 01     146         ld (ZadrWork+2),hl
-00ac cd e4 01     147         call SETZADDRESS        ; set bank to song base address + 1c!
-00af              148 
-00af              149 ; Is the loop variable = 00 00 ?
-00af 7e           150         ld a,(hl)               ; pointer is at loop portion of header. 
-00b0 4f           151         ld c,a 
-00b1 cd bf 01     152         call GetNextSongByte    ; HL++
-00b4 7e           153         ld a,(hl)               ; Is there loop location?
-00b5 b1           154         or c  
-00b6 28 43        155         jr z, noloop            ; checks first two bytes only~~~
-00b8 7e           156         ld a,(hl)
-00b9 47           157         ld b,a                  ; 1c and 1d are in bc
-00ba              158 ; store the 32bit 68000 address at LoopLoc
-00ba e5           159         push hl 
-00bb c5           160          push bc 
-00bc e1           161          pop hl 
-00bd 22 25 00     162          ld (LoopLoc),hl ; store 1c-1d here
-00c0 e1           163         pop hl          ; at LoopLoc
-00c1 cd bf 01     164         call GetNextSongByte 
-00c4 7e           165         ld a,(hl) 
-00c5 4f           166         ld c,a 
-00c6 cd bf 01     167         CALL GetNextSongByte
-00c9 7e           168         ld a,(hl) 
-00ca 47           169         ld b,a 
-00cb c5           170         push bc         ; excg
-00cc e1           171         pop hl          ; bc and hl
-00cd 22 27 00     172         ld (LoopLoc+2),hl  ; and at LoopLoc+2
-00d0              173         ; WE AREN'T DONE!!!
-00d0              174 ; we need to convert this to the 68000 range.;
-00d0 2a 82 00     175         ld hl,(SongBaseAddress) 
-00d3 e5           176         push hl 
-00d4 c1           177         pop bc                  ; HL = LoopLoc+0, BC=SongBaseAddress+0 
-00d5 2a 25 00     178         ld hl,(LoopLoc) 
-00d8 af           179         xor a 
-00d9 ed 4a        180         adc hl,bc               ; if it overflows, its in the carry...
-00db 22 25 00     181         ld (LoopLoc),hl         ; lower byte stored
-00de 2a 27 00     182         ld hl,(LoopLoc+2)       ; load upper byte and store carry
-00e1 01 00 00     183         ld bc,$0000
-00e4 ed 4a        184         adc hl,bc               ; <- carry taken care of. 
-00e6 22 27 00     185         ld (LoopLoc+2),hl 
-00e9              186         ; HL = LoopLoc+2 and carry
-00e9 e5           187         push hl 
-00ea 2a 84 00     188          ld hl,(SongBaseAddress+2) 
-00ed e5           189          push hl 
-00ee c1           190          pop bc 
-00ef e1           191         pop hl    ; HL = LoopLoc+2+c, BC = SongBaseAddress+2
-00f0 af           192         xor a     ; clear carry for the upper bytes 
-00f1 ed 4a        193         adc hl,bc               ; phew! NOW we're good 
-00f3 22 27 00     194         ld (LoopLoc+2),hl 
-00f6              195 ; Set start playing flag 
-00f6 3e 01        196         ld a,1 
-00f8 32 24 00     197         ld (LoopPlay),a           ; set LoopPlay to 1
-00fb              198 noloop:
-00fb              199 ; Now set HL to song data pointer - longword at 0x0034 into the VGM header 
-00fb 2a 82 00     200         ld hl,(SongBaseAddress)    ; 00001ef7, need to add 83 to skip header and
-00fe              201                                    ; byte size
-00fe 01 80 00     202         ld bc, $0080      ; skip the header
-0101 af           203         xor a 
-0102 ed 4a        204         adc hl,bc  ; 0x100              ; 1f2b 1f2e is wrong! should be 1f7a
-0104 22 e0 01     205         ld (ZadrWork),hl           ; 16bit addition ; START BAD CODE
-0107 01 00 00     206         ld bc,$0000
-010a 2a 84 00     207         ld hl,(SongBaseAddress+2)
-010d ed 4a        208         adc hl,bc ; catch the carry 
-010f 22 e2 01     209         ld (ZadrWork+2),hl              ; < ok
-0112 cd e4 01     210         call SETZADDRESS   
-0115              211 ; TODO FIXME i am not reading addr from header right now     
-0115              212 ; This means only 128-byte header VGMs (1.60 will work!)
-0115              213         ; hl now contains base+34 or data offset start
-0115              214 ; Get the 68000 address and store it in SongDataStart (our sram var) 
-0115 7e           215         ld a,(hl) ; data start offset bits 0-7. add this to ;
-0116              216 
-0116 2b           217         dec hl  ;) < go down one because we call GetNextSongByte below
-0117              218 PLAYLOOP:
-0117              219 ;;;;;;;;;;;;;;;;
-0117 cd bf 01     220         call GetNextSongByte
-011a 7e           221         LD A,(HL) 
-011b fe 50        222         cp $50 
-011d da 90 01     223          jp c,ERROR      ; 0-49f - ERROR, invalid control byte
-0120 ca 96 06     224         JP z,WRITEPSG   ; 50f - write PSG
-0123 fe 52        225         cp $52          ; 0x52 a b - 2612 port 0 (gen FM1) <-
-0125 ca 61 06     226         JP z,WRITEFM1
-0128 fe 53        227         cp $53          ; 0x53 a b - 2612 port 1 (gen FM2) <-
-012a ca 7f 06     228         JP z,WRITEFM2
-012d fe 61        229         CP $61          ; 0X61 a b - wait ba samples
-012f ca a0 06     230         JP Z,SAMPLEWAIT 
-0132 fe 62        231         CP $62          ; 0x62 wait 1/60 second
-0134 ca 7e 01     232         JP Z,FRAMEOVER  ; (until next vblank)
-0137 fe 63        233         CP $63
-0139 ca 7e 01     234         JP Z,FRAMEOVER  ; Same frame wait code won't make a difference on PAL
-013c fe 66        235         CP $66          
-013e da 90 01     236          JP C,ERROR      ; 64-65 error 
-0141 ca 9c 01     237         JP Z,SONGOVER   ; 0x66 stop music playback
-0144 fe 67        238         CP $67          ; DATA BLOCK 
-0146 ca 92 05     239         JP Z,DATABLOCK  ;  sets up all pointers
-0149 fe 68        240         cp $68 
-014b ca cb 01     241         JP Z,WRITEPCM   ;  probably not used 
-014e fe 7c        242         CP $7C
-0150 ca c7 01     243         JP Z,VOLUMESET    ; discrete volume control
-0153 fe 80        244         CP $80
-0155 da cf 01     245         JP C,QWAIT        ; 69-7f (not 7c) quick wait
-0158 fe 90        246         CP $90 
-015a da 90 01     247         JP C,ERROR      ; QFMWAIT      ; 80-8f quick fm write/wait
-015d ca 5b 03     248         jp z,DACSETUP     ; 90 setup dac stream
-0160 fe 91        249         CP $91 
-0162 ca 6e 03     250         JP Z,SETDACSTREAM
-0165 fe 92        251         CP $92 
-0167 ca 9f 03     252         JP Z,SETDACFREQ
-016a fe 93        253         CP $93 
-016c ca 0f 04     254         JP Z,STARTDACSTREAM ; UNSUPPORTED FIXME
-016f fe 94        255         CP $94 
-0171 ca 38 03     256         JP Z,STOPDAC
-0174 fe 95        257         CP $95
-0176 ca 31 04     258         JP Z,DACFASTCALL
-0179 fe ff        259         CP $FF 
-017b da 90 01     260          JP C,ERROR     ; 96-fe goto ERROR
-017e              261         
-017e              262 FRAMEOVER:
-017e              263 ;;;;;;;;;;;
-017e              264 ; * A
-017e              265 ; Waits until next vblank signal (done via 68k)
-017e              266         ;JP FRAMEOVER 
-017e              267         ; Before checking 68k vbl, we need to see if DAC are queued.
-017e              268         ;LD A,(DacTransferActive) 
-017e              269         ;cp 0 
-017e cd 56 02     270         call DACBLOCKTRANSFER ; MAD TESTING BRUH
-0181              271 _framewait:
-0181 3a 80 00     272         LD A,(PlayNext)  ; check the 'play next frame' var
-0184 fe 01        273         CP 1             ; is it = 1?
-0186 20 f9        274         JR NZ,_framewait  ; if not, loop.
-0188 af           275         xor a            ; if it is, clear it.
-0189 32 80 00     276         ld (PlayNext),a 
-018c c3 17 01     277         JP PLAYLOOP
-018f              278 ;;;; 
-018f              279 
-018f 99           280 ERRDEFB: DEFB $99
-0190              281 ; This error handling is super rudimentary and only intended to get songs to
-0190              282 ;  play without crashing!
-0190              283 ERROR:  
-0190              284         ;cp $28    ; probably just got lost 
-0190 18 03        285         jr _fixsongptr
-0192 c3 90 01     286         jp ERROR 
-0195              287 
-0195              288 _fixsongptr: 
-0195 cd bf 01     289         call GetNextSongByte
-0198 c3 17 01     290         jp PLAYLOOP 
-019b              291 
-019b 55           292 _songoverb: defb $55
-019c              293 SONGOVER:
-019c              294 ;;;;;;;;;;;
-019c              295 ; * A
-019c              296 ; Stops the song when hits command byte 0x66
-019c              297 ;  Or, if looping, jumps to loop
-019c 3a 24 00     298         ld a,(LoopPlay) 
-019f fe 00        299         cp 0 
-01a1 28 12        300         jr z, _endsong  
-01a3              301 ; LOOP PLAY:
-01a3              302         ; LoopLoc should be all set...
-01a3 2a 25 00     303         ld hl,(LoopLoc) 
-01a6 22 e0 01     304         ld (ZadrWork),hl 
-01a9 2a 27 00     305         ld hl,(LoopLoc+2) 
-01ac 22 e2 01     306         ld (ZadrWork+2),hl 
-01af cd e4 01     307         call SETZADDRESS 
-01b2 c3 17 01     308         jp PLAYLOOP
-01b5              309 _endsong:
-01b5 af           310         XOR A 
-01b6 32 81 00     311         LD (SongPlaying),A
-01b9 cd d1 06     312         call CLEARPSG
-01bc              313         ; TODO in case the VGM doesn't clear the FM stuff, do that here
-01bc              314 _overloop
-01bc c3 bc 01     315         JP _overloop
-01bf              316 
+0031              106 
+0031              107 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0031              108 
+0031              109         org $80
+0080              110 
+0080              111 ; Vars
+0080              112 
+0080              113 PlayNext:
+0080 00           114         defb 0          ; 80h
+0081              115 SongPlaying: 
+0081 00           116         defb 0          ; 81h
+0082              117 SongBaseAddress:        ; Set me when loading the song from the 68000!
+0082 00 00 00 00  118         defb $0, $0, 0, 0 ; 82-85h
+0086              119 RomBank:
+0086 00           120         defb 0          ; 86h
+0087              121 StartBank:
+0087 00           122         defb 0          ; --
+0088              123 ; This is 0 if NTSC, and 1 if PAL.
+0088 00           124 PALFlag: defb 0         ; 88h
+0089              125 ; Set this to 1 and the next frame the Z80 will reset (jp 0). 
+0089              126 ; Do this after changing SongBaseAddress to change songs. 
+0089 00           127 ResetFlag: defb 0       ; 89h
+008a              128  
+008a              129 
+008a              130 LOADVGM:
+008a              131 ;;;;;;;;;;;;;;;;
+008a              132         
+008a 3e 01        133         LD A,1 
+008c 32 81 00     134         LD (SongPlaying),A      ; set playing var to ON
+008f 3a 86 00     135         LD A,(RomBank) 
+0092 32 87 00     136         LD (StartBank),A        ; Store the initial ROM bank for looping.
+0095              137         
+0095              138 ; Set the memory window to the song header (+1c)      
+0095 2a 82 00     139         ld hl,(SongBaseAddress)
+0098 01 1c 00     140         ld bc,$001c 
+009b af           141         xor a 
+009c ed 4a        142         adc hl,bc 
+009e 22 e0 01     143         ld (ZadrWork),hl 
+00a1 2a 84 00     144         ld hl,(SongBaseAddress+2)
+00a4 01 00 00     145         ld bc,$0000
+00a7 ed 4a        146         adc hl,bc               ; catch the carry
+00a9 22 e2 01     147         ld (ZadrWork+2),hl
+00ac cd e4 01     148         call SETZADDRESS        ; set bank to song base address + 1c!
+00af              149 
+00af              150 ; Is the loop variable = 00 00 ?
+00af 7e           151         ld a,(hl)               ; pointer is at loop portion of header. 
+00b0 4f           152         ld c,a 
+00b1 cd bf 01     153         call GetNextSongByte    ; HL++
+00b4 7e           154         ld a,(hl)               ; Is there loop location?
+00b5 b1           155         or c  
+00b6 28 43        156         jr z, noloop            ; checks first two bytes only~~~
+00b8 7e           157         ld a,(hl)
+00b9 47           158         ld b,a                  ; 1c and 1d are in bc
+00ba              159 ; store the 32bit 68000 address at LoopLoc
+00ba e5           160         push hl 
+00bb c5           161          push bc 
+00bc e1           162          pop hl 
+00bd 22 25 00     163          ld (LoopLoc),hl ; store 1c-1d here
+00c0 e1           164         pop hl          ; at LoopLoc
+00c1 cd bf 01     165         call GetNextSongByte 
+00c4 7e           166         ld a,(hl) 
+00c5 4f           167         ld c,a 
+00c6 cd bf 01     168         CALL GetNextSongByte
+00c9 7e           169         ld a,(hl) 
+00ca 47           170         ld b,a 
+00cb c5           171         push bc         ; excg
+00cc e1           172         pop hl          ; bc and hl
+00cd 22 27 00     173         ld (LoopLoc+2),hl  ; and at LoopLoc+2
+00d0              174         ; WE AREN'T DONE!!!
+00d0              175 ; we need to convert this to the 68000 range.;
+00d0 2a 82 00     176         ld hl,(SongBaseAddress) 
+00d3 e5           177         push hl 
+00d4 c1           178         pop bc                  ; HL = LoopLoc+0, BC=SongBaseAddress+0 
+00d5 2a 25 00     179         ld hl,(LoopLoc) 
+00d8 af           180         xor a 
+00d9 ed 4a        181         adc hl,bc               ; if it overflows, its in the carry...
+00db 22 25 00     182         ld (LoopLoc),hl         ; lower byte stored
+00de 2a 27 00     183         ld hl,(LoopLoc+2)       ; load upper byte and store carry
+00e1 01 00 00     184         ld bc,$0000
+00e4 ed 4a        185         adc hl,bc               ; <- carry taken care of. 
+00e6 22 27 00     186         ld (LoopLoc+2),hl 
+00e9              187         ; HL = LoopLoc+2 and carry
+00e9 e5           188         push hl 
+00ea 2a 84 00     189          ld hl,(SongBaseAddress+2) 
+00ed e5           190          push hl 
+00ee c1           191          pop bc 
+00ef e1           192         pop hl    ; HL = LoopLoc+2+c, BC = SongBaseAddress+2
+00f0 af           193         xor a     ; clear carry for the upper bytes 
+00f1 ed 4a        194         adc hl,bc               ; phew! NOW we're good 
+00f3 22 27 00     195         ld (LoopLoc+2),hl 
+00f6              196 ; Set start playing flag 
+00f6 3e 01        197         ld a,1 
+00f8 32 24 00     198         ld (LoopPlay),a           ; set LoopPlay to 1
+00fb              199 noloop:
+00fb              200 ; Now set HL to song data pointer - longword at 0x0034 into the VGM header 
+00fb 2a 82 00     201         ld hl,(SongBaseAddress)    ; 00001ef7, need to add 83 to skip header and
+00fe              202                                    ; byte size
+00fe 01 80 00     203         ld bc, $0080      ; skip the header
+0101 af           204         xor a 
+0102 ed 4a        205         adc hl,bc  ; 0x100              ; 1f2b 1f2e is wrong! should be 1f7a
+0104 22 e0 01     206         ld (ZadrWork),hl           ; 16bit addition ; START BAD CODE
+0107 01 00 00     207         ld bc,$0000
+010a 2a 84 00     208         ld hl,(SongBaseAddress+2)
+010d ed 4a        209         adc hl,bc ; catch the carry 
+010f 22 e2 01     210         ld (ZadrWork+2),hl              ; < ok
+0112 cd e4 01     211         call SETZADDRESS   
+0115              212 ; TODO FIXME i am not reading addr from header right now     
+0115              213 ; This means only 128-byte header VGMs (1.60 will work!)
+0115              214         ; hl now contains base+34 or data offset start
+0115              215 ; Get the 68000 address and store it in SongDataStart (our sram var) 
+0115 7e           216         ld a,(hl) ; data start offset bits 0-7. add this to ;
+0116              217 
+0116 2b           218         dec hl  ;) < go down one because we call GetNextSongByte below
+0117              219 PLAYLOOP:
+0117              220 ;;;;;;;;;;;;;;;;
+0117 cd bf 01     221         call GetNextSongByte
+011a 7e           222         LD A,(HL) 
+011b fe 50        223         cp $50 
+011d da 90 01     224          jp c,ERROR      ; 0-49f - ERROR, invalid control byte
+0120 ca 9c 06     225         JP z,WRITEPSG   ; 50f - write PSG
+0123 fe 52        226         cp $52          ; 0x52 a b - 2612 port 0 (gen FM1) <-
+0125 ca 67 06     227         JP z,WRITEFM1
+0128 fe 53        228         cp $53          ; 0x53 a b - 2612 port 1 (gen FM2) <-
+012a ca 85 06     229         JP z,WRITEFM2
+012d fe 61        230         CP $61          ; 0X61 a b - wait ba samples
+012f ca a6 06     231         JP Z,SAMPLEWAIT 
+0132 fe 62        232         CP $62          ; 0x62 wait 1/60 second
+0134 ca 7e 01     233         JP Z,FRAMEOVER  ; (until next vblank)
+0137 fe 63        234         CP $63
+0139 ca 7e 01     235         JP Z,FRAMEOVER  ; Same frame wait code won't make a difference on PAL
+013c fe 66        236         CP $66          
+013e da 90 01     237          JP C,ERROR      ; 64-65 error 
+0141 ca 9c 01     238         JP Z,SONGOVER   ; 0x66 stop music playback
+0144 fe 67        239         CP $67          ; DATA BLOCK 
+0146 ca 98 05     240         JP Z,DATABLOCK  ;  sets up all pointers
+0149 fe 68        241         cp $68 
+014b ca cb 01     242         JP Z,WRITEPCM   ;  probably not used 
+014e fe 7c        243         CP $7C
+0150 ca c7 01     244         JP Z,VOLUMESET    ; discrete volume control
+0153 fe 80        245         CP $80
+0155 da cf 01     246         JP C,QWAIT        ; 69-7f (not 7c) quick wait
+0158 fe 90        247         CP $90 
+015a da 90 01     248         JP C,ERROR      ; QFMWAIT      ; 80-8f quick fm write/wait
+015d ca 61 03     249         jp z,DACSETUP     ; 90 setup dac stream
+0160 fe 91        250         CP $91 
+0162 ca 74 03     251         JP Z,SETDACSTREAM
+0165 fe 92        252         CP $92 
+0167 ca a5 03     253         JP Z,SETDACFREQ
+016a fe 93        254         CP $93 
+016c ca 15 04     255         JP Z,STARTDACSTREAM ; UNSUPPORTED FIXME
+016f fe 94        256         CP $94 
+0171 ca 3e 03     257         JP Z,STOPDAC
+0174 fe 95        258         CP $95
+0176 ca 37 04     259         JP Z,DACFASTCALL
+0179 fe ff        260         CP $FF 
+017b da 90 01     261          JP C,ERROR     ; 96-fe goto ERROR
+017e              262         
+017e              263 FRAMEOVER:
+017e              264 ;;;;;;;;;;;
+017e              265 ; * A
+017e              266 ; Waits until next vblank signal (done via 68k)
+017e              267         ;JP FRAMEOVER 
+017e              268         ; Before checking 68k vbl, we need to see if DAC are queued.
+017e              269         ;LD A,(DacTransferActive) 
+017e              270         ;cp 0 
+017e cd 56 02     271         call DACBLOCKTRANSFER ; MAD TESTING BRUH
+0181              272 _framewait:
+0181 3a 80 00     273         LD A,(PlayNext)  ; check the 'play next frame' var
+0184 fe 01        274         CP 1             ; is it = 1?
+0186 20 f9        275         JR NZ,_framewait  ; if not, loop.
+0188 af           276         xor a            ; if it is, clear it.
+0189 32 80 00     277         ld (PlayNext),a 
+018c c3 17 01     278         JP PLAYLOOP
+018f              279 ;;;; 
+018f              280 
+018f 99           281 ERRDEFB: DEFB $99
+0190              282 ; This error handling is super rudimentary and only intended to get songs to
+0190              283 ;  play without crashing!
+0190              284 ERROR:  
+0190              285         ;cp $28    ; probably just got lost 
+0190 18 03        286         jr _fixsongptr
+0192 c3 90 01     287         jp ERROR 
+0195              288 
+0195              289 _fixsongptr: 
+0195 cd bf 01     290         call GetNextSongByte
+0198 c3 17 01     291         jp PLAYLOOP 
+019b              292 
+019b 55           293 _songoverb: defb $55
+019c              294 SONGOVER:
+019c              295 ;;;;;;;;;;;
+019c              296 ; * A
+019c              297 ; Stops the song when hits command byte 0x66
+019c              298 ;  Or, if looping, jumps to loop
+019c 3a 24 00     299         ld a,(LoopPlay) 
+019f fe 00        300         cp 0 
+01a1 28 12        301         jr z, _endsong  
+01a3              302 ; LOOP PLAY:
+01a3              303         ; LoopLoc should be all set...
+01a3 2a 25 00     304         ld hl,(LoopLoc) 
+01a6 22 e0 01     305         ld (ZadrWork),hl 
+01a9 2a 27 00     306         ld hl,(LoopLoc+2) 
+01ac 22 e2 01     307         ld (ZadrWork+2),hl 
+01af cd e4 01     308         call SETZADDRESS 
+01b2 c3 17 01     309         jp PLAYLOOP
+01b5              310 _endsong:
+01b5 af           311         XOR A 
+01b6 32 81 00     312         LD (SongPlaying),A
+01b9 cd e4 06     313         call CLEARPSG
+01bc              314         ; TODO in case the VGM doesn't clear the FM stuff, do that here
+01bc              315 _overloop
+01bc c3 bc 01     316         JP _overloop
 01bf              317 
-01bf              318 GetNextSongByte:
-01bf 23           319         inc hl 
-01c0 7c           320         ld a,h 
-01c1 e6 80        321         and $80 
-01c3 cc 53 06     322         call z,BANKUP ; this also sets HL to 8000
-01c6 c9           323         ret 
-01c7              324 
+01bf              318 
+01bf              319 GetNextSongByte:
+01bf 23           320         inc hl 
+01c0 7c           321         ld a,h 
+01c1 e6 80        322         and $80 
+01c3 cc 59 06     323         call z,BANKUP ; this also sets HL to 8000
+01c6 c9           324         ret 
 01c7              325 
-01c7              326 VOLUMESET:
-01c7              327         ;JP PLAYLOOP  
-01c7 c3 c7 01     328         JP VOLUMESET 
-01ca              329         
-01ca              330 
-01ca 11           331 aaa: defb $11
-01cb              332 WRITEPCM:
-01cb              333         ;jp PLAYLOOP  
-01cb c3 cb 01     334         JP WRITEPCM 
-01ce 22           335 bbb: defb $22
-01cf              336 ; Waits 1-16 samples
-01cf              337 QWAIT:
-01cf              338         ; TOO SHORT TO NOTICE?
-01cf e6 0f        339         and $0f 
-01d1 47           340         ld b,a 
-01d2 0e 00        341         ld c,0 
-01d4              342 _qwl:   ; idk what to do other than skip 256*n cycles
-01d4 0b           343         dec bc 
-01d5 79           344         ld a,c 
-01d6 b0           345         or b 
-01d7 20 fb        346         jr nz, _qwl
-01d9              347         ;JP QWAIT 
-01d9 c3 17 01     348         JP PLAYLOOP 
-01dc 33           349 ccc: defb $33
-01dd              350 QFMWAIT:
-01dd              351         ;jp PLAYLOOP 
-01dd c3 dd 01     352         JP QFMWAIT 
-01e0              353 
-01e0 00 00 00 00  354 ZadrWork: defb 0,0,0,0
-01e4              355 
-01e4              356 SETZADDRESS:
-01e4              357 ;;;;;;;;;;;;;;;;;;
-01e4              358 ; * A H L 
-01e4              359 ; Input: ZadrWork 32-bit address (68000 memory)
-01e4              360 ; Output: changes active rom bank, and sets HL to mem addr
-01e4 2a e1 01     361         ld hl,(ZadrWork+1) ; ignore bits 0-7, so we have 8-23
-01e7 af           362         xor a ; clc 
-01e8 cb 3c        363         srl h
-01ea cb 1d        364         rr l   ; hl >> 1
-01ec cb 3c        365         srl h
-01ee cb 1d        366         rr l   ; hl >> 2
-01f0 cb 3c        367         srl h
-01f2 cb 1d        368         rr l   ; hl >> 3
-01f4 cb 3c        369         srl h
-01f6 cb 1d        370         rr l   ; hl >> 4
-01f8 cb 3c        371         srl h
-01fa cb 1d        372         rr l   ; hl >> 5
-01fc cb 3c        373         srl h
-01fe cb 1d        374         rr l   ; hl >> 6
-0200 cb 3c        375         srl h
-0202 cb 1d        376         rr l   ; hl >> 7 
-0204 7d           377         ld a,l 
-0205 32 86 00     378         ld (RomBank),a ; BITS 15-22
-0208 cd 33 06     379         call BANKSWAP
-020b 2a e0 01     380         LD HL,(ZadrWork)  ; 0-15 
-020e 3e 7f        381         ld a,$7f 
-0210 a4           382         and h 
-0211 f6 80        383         or $80 ; always set top bit so we look at $8000 + 
-0213 67           384         ld h,a
-0214 e5           385         push hl 
-0215 21 00 00     386         ld hl,$0000 
-0218 22 e0 01     387         ld (ZadrWork),hl 
-021b 22 e2 01     388         ld (ZadrWork+2),hl 
-021e e1           389         pop hl 
-021f              390         ; [HL] now contains memory pointer!
-021f c9           391         ret
-0220              392 ;;;;
-0220              393 
-0220              394 GETROMADDRESS: 
-0220              395 ;;;;;;;;;;;;;;
-0220              396 ; INPUT: ZadrWork+0 BANK
-0220              397 ;        ZadrWork+2~ZadrWork+3 HL
-0220              398 ; (bank * 8000) + HL & 7fff
-0220              399 ; OUTPUT: ZadrWork ~ ZadrWork+3 CONTAINS LONGWORD ADDRESS
-0220              400 ; * A
-0220              401 ; Preserves HL
-0220 e5           402         push hl
-0221 c5           403         push bc  
-0222 af           404          xor a ; clc 
-0223 3a e0 01     405          ld a,(ZadrWork) ; contains RomBank, A15-A22
-0226              406          ; 15:
-0226 e6 01        407          and $1 
-0228 cb 1f        408          rr a   ; 15 > carry 
-022a cb 1f        409          rr a   ; carry > 7, carry = 0
-022c 47           410          ld b,a ; contains bit 15 ; SAVE
-022d 3a e0 01     411          ld a,(ZadrWork) ; 15-22...
-0230 e6 fe        412          and $fe
-0232 cb 3f        413          srl a    ; and the last bit and shift RIGHT, so we have 16-23 (minus23)
-0234 2a e2 01     414          ld hl,(ZadrWork+2) 
-0237 32 e2 01     415          ld (ZadrWork+2),a ; put it in the 3rd byte 
-023a af           416          xor a 
-023b 32 e0 01     417          ld (ZadrWork),a 
-023e 32 e1 01     418          ld (ZadrWork+1),a ; zero the first two
-0241              419          
-0241 3e 7f        420          ld a,$7f 
-0243 a4           421          and h ; hl = bits 0-14, dont forget 15 in b!
-0244 b0           422          or b           ; d(>.< )
-0245 67           423          ld h,a
-0246 22 e0 01     424          ld (ZadrWork),hl 
-0249 af           425          xor a 
-024a 32 e3 01     426          ld (ZadrWork+3),a ; 24-31 are always 0
-024d c1           427         pop bc 
-024e e1           428         pop hl 
-024f c9           429         RET 
-0250              430 
-0250 00 00        431 DacWRAM: defb 0, 0
-0252              432 DACWORK
-0252 00 00 00 00  433         defb 0,0,0,0
-0256              434 ; Block struct:
-0256              435 ;Type (ff means empty) 1
-0256              436 ; Compatible types:
-0256              437 ; 0: YM2612 PCM data 
-0256              438 ;Size 4
-0256              439 ; 32 bit size (from VGM file)
-0256              440 ;Loc 2 (HL offset of data start)
-0256              441 ;Bank 1 (bank of data start)
-0256              442 ;Counter 4 (32bit offset remaining to play of this loop)
-0256              443 ;BlockActive: 1 if we need to dac stream it, 0 skips
-0256              444 ;_buffer 3 : to align to 16 bytes
-0256              445 
-0256              446 DACBLOCKTRANSFER:
-0256              447         ;ret 
-0256              448 
-0256              449 ;; Step through me again
-0256              450         ; PRESERVE CURRENT ROM BANK AND SONG PTR IN WORKRAM~+3
-0256 3a 86 00     451         ld a,(RomBank)          
-0259 32 52 02     452         ld (DACWORK),a 
-025c af           453         xor a
-025d 32 53 02     454         ld (DACWORK+1),a     ; saving me for later!
-0260 22 54 02     455         ld (DACWORK+2),hl       
-0263              456         ; LOOP THROUGH DATA STRUCT[], SEARCH FOR ACTIVE BYTE == 1
-0263              457 ;        ld hl,BlockActive-16
-0263              458 ;        ld b,16   ; 16 data arrays
-0263              459 ;        ld de,1  ; 16 bytes each FIXME
-0263              460 ;_nextdb
-0263              461 ;        OR A 
-0263              462 ;        adc hl,de 
-0263              463 ;        ld a,(hl) 
-0263              464 ;        cp $0
-0263              465 ;        jr nz,_found
-0263              466 ;        djnz _nextdb
-0263              467 ;        cp $0 
-0263              468 ;        jp z,_daclpend     ; if all are 0, return
-0263              469 _found
-0263              470         ; TESTING 
-0263 3a 9c 04     471         ld a,(BlockActive) 
-0266 fe 00        472         cp 0 
-0268 c8           473         ret z 
-0269              474         ; b = 15 to 0 (to flip: 15 - b)
-0269              475         ;ld hl,15 
-0269              476         ;ld c,0
-0269              477         ;or a 
-0269              478         ;sbc hl,bc 
-0269              479         ;ld a,l
-0269              480         ; now [A] has active data bank 0-15
-0269              481         ; TODO 
-0269              482         ; GET THE STRUCT'S CTR, STORE IT IN ACTIVEDACCTR
-0269              483 
-0269              484         ; switch to ActiveDacBank|ActiveDacLoc 
-0269 3a 2f 04     485         ld a,(ActiveDacBank)     ; = 0
-026c 32 86 00     486         ld (RomBank),a 
-026f cd 33 06     487         call BANKSWAP 
-0272              488         ; output 267 bytes from the bank (TODO DacFrequency)
-0272              489         ; 1. CHECK ACTIVEDACCTR+2~3 - IF > 0, BC = $10B
-0272              490         ; 2. COMPARE ADC+0~1 WITH $10B - IF >, BC=$10B
-0272              491         ;    ELSE BC = ADC+0~1
-0272              492         ; STORE BC IN DACWRAM
-0272              493         
-0272 cd 78 06     494         CALL ZWAIT 
-0275 3e 2b        495         ld a,$2b 
-0277 32 00 40     496         ld ($4000),a 
-027a cd 78 06     497         CALL ZWAIT 
-027d 3e 80        498         ld a,$80 
-027f 32 01 40     499         ld ($4001),a 
-0282 2a 2b 04     500         LD HL,(ActiveDacCtr+2) 
-0285 7c           501         LD A,H 
-0286 b5           502         or L 
-0287 20 1a        503         JR NZ,_norm   ; if either of the two high bytes are > 0, normal.
-0289              504         
-0289 ed 4b 29 04  505         ld bc,(ActiveDacCtr) 
-028d 3a 85 03     506         ld a,(DacFrequency)
-0290 91           507         sub c 
-0291 3a 86 03     508         ld a,(DacFrequency+1)
-0294 98           509         sbc a,b 
-0295 38 0c        510         jr c,_norm 
-0297              511         ; else, short dac 
-0297 ed 4b 29 04  512         ld bc,(ActiveDacCtr) 
-029b 79           513         ld a,c 
-029c b0           514         or b
-029d ca eb 02     515         jp z,_enddac
-02a0 c3 a7 02     516         jp _nr
-02a3              517 _norm:
-02a3 ed 4b 85 03  518         ld bc,(DacFrequency) ;; (DacFrequency) ; hopefully 267: debug me
-02a7              519 _nr:
-02a7 ed 43 50 02  520         ld (DacWRAM),bc 
-02ab 2a 2d 04     521         ld hl,(ActiveDacLoc) ; already -1!
-02ae              522 dacwriteloop:
-02ae              523         ;call ZWAIT 
-02ae 3e 2a        524         ld a,$2a
-02b0 32 00 40     525         ld ($4000),a
-02b3 cd bf 01     526         call GetNextSongByte
-02b6              527         ;call ZWAIT  
-02b6 7e           528         ld a,(hl)
-02b7 32 01 40     529         ld ($4001),a 
-02ba              530         
-02ba 0b           531         dec bc
-02bb 79           532         ld a,c 
-02bc b0           533         or b 
-02bd 20 ef        534         jr nz,dacwriteloop ; a360 bank 0
-02bf              535 ;BREAKPOINT: JP BREAKPOINT 
-02bf              536         ; 3. SUBTRACT DACWRAM FROM ADC (32BIT-16BIT)
-02bf 3a 86 00     537         ld a,(RomBank) 
-02c2 32 2f 04     538         ld (ActiveDacBank),a ; may be unnecessary 
-02c5 22 2d 04     539         ld (ActiveDacLoc),hl 
-02c8              540         
-02c8 b7           541         or a ; clc 
-02c9 e5           542         push hl 
-02ca c5           543          push bc 
-02cb 2a 29 04     544           ld hl,(ActiveDacCtr) 
-02ce ed 4b 50 02  545           ld bc,(DacWRAM) 
-02d2 b7           546           or a  ; clc 
-02d3 ed 42        547           sbc hl,bc 
-02d5 22 29 04     548           ld (ActiveDacCtr),hl 
-02d8 ca eb 02     549           jp z,_enddac 
-02db f2 f2 02     550           jp p,_nouflow
-02de da eb 02     551           jp c,_enddac 
-02e1              552           ; else dec adc+2 
-02e1 2a 2b 04     553           ld hl,(ActiveDacCtr+2) 
-02e4 2b           554           dec hl 
-02e5 22 2b 04     555           ld (ActiveDacCtr+2),hl 
-02e8              556         ; 4. IF ADC UNDERFLOWS, END DAC (or check loop if its there)
-02e8 f2 f2 02     557           jp p,_nouflow ; if < 0, we're done with this. 
-02eb              558 _enddac:
-02eb cd 10 03     559           CALL QUICKSTOP
-02ee af           560           xor a 
-02ef 32 84 03     561           ld (DacTransferActive),a 
-02f2              562 _nouflow: 
-02f2 c1           563          pop bc 
-02f3 e1           564         pop hl 
-02f4              565 _daclpend:
-02f4 cd 78 06     566         call ZWAIT 
-02f7 3e 2b        567         ld a,$2b 
-02f9 32 00 40     568         ld ($4000),a
-02fc cd 78 06     569         CALL ZWAIT  
-02ff af           570         xor a
-0300 32 01 40     571         ld ($4001),a 
-0303              572         
-0303 3a 52 02     573         ld a,(DACWORK) 
-0306 32 86 00     574         ld (RomBank),a 
-0309 cd 33 06     575         call BANKSWAP 
-030c 2a 54 02     576         ld hl,(DACWORK+2) 
-030f              577         ; dont get next song byte outside the loop.
-030f c9           578         ret 
-0310              579 ;;;;
-0310              580 
-0310              581 QUICKSTOP:
-0310              582         
-0310              583 ; TODO 
-0310              584 ; get the active dac block (this is set inside the transfer each loop)
-0310              585 ;  (ActiveDacBlock) is not used anywhere else
-0310              586 ; set that block's "active" byte and counter to 0
-0310 3a 28 04     587         ld a,(ActiveDacBlock)   ; ? 
-0313 e5           588         push hl 
-0314 c5           589          push bc 
-0315 cd 11 04     590           call GETBLOCKSTRUCT
-0318 01 0c 00     591           ld bc,12 ; +12 = ACTIVE BYTE 
-031b b7           592           or a 
-031c ed 4a        593           adc hl,bc 
-031e af           594           xor a 
-031f 77           595           ld (hl),a 
-0320              596           ;ld (DacTransferActive),a 
-0320              597           ;ld (ActiveDacBank),a 
-0320 c1           598          pop bc 
-0321 e1           599         pop hl 
-0322              600         ;?
-0322 32 28 04     601         ld (ActiveDacBlock),a 
-0325 32 29 04     602         ld (ActiveDacCtr),a 
-0328 32 2a 04     603         ld (ActiveDacCtr+1),a 
-032b 32 2b 04     604         ld (ActiveDacCtr+2),a 
-032e 32 2c 04     605         ld (ActiveDacCtr+3),a 
-0331 32 2d 04     606         ld (ActiveDacLoc),a 
-0334 32 2e 04     607         ld (ActiveDacLoc+1),a 
-0337              608 ;       block transfer method takes care of turning off DAC mode 
-0337 c9           609         RET 
-0338              610 
-0338              611 STOPDAC:
-0338              612 ;;;;;;;;;;;;;;
-0338              613 ; Stops DAC and disables DAC mode on CH6
-0338              614 ; FIXME broken ?
-0338 cd bf 01     615         call GetNextSongByte ; unused 
-033b af           616         xor a 
-033c 32 84 03     617         ld (DacTransferActive),a 
-033f 32 2f 04     618         ld (ActiveDacBank),a 
-0342 32 28 04     619         ld (ActiveDacBlock),a 
-0345 32 29 04     620         ld (ActiveDacCtr),a 
-0348 32 2a 04     621         ld (ActiveDacCtr+1),a 
-034b 32 2b 04     622         ld (ActiveDacCtr+2),a 
-034e 32 2c 04     623         ld (ActiveDacCtr+3),a 
-0351 32 2d 04     624         ld (ActiveDacLoc),a 
-0354 32 2e 04     625         ld (ActiveDacLoc+1),a 
-0357              626         ;call ZWAIT 
-0357              627         ;ld a,$2b 
-0357              628         ;ld ($4000),a 
-0357              629         ;call ZWAIT 
-0357              630         ;xor a 
-0357              631         ;;ld ($4001),a 
-0357 c3 17 01     632         jp PLAYLOOP  
-035a              633 ;;;
-035a              634 
-035a 00           635 StreamID: defb 0
-035b              636 ; 90 0 2 0 2a 
-035b              637 ; TODO SUPPORT MORE THAN ONE DAC STREAM :)
-035b              638 DACSETUP:
-035b              639         ;INC HL  ; STREAM ID 
-035b cd bf 01     640         call GetNextSongByte ; 0 
-035e 7e           641         LD A,(HL) 
-035f 32 5a 03     642         LD (StreamID),A 
-0362              643         ; We only want DAC mode on while transferring, so we leave that to
-0362              644         ; the block transfer method
-0362              645         ;INC HL  ; CHIP TYPE 
-0362 cd bf 01     646         call GetNextSongByte ; 2 
-0365              647         ;LD A,(HL) ; for genesis this should only ever be 02
-0365              648         ;CP 2
-0365              649         ;JR NZ,fail
-0365              650         ; I ignore these two bytes because VGM files appear to have
-0365              651         ; discrepency over the byte order.
-0365 cd bf 01     652         call GetNextSongByte ; write this byte 
-0368 cd bf 01     653         call GetNextSongByte ; to this reg
-036b              654         
-036b c3 17 01     655         jp PLAYLOOP 
-036e              656 
-036e              657 SETDACSTREAM:        
-036e              658 ; 0X91 <STREAM> <DATABANK ID> <STEP SIZE> <STEP BASE>
-036e              659 ;         0           0            1           0 
-036e              660 ; Preserves BC 
-036e c5           661        push bc 
-036f cd bf 01     662         call GetNextSongByte ; Stream ID is for multiple DAC channels.
-0372              663         ; Genesis only supports one, so we skip it
-0372 cd bf 01     664         call GetNextSongByte ; Databank
-0375              665         ; Set the active block
-0375 7e           666         ld a,(hl) 
-0376              667         ;ld (ActiveDacBlock),a 
-0376              668         ; always call DAC TRANSFER every frame, but loop it through the 
-0376              669         ;  data structs instead to find Active Byte = 1
-0376              670         ;push hl 
-0376              671          ;call GETBLOCKSTRUCT
-0376              672          ;or a 
-0376              673          ;ld bc,12 
-0376              674          ;adc hl,bc 
-0376              675          ;push hl 
-0376              676          ;pop bc 
-0376              677         ;pop hl   ; HL = song ptr, BC = address of block A active byte 
-0376              678         ;LD A,1
-0376              679         ;LD (BC),A 
-0376              680 
-0376 cd bf 01     681         call GetNextSongByte ; always 1? (step)
-0379 cd bf 01     682         call GetNextSongByte ; always 0? (step base)
-037c c1           683        pop bc 
-037d              684 
-037d c3 17 01     685         jp PLAYLOOP  
-0380              686 
-0380              687 _invfreq
-0380 88           688         defb $88
-0381 c3 81 03     689 INVALIDFREQ: JP INVALIDFREQ 
-0384              690 
-0384              691 DacTransferActive: 
-0384 00           692         defb 0
-0385              693 DacFrequency:
-0385 00 00        694         defb 0, 0
-0387              695 RealFrequency: 
-0387 00 00 00 00  696         defb 0,0,0,0
-038b              697 
-038b              698 
-038b              699 FreqTable:
-038b 86 00 b8 00 0b 01 70 01 15 02  700         DEFW 134,184,267,368,533
-0395              701 PALFreqTable:
-0395 a0 00 dd 00 40 01 b9 01 80 02  702         DEFW 160,221,320,441,640
-039f              703 
-039f              704 ; $92
-039f              705 SETDACFREQ: ; 7D00 == 32000
-039f              706 ; 7D00 = 32000 = 533 N 640P ; 
-039f              707 ; 5622 = 22050 = 368 N 441P ; 
-039f              708 ; 3E80 = 16000 = 267 N 320P ; 
-039f              709 ; 2b11 = 11025 = 184 N 221P
-039f              710 ; 1f40 = 8000 =  134 N 160P
-039f              711 ;BREAKPOINT: JP BREAKPOINT
-039f cd bf 01     712         call GetNextSongByte ; STREAM I
-03a2 cd bf 01     713         call GetNextSongByte ; LOW BYTE FREQ 
-03a5 7e           714         ld a,(hl) 
-03a6 32 87 03     715         ld (RealFrequency),a 
-03a9 cd bf 01     716         call GetNextSongByte ; 8-15
-03ac 7e           717         ld a,(hl) 
-03ad 32 88 03     718         ld (RealFrequency+1),a
-03b0 cd bf 01     719         call GetNextSongByte ; byte 3
-03b3 cd bf 01     720         call GetNextSongByte ; byte 4
-03b6              721 
-03b6 e5           722         push hl 
-03b7 d5           723         push de 
-03b8              724 
-03b8 3a 88 00     725         ld a,(PALFlag)
-03bb fe 01        726         cp 1
-03bd 20 05        727         jr nz,__2 
-03bf 21 95 03     728         ld hl,PALFreqTable
-03c2 18 03        729         jr __1
-03c4              730 __2
-03c4 21 8b 03     731         ld hl,FreqTable
-03c7              732 __1
-03c7              733 
-03c7 3a 88 03     734         ld a,(RealFrequency+1)               ; high byte of real freq is all we care about        
-03ca fe 1f        735         cp $1f
-03cc 28 13        736         jr z,_set8
-03ce fe 2b        737         cp $2b 
-03d0 28 11        738         jr z,_set11
-03d2 fe 3e        739         cp $3e 
-03d4 28 15        740         jr z,_set16 
-03d6 fe 56        741         cp $56 
-03d8 28 19        742         jr z,_set22 
-03da fe 7d        743         cp $7d 
-03dc 28 1d        744         jr z,_set32 
-03de c3 81 03     745         jp INVALIDFREQ 
-03e1              746 _set8:
-03e1 18 1e        747         jr _endfset
-03e3              748 _set11:
-03e3 b7           749         or a 
-03e4 11 02 00     750         ld de,2 
-03e7 ed 5a        751         adc hl,de 
-03e9 18 16        752         jr _endfset
-03eb              753 _set16:
-03eb b7           754         or a 
-03ec 11 04 00     755         ld de,4 
-03ef ed 5a        756         adc hl,de 
-03f1 18 0e        757         jr _endfset
-03f3              758 _set22:
-03f3 b7           759         or a 
-03f4 11 06 00     760         ld de,6 
-03f7 ed 5a        761         adc hl,de 
-03f9 18 06        762         jr _endfset
-03fb              763 _set32:
-03fb b7           764         or a 
-03fc 11 08 00     765         ld de,8 
-03ff ed 5a        766         adc hl,de 
-0401              767 
-0401              768 _endfset
-0401 7e           769         ld a,(hl) 
-0402 32 85 03     770         ld (DacFrequency),a 
-0405 23           771         inc hl 
-0406 7e           772         ld a,(hl) 
-0407 32 86 03     773         ld (DacFrequency+1),a 
-040a              774         
-040a d1           775         pop de
-040b e1           776         pop hl 
-040c              777         ;call GetNextSongByte ; (theres an extra 0?)
-040c              778 
-040c c3 17 01     779         jp PLAYLOOP 
-040f              780 
-040f              781 
-040f              782 ;;;;;;;;;;;;;;;;;
-040f              783 STARTDACSTREAM:
-040f              784 ;        inc hl  ; stream id 
-040f              785         ; TODO NOT USED IN MY EXAMPLES
-040f 18 fe        786         JR STARTDACSTREAM
-0411              787 
-0411              788 GETBLOCKSTRUCT:
-0411              789 ;;;;;;;;;;;;;;;;;;
-0411              790 ; IN: [A]
-0411              791 ; OUT: HL
-0411              792 ; PRESERVES BC 
-0411              793 ; * A H L 
-0411 c5           794         push bc 
-0412 21 90 04     795         ld hl,DataType ; block 0 byte 0
-0415 cb 27        796         sla a ; * 2
-0417 cb 27        797         sla a ; * 4
-0419 cb 27        798         sla a ; * 8 
-041b cb 27        799         sla a ; * 16  ; we are 16 bytes large 
-041d 85           800         add a,l   ; carry?
-041e 6f           801         ld l,a 
-041f 3e 00        802         ld a,0 
-0421 4f           803         ld c,a 
-0422 06 00        804         ld b,0   ; < this is to preserve carry 
-0424 ed 4a        805         adc hl,bc ; HL now has (DataType) + blockID*8
-0426 c1           806         pop bc 
-0427 c9           807         RET 
-0428              808 
-0428              809 ; 95 00 (0-15) 00
-0428 00           810 ActiveDacBlock: defb 0  ; which block 0-15 stored below
-0429 00 00 00 00  811 ActiveDacCtr: defb 0,0,0,0 ; 32bit count
-042d 00 00        812 ActiveDacLoc: defb 0,0  ; what is the memory offset
-042f 00           813 ActiveDacBank: defb 0   ; which 68000 memory bank
-0430 00           814 LoopDac: defb 0
-0431              815 
-0431              816 DACFASTCALL:
-0431              817 ;;;;;;;;;;;;;;;;;;;;;;;;
-0431              818 ; This should start the DAC playback
-0431              819 ; 95 00 
-0431              820 ; for data block info:
-0431              821 ; data type 1
-0431              822 ; datasize 4
-0431              823 ; dataloc 2  (hl) 
-0431              824 ; databank 1 (rom)
-0431              825 ; datacounter 4 (bytes left this loop)
-0431              826 ; blockactive 1 (gogogo)
-0431              827 ; 0X95
-0431 cd bf 01     828         call GetNextSongByte ; STREAM ID - ALWAYS 0 FOR NOW
-0434              829         ;ld a, 1
-0434              830         ;ld (DacTransferActive),a  ; SET TRANSFER TO ACTIVE SO WE DO IT LOL
-0434 cd bf 01     831         call GetNextSongByte
-0437 7e           832         ld a,(hl)       ; [A] contains block ID 
-0438 87           833         add a,a 
-0439 20 52        834         jr nz, _nope  ; FIXME: ONE STREAM FOR NOW
-043b              835         ; warning! only have ram for 0-15!
-043b 32 28 04     836         ld (ActiveDacBlock),a ; low byte 
-043e e5           837         push hl 
-043f cd 11 04     838          call GETBLOCKSTRUCT
-0442 e5           839          push HL 
-0443 c1           840          pop bc ; put it in BC
-0444 e1           841         pop hl ; recover song pointer 
-0445 cd bf 01     842         call GetNextSongByte ; block ID high 8 bits - skip this 
-0448              843         ;ld a,(bc) ; data type
-0448 03           844         INC BC 
-0449 03           845         INC BC 
-044a 03           846         INC BC 
-044b 03           847         INC BC  ; SKIP FOUR SIZE BYTES
-044c              848 
-044c 03           849         inc bc 
-044d 0a           850         ld a,(bc) 
-044e              851 ;        LD E,4 
-044e              852 ;        ADD A,E 
-044e 32 2d 04     853         ld (ActiveDacLoc),a 
-0451 03           854         inc bc         
-0452 0a           855         ld a,(bc)
-0453              856 ;        ADC A,0 
-0453 32 2e 04     857         ld (ActiveDacLoc+1),a ; 16bit dac offset ;a1e0
-0456              858 
-0456 03           859         inc bc 
-0457 0a           860         ld a,(bc) ; data rom bank #
-0458 32 2f 04     861         ld (ActiveDacBank),a 
-045b              862 
-045b d5           863         push de 
-045c 03           864         inc bc 
-045d 0a           865         ld a,(bc) ; CTR+0
-045e 57           866         ld d,a 
-045f 32 29 04     867         ld (ActiveDacCtr),a 
-0462 03           868         inc bc 
-0463 0a           869         ld a,(bc) 
-0464 32 2a 04     870         ld (ActiveDacCtr+1),a 
-0467 b2           871         or d 
-0468 57           872         ld d,a 
-0469 03           873         inc bc 
-046a 0a           874         ld a,(bc) 
-046b 32 2b 04     875         ld (ActiveDacCtr+2),a 
-046e b2           876         or d 
-046f 57           877         ld d,a 
-0470 03           878         inc bc 
-0471 0a           879         ld a,(bc) 
-0472 32 2c 04     880         ld (ActiveDacCtr+3),a ; store 32bit dac size
-0475 b2           881         or d 
-0476 fe 00        882         cp 0 
-0478 20 04        883         jr nz,_active
-047a              884 _inactive 
-047a 03           885         inc bc 
-047b af           886         xor a 
-047c 18 03        887         jr _setblockon
-047e              888 _active
-047e 03           889         inc bc 
-047f 3e 01        890         ld a,1
-0481              891 _setblockon
-0481 02           892         ld (bc),a 
-0482 d1           893         pop de 
-0483              894         ;INC HL          ; FLAGS 
-0483 cd bf 01     895         call GetNextSongByte
-0486 7e           896         ld a, (hl)      ; AM I LOOPING?
-0487 32 30 04     897         ld (LoopDac),a  ; FIXME - NO LOOP FOR NOW
-048a              898         ; enable!
-048a c3 17 01     899         jp PLAYLOOP 
-048d              900 _nope: 
-048d              901         ;call GetNextSongByte
-048d              902         ;call GetNextSongByte
-048d c3 17 01     903         jp PLAYLOOP
-0490              904 
-0490              905 ; Data Block struct:
-0490 ff           906 DataType: defb $ff
-0491 00 00 00 00  907 DataSize: defb 0,0,0,0
-0495 00 00        908 DataLoc: defb 0,0
-0497 00           909 DataBank: defb 0
-0498 00 00 00 00  910 DataCounter: defb 0,0,0,0 
-049c 00           911 BlockActive: defb 0
-049d 00 00 00     912 _buffer: defb 0,0,0          ; 16 bytes 
-04a0              913 ;Type (ff means empty) 1
-04a0              914 ; Compatible types:
-04a0              915 ; 0: YM2612 PCM data 
-04a0              916 ;Size 4
-04a0              917 ; 32 bit size (from VGM file)
-04a0              918 ;Loc 2 (HL offset of data start)
-04a0              919 ;Bank 1 (bank of data start)
-04a0              920 ;Counter 4 (32bit offset remaining to play of this loop)
-04a0              921 ;BlockActive: 1 if we need to dac stream it, 0 skips
-04a0              922 ;_buffer 3 : to align to 16 bytes
-04a0 ff 00 00 00 00 00 00 00  923 Block1: defb $ff,0,0,0,0,0,0,0
-04a8 00 00 00 00 00 00 00 00  924         defb $0,0,0,0,0,0,0,0
-04b0 ff 00 00 00 00 00 00 00  925 Block2: defb $ff,0,0,0,0,0,0,0
-04b8 00 00 00 00 00 00 00 00  926         defb $0,0,0,0,0,0,0,0
-04c0 ff 00 00 00 00 00 00 00  927 Block3: defb $ff,0,0,0,0,0,0,0
-04c8 00 00 00 00 00 00 00 00  928         defb $0,0,0,0,0,0,0,0
-04d0 ff 00 00 00 00 00 00 00  929 Block4: defb $ff,0,0,0,0,0,0,0
-04d8 00 00 00 00 00 00 00 00  930         defb $0,0,0,0,0,0,0,0
-04e0 ff 00 00 00 00 00 00 00  931 Block5: defb $ff,0,0,0,0,0,0,0
-04e8 00 00 00 00 00 00 00 00  932         defb $0,0,0,0,0,0,0,0
-04f0 ff 00 00 00 00 00 00 00  933 Block6: defb $ff,0,0,0,0,0,0,0
-04f8 00 00 00 00 00 00 00 00  934         defb $0,0,0,0,0,0,0,0
-0500 ff 00 00 00 00 00 00 00  935 Block7: defb $ff,0,0,0,0,0,0,0
-0508 00 00 00 00 00 00 00 00  936         defb $0,0,0,0,0,0,0,0
-0510 ff 00 00 00 00 00 00 00  937 Block8: defb $ff,0,0,0,0,0,0,0
-0518 00 00 00 00 00 00 00 00  938         defb $0,0,0,0,0,0,0,0
-0520 ff 00 00 00 00 00 00 00  939 Block9: defb $ff,0,0,0,0,0,0,0
-0528 00 00 00 00 00 00 00 00  940         defb $0,0,0,0,0,0,0,0
-0530 ff 00 00 00 00 00 00 00  941 Block10: defb $ff,0,0,0,0,0,0,0
-0538 00 00 00 00 00 00 00 00  942         defb $0,0,0,0,0,0,0,0
-0540 ff 00 00 00 00 00 00 00  943 Block11: defb $ff,0,0,0,0,0,0,0
-0548 00 00 00 00 00 00 00 00  944         defb $0,0,0,0,0,0,0,0
-0550 ff 00 00 00 00 00 00 00  945 Block12: defb $ff,0,0,0,0,0,0,0
-0558 00 00 00 00 00 00 00 00  946         defb $0,0,0,0,0,0,0,0
-0560 ff 00 00 00 00 00 00 00  947 Block13: defb $ff,0,0,0,0,0,0,0
-0568 00 00 00 00 00 00 00 00  948         defb $0,0,0,0,0,0,0,0
-0570 ff 00 00 00 00 00 00 00  949 Block14: defb $ff,0,0,0,0,0,0,0
-0578 00 00 00 00 00 00 00 00  950         defb $0,0,0,0,0,0,0,0
-0580 ff 00 00 00 00 00 00 00  951 Block15: defb $ff,0,0,0,0,0,0,0
-0588 00 00 00 00 00 00 00 00  952         defb $0,0,0,0,0,0,0,0
-0590              953 
-0590 00 00        954 DBWORK: defb 0,0
-0592              955 
-0592              956 DATABLOCK:
-0592              957 ;;;;;;;;;;;;
-0592              958 ;
-0592 d5           959       push de 
-0593 cd bf 01     960         call GetNextSongByte ; should be 0x66
-0596 7e           961         ld a,(hl) 
-0597              962         ; find an empty block of pointers
-0597 e5           963         push hl ;9f43 = 66
-0598 21 80 04     964          ld hl,DataType-16
-059b 01 10 00     965          ld bc,16      ; 16 BYTES IN SIZE 
-059e              966 _blockfind:
-059e af           967          xor a 
-059f ed 4a        968          adc hl,bc 
-05a1 7e           969          ld a,(hl)    ; hl += 16
-05a2 fe ff        970          cp $ff 
-05a4 28 02        971          jr z,_blockok 
-05a6 18 f6        972          jr _blockfind 
-05a8              973 _blockok:         
-05a8 e5           974          push hl 
-05a9 c1           975          pop bc ; now BC has block struct pointer. 
-05aa ed 43 90 05  976          LD (DBWORK),BC 
-05ae e1           977         pop hl                  
-05af              978 
-05af              979 ; FIXME I dont work with empty data blocks.
-05af cd bf 01     980         call GetNextSongByte
-05b2 7e           981         ld a,(hl) 
-05b3 02           982         ld (bc),a  ; data type  ; = 0
-05b4 cd bf 01     983         call GetNextSongByte
-05b7              984         ; TODO: Check data type
-05b7              985         
-05b7 03           986         inc bc 
-05b8 7e           987         ld a,(hl)  ; 9f45 = 77
-05b9 02           988         ld (bc),a ; data size
-05ba 32 29 00     989         ld (WORKRAM),a 
-05bd              990         ;ld d,a
-05bd cd bf 01     991         call GetNextSongByte
-05c0              992         
-05c0 7e           993         ld a,(hl)
-05c1 03           994         inc bc  
-05c2 02           995         ld (bc),a ; data size+1 = 0c
-05c3 32 2a 00     996         ld (WORKRAM+1),a ; for later
-05c6              997         ;or d 
-05c6              998         ;ld d,a
-05c6 cd bf 01     999         call GetNextSongByte
-05c9             1000         
-05c9 03          1001         inc bc 
-05ca 7e          1002         ld a,(hl) 
-05cb 02          1003         ld (bc),a ; data size+2 = 00
-05cc 32 2b 00    1004         ld (WORKRAM+2),a 
-05cf             1005         ;or d  
-05cf             1006         ;ld d,a 
-05cf cd bf 01    1007         call GetNextSongByte
-05d2             1008         
-05d2 03          1009         inc bc 
-05d3 7e          1010         ld a,(hl) 
-05d4 02          1011         ld (bc),a ; data size+3 = 00
-05d5 32 2c 00    1012         ld (WORKRAM+3),a 
-05d8             1013         ;or d
-05d8             1014         ;CP 0             ; D contains 0 if all bytes were 0 
-05d8             1015         ;jr z,_emptyblock ; so don't use this 
-05d8             1016         
-05d8             1017         ; now store HL, which is right before data start...
-05d8 03          1018         inc bc 
-05d9 7d          1019         ld a,l   ; dataloc l...
-05da 02          1020         ld (bc),a 
-05db             1021         
-05db 7c          1022         ld a,h   ; and h
-05dc             1023         ;and $7f 
-05dc 03          1024         inc bc 
-05dd 02          1025         ld (bc),a ;
-05de             1026         
-05de 3a 86 00    1027         ld a,(RomBank) 
-05e1 03          1028         inc bc     ; DataBank
-05e2 02          1029         ld (bc),a ; and store current rom bank, cuz this must be where it starts
-05e3 32 e0 01    1030         ld (ZadrWork),a 
-05e6 af          1031         xor a 
-05e7 32 e1 01    1032         ld (ZadrWork+1),a 
-05ea 22 e2 01    1033         ld (ZadrWork+2),hl ; 0, 0, 9a9f ( = 1a9f)
-05ed             1034 ;Counter 4 (32bit offset remaining to play of this loop)
-05ed 2a 29 00    1035         ld hl,(WORKRAM) 
-05f0 7d          1036         ld a,l 
-05f1 03          1037         inc bc     ; ctr+0
-05f2 02          1038         ld (bc),a 
-05f3 7c          1039         ld a,h 
-05f4 03          1040         inc bc 
-05f5 02          1041         ld (bc),a  ; ctr+1 
-05f6 2a 2b 00    1042         ld hl,(WORKRAM+2) 
-05f9 7d          1043         ld a,l 
-05fa 03          1044         inc bc   ; ctr+2
-05fb 02          1045         ld (bc),a 
-05fc 7c          1046         ld a,h 
-05fd 03          1047         inc bc 
-05fe 02          1048         ld (bc),a  ; ctr+3 
-05ff             1049         ; BlockActive starts at 0, we set it to 1 when we hit FASTCALL. 
-05ff             1050         ; so ignore the rest.
-05ff             1051 
-05ff             1052         ; NEW FUNCTION: Get 68000 address from current bank/HL
-05ff cd 20 02    1053         call GETROMADDRESS
-0602             1054         ; ZadrWork = 32bit address of data bank start 
-0602             1055         ; WORKRAM = data size 
-0602             1056         ; add WORKRAM to ZadrWork
-0602 2a e0 01    1057         ld hl,(ZadrWork) ; 
-0605 ed 4b 29 00 1058         ld bc,(WORKRAM)  ; data size low 16 
-0609 b7          1059         or a 
-060a ed 4a       1060         adc hl,bc ; check carry 
-060c 22 e0 01    1061         ld (ZadrWork),hl ; save low 16
-060f 2a e2 01    1062         ld hl,(ZadrWork+2) 
-0612 01 00 00    1063         ld bc,$0000
-0615 ed 4a       1064         adc hl,bc  ; ok  ; carry is cleared here)
-0617 ed 4b 2b 00 1065         ld bc,(WORKRAM+2) 
-061b ed 4a       1066         adc hl,bc  ; upper 16
-061d 22 e2 01    1067         ld (ZadrWork+2),hl 
-0620 cd e4 01    1068         call SETZADDRESS  ; s
-0623             1069         ; now our song pointer and rom window should be
-0623             1070         ; at the byte following the data block -1.
-0623 d1          1071      pop de 
-0624             1072 _compressed: ; TODO do extra stuff for compressed data
-0624             1073 _uncompressed:
-0624             1074 
-0624 c3 17 01    1075         jp PLAYLOOP     
-0627             1076 
-0627             1077 _emptyblock
-0627 3e ff       1078         LD A,$FF 
-0629 e5          1079         PUSH HL 
-062a 2a 90 05    1080         LD HL,(DBWORK) 
-062d 77          1081         LD (HL),A 
-062e e1          1082         POP HL 
-062f d1          1083         POP DE 
-0630 c3 17 01    1084         JP PLAYLOOP 
-0633             1085 
-0633             1086 BANKSWAP:
-0633             1087 ;;;;;;;;;;;;;
-0633             1088 ; * A (preserve bc)
-0633             1089 ; RomBank has the # of the 32kb block to write to 6001.
-0633             1090 ;  Keep it 8 bits for now FIXME for > 8MB song locations 
-0633 c5          1091         push bc 
-0634 0e 01       1092         ld c, 1         ; = 0b00000001
-0636 b7          1093         or a 
-0637             1094 _bswp2: 
-0637 3a 86 00    1095         ld a,(RomBank)
-063a a1          1096         and c 
-063b fe 00       1097         cp 0 
-063d 28 02       1098         jr z,_bzero 
-063f 18 03       1099         jr _bone
-0641             1100 _bzero: 
-0641             1101         ;call ZWAIT 
-0641 af          1102         xor a 
-0642 18 02       1103         jr _bwrt 
-0644             1104 _bone:
-0644             1105         ;call ZWAIT 
-0644 3e 01       1106         ld a,1
-0646             1107 _bwrt:
-0646 32 01 60    1108         ld ($6001),a 
-0649 cb 21       1109         sla c           ; = 0b00000010
-064b 30 ea       1110         jr nc,_bswp2    ; loop until bit goes into carry
-064d             1111 
-064d             1112         ;call ZWAIT 
-064d af          1113         xor a 
-064e 32 01 60    1114         ld ($6001),a       ; 9 bit = 0 ( works for < 8MB)
-0651 c1          1115         pop bc 
-0652 c9          1116         ret 
-0653             1117 ;;;;
-0653             1118 
-0653             1119 BANKUP:
-0653             1120 ;;;;;;;;;;;;;;
-0653             1121 ; * A H L
-0653             1122 ; Pops up the rom bank by 1 and 
-0653             1123 ; sets HL back to $8000
-0653 3a 86 00    1124         ld a,(RomBank) 
-0656 3c          1125         inc a 
-0657 32 86 00    1126         ld (RomBank),a 
-065a cd 33 06    1127         call BANKSWAP 
-065d 21 00 80    1128         ld hl,$8000
-0660 c9          1129         ret 
-0661             1130 ;;;;
-0661             1131 
-0661             1132 
-0661             1133 WRITEFM1:
-0661             1134 ;;;;;;;;;;;;;;;;;;;
-0661             1135 ; HL - location of song byte
-0661             1136 ; * A  
-0661 cd bf 01    1137         call GetNextSongByte ; register 
-0664 cd 78 06    1138         CALL ZWAIT 
-0667 7e          1139         LD A,(HL) 
-0668 32 00 40    1140         LD (FMREG0),A
-066b cd bf 01    1141         call GetNextSongByte ; data byte 
-066e cd 78 06    1142         CALL ZWAIT  
-0671 7e          1143         LD A,(HL) 
-0672 32 01 40    1144         LD (FMDAT0),A 
-0675 c3 17 01    1145         JP PLAYLOOP
-0678             1146 ;;;;
-0678             1147 
-0678             1148 ZWAIT:
-0678             1149 ;;;;;;;;;;;;;;;;;;
-0678             1150 ; * A C
-0678 3a 00 40    1151         LD A,($4000) 
-067b 87          1152         ADD A, A 
-067c 38 fa       1153         JR C,ZWAIT   
-067e c9          1154         RET 
-067f             1155 ;;;;
-067f             1156 
-067f             1157 WRITEFM2:
-067f             1158 ;;;;;;;;;;;;;;;;
-067f             1159 ; HL = song byte
-067f             1160 ; * A
-067f cd bf 01    1161         call GetNextSongByte
-0682 cd 78 06    1162         CALL ZWAIT 
-0685 7e          1163         LD A,(HL) 
-0686 32 02 40    1164         LD (FMREG1),A 
-0689 cd bf 01    1165         call GetNextSongByte
-068c cd 78 06    1166         CALL ZWAIT 
-068f 7e          1167         LD A,(HL) 
-0690 32 03 40    1168         LD (FMDAT1),A 
-0693 c3 17 01    1169         JP PLAYLOOP 
-0696             1170 ;;;;
-0696             1171 
-0696             1172 WRITEPSG:
-0696             1173 ;;;;;;;;;;;;;;;;
-0696             1174 ; HL = song byte 
-0696             1175 ; * A
-0696 cd bf 01    1176         call GetNextSongByte
-0699             1177         ;CALL ZWAIT 
-0699 7e          1178         LD A,(HL) 
-069a 32 11 7f    1179         ld (PSGREG),a 
-069d c3 17 01    1180         JP PLAYLOOP 
-06a0             1181 ;;;;
-06a0             1182 
-06a0             1183 
-06a0             1184 
-06a0             1185 SAMPLEWAIT:
-06a0             1186 ;;;;;;;;;;;
-06a0             1187 ; * A, B, C
-06a0             1188 ; HL = song byte 
-06a0             1189         ;jp SAMPLEWAIT 
-06a0 cd bf 01    1190         call GetNextSongByte
-06a3 7e          1191         LD A,(HL)
-06a4 4f          1192         LD C,A  
-06a5 cd bf 01    1193         call GetNextSongByte
-06a8 7e          1194         LD A,(HL)
-06a9 47          1195         LD B,A          ; BC = SAMPLE WAIT 16BIT
-06aa             1196 _sw2 
-06aa             1197         ;call DACBLOCKTRANSFER
-06aa             1198 _sampwt:        
-06aa 3a 80 00    1199         LD A,(PlayNext)  ; check the 'play next frame' var
-06ad fe 00       1200         CP 0             ; is it = 1?
-06af 28 f9       1201         JR Z,_sampwt    ; if not, wait until frame is over
-06b1             1202         ;call DACBLOCKTRANSFER
-06b1 af          1203         xor a
-06b2 32 80 00    1204         ld (PlayNext),a  ; clear play var
-06b5             1205         ; subtract 735 from BC 
-06b5 e5          1206         push hl         ; save song pointer
-06b6 c5          1207           push bc       ; sample wait value:
-06b7 e1          1208           pop hl        ; bc to hl 
-06b8 3a 88 00    1209          ld a,(PALFlag) 
-06bb fe 01       1210          cp 1 
-06bd 20 05       1211          jr nz,_palsize
-06bf 01 0b 01    1212          ld bc,267   ;735      ; NTSC < WTF TODO
-06c2 18 03       1213          jr __3
-06c4             1214 _palsize 
-06c4 01 72 03    1215          ld bc,882      ; PAL
-06c7             1216 __3 
-06c7 ed 42       1217          sbc hl,bc      ; samplewait - 735 -> HL
-06c9 e5          1218          push hl 
-06ca c1          1219          pop bc         ; store it back in bc 
-06cb e1          1220         pop hl          ; recover song pointer
-06cc 30 dc       1221         jr nc,_sw2   ; wait another frame if samplewait is still > 0
-06ce             1222 
-06ce c3 17 01    1223         JP PLAYLOOP 
-06d1             1224 ;;;;
-06d1             1225 
-06d1             1226 
-06d1             1227 CLEARPSG:
-06d1             1228 ;;;;;;;;;;;;;;;;;;;;
-06d1             1229 ; clear the SSG (mute)
-06d1             1230 ; * A, B (preserve HL)
-06d1 e5          1231         push hl 
-06d2 21 20 00    1232         LD HL,CLRTB 
-06d5 06 04       1233         ld b,4
-06d7             1234 _clearlp:
-06d7 7e          1235         ld a,(hl) 
-06d8 32 11 7f    1236         ld (PSGREG),a 
-06db cd bf 01    1237         call GetNextSongByte
-06de 10 f7       1238         djnz _clearlp
-06e0 e1          1239         pop hl 
-06e1 c9          1240         RET
-06e2             1241 ;;;;
-1683 bytes code generated and 149 labels defined
+01c7              326 
+01c7              327 VOLUMESET:
+01c7              328         ;JP PLAYLOOP  
+01c7 c3 c7 01     329         JP VOLUMESET 
+01ca              330         
+01ca              331 
+01ca 11           332 aaa: defb $11
+01cb              333 WRITEPCM:
+01cb              334         ;jp PLAYLOOP  
+01cb c3 cb 01     335         JP WRITEPCM 
+01ce 22           336 bbb: defb $22
+01cf              337 ; Waits 1-16 samples
+01cf              338 QWAIT:
+01cf              339         ; TOO SHORT TO NOTICE?
+01cf e6 0f        340         and $0f 
+01d1 47           341         ld b,a 
+01d2 0e 00        342         ld c,0 
+01d4              343 _qwl:   ; idk what to do other than skip 256*n cycles
+01d4 0b           344         dec bc 
+01d5 79           345         ld a,c 
+01d6 b0           346         or b 
+01d7 20 fb        347         jr nz, _qwl
+01d9              348         ;JP QWAIT 
+01d9 c3 17 01     349         JP PLAYLOOP 
+01dc 33           350 ccc: defb $33
+01dd              351 QFMWAIT:
+01dd              352         ;jp PLAYLOOP 
+01dd c3 dd 01     353         JP QFMWAIT 
+01e0              354 
+01e0 00 00 00 00  355 ZadrWork: defb 0,0,0,0
+01e4              356 
+01e4              357 SETZADDRESS:
+01e4              358 ;;;;;;;;;;;;;;;;;;
+01e4              359 ; * A H L 
+01e4              360 ; Input: ZadrWork 32-bit address (68000 memory)
+01e4              361 ; Output: changes active rom bank, and sets HL to mem addr
+01e4 2a e1 01     362         ld hl,(ZadrWork+1) ; ignore bits 0-7, so we have 8-23
+01e7 af           363         xor a ; clc 
+01e8 cb 3c        364         srl h
+01ea cb 1d        365         rr l   ; hl >> 1
+01ec cb 3c        366         srl h
+01ee cb 1d        367         rr l   ; hl >> 2
+01f0 cb 3c        368         srl h
+01f2 cb 1d        369         rr l   ; hl >> 3
+01f4 cb 3c        370         srl h
+01f6 cb 1d        371         rr l   ; hl >> 4
+01f8 cb 3c        372         srl h
+01fa cb 1d        373         rr l   ; hl >> 5
+01fc cb 3c        374         srl h
+01fe cb 1d        375         rr l   ; hl >> 6
+0200 cb 3c        376         srl h
+0202 cb 1d        377         rr l   ; hl >> 7 
+0204 7d           378         ld a,l 
+0205 32 86 00     379         ld (RomBank),a ; BITS 15-22
+0208 cd 39 06     380         call BANKSWAP
+020b 2a e0 01     381         LD HL,(ZadrWork)  ; 0-15 
+020e 3e 7f        382         ld a,$7f 
+0210 a4           383         and h 
+0211 f6 80        384         or $80 ; always set top bit so we look at $8000 + 
+0213 67           385         ld h,a
+0214 e5           386         push hl 
+0215 21 00 00     387         ld hl,$0000 
+0218 22 e0 01     388         ld (ZadrWork),hl 
+021b 22 e2 01     389         ld (ZadrWork+2),hl 
+021e e1           390         pop hl 
+021f              391         ; [HL] now contains memory pointer!
+021f c9           392         ret
+0220              393 ;;;;
+0220              394 
+0220              395 GETROMADDRESS: 
+0220              396 ;;;;;;;;;;;;;;
+0220              397 ; INPUT: ZadrWork+0 BANK
+0220              398 ;        ZadrWork+2~ZadrWork+3 HL
+0220              399 ; (bank * 8000) + HL & 7fff
+0220              400 ; OUTPUT: ZadrWork ~ ZadrWork+3 CONTAINS LONGWORD ADDRESS
+0220              401 ; * A
+0220              402 ; Preserves HL
+0220 e5           403         push hl
+0221 c5           404         push bc  
+0222 af           405          xor a ; clc 
+0223 3a e0 01     406          ld a,(ZadrWork) ; contains RomBank, A15-A22
+0226              407          ; 15:
+0226 e6 01        408          and $1 
+0228 cb 1f        409          rr a   ; 15 > carry 
+022a cb 1f        410          rr a   ; carry > 7, carry = 0
+022c 47           411          ld b,a ; contains bit 15 ; SAVE
+022d 3a e0 01     412          ld a,(ZadrWork) ; 15-22...
+0230 e6 fe        413          and $fe
+0232 cb 3f        414          srl a    ; and the last bit and shift RIGHT, so we have 16-23 (minus23)
+0234 2a e2 01     415          ld hl,(ZadrWork+2) 
+0237 32 e2 01     416          ld (ZadrWork+2),a ; put it in the 3rd byte 
+023a af           417          xor a 
+023b 32 e0 01     418          ld (ZadrWork),a 
+023e 32 e1 01     419          ld (ZadrWork+1),a ; zero the first two
+0241              420          
+0241 3e 7f        421          ld a,$7f 
+0243 a4           422          and h ; hl = bits 0-14, dont forget 15 in b!
+0244 b0           423          or b           ; d(>.< )
+0245 67           424          ld h,a
+0246 22 e0 01     425          ld (ZadrWork),hl 
+0249 af           426          xor a 
+024a 32 e3 01     427          ld (ZadrWork+3),a ; 24-31 are always 0
+024d c1           428         pop bc 
+024e e1           429         pop hl 
+024f c9           430         RET 
+0250              431 
+0250 00 00        432 DacWRAM: defb 0, 0
+0252              433 DACWORK
+0252 00 00 00 00  434         defb 0,0,0,0
+0256              435 ; Block struct:
+0256              436 ;Type (ff means empty) 1
+0256              437 ; Compatible types:
+0256              438 ; 0: YM2612 PCM data 
+0256              439 ;Size 4
+0256              440 ; 32 bit size (from VGM file)
+0256              441 ;Loc 2 (HL offset of data start)
+0256              442 ;Bank 1 (bank of data start)
+0256              443 ;Counter 4 (32bit offset remaining to play of this loop)
+0256              444 ;BlockActive: 1 if we need to dac stream it, 0 skips
+0256              445 ;_buffer 3 : to align to 16 bytes
+0256              446 
+0256              447 DACBLOCKTRANSFER:
+0256              448         ;ret 
+0256              449 
+0256              450 ;; Step through me again
+0256              451         ; PRESERVE CURRENT ROM BANK AND SONG PTR IN WORKRAM~+3
+0256 3a 86 00     452         ld a,(RomBank)          
+0259 32 52 02     453         ld (DACWORK),a 
+025c af           454         xor a
+025d 32 53 02     455         ld (DACWORK+1),a     ; saving me for later!
+0260 22 54 02     456         ld (DACWORK+2),hl       
+0263              457         ; LOOP THROUGH DATA STRUCT[], SEARCH FOR ACTIVE BYTE == 1
+0263              458 ;        ld hl,BlockActive-16
+0263              459 ;        ld b,16   ; 16 data arrays
+0263              460 ;        ld de,1  ; 16 bytes each FIXME
+0263              461 ;_nextdb
+0263              462 ;        OR A 
+0263              463 ;        adc hl,de 
+0263              464 ;        ld a,(hl) 
+0263              465 ;        cp $0
+0263              466 ;        jr nz,_found
+0263              467 ;        djnz _nextdb
+0263              468 ;        cp $0 
+0263              469 ;        jp z,_daclpend     ; if all are 0, return
+0263              470 _found
+0263              471         ; TESTING 
+0263 3a a2 04     472         ld a,(BlockActive) 
+0266 fe 00        473         cp 0 
+0268 c8           474         ret z 
+0269              475         ; b = 15 to 0 (to flip: 15 - b)
+0269              476         ;ld hl,15 
+0269              477         ;ld c,0
+0269              478         ;or a 
+0269              479         ;sbc hl,bc 
+0269              480         ;ld a,l
+0269              481         ; now [A] has active data bank 0-15
+0269              482         ; TODO 
+0269              483         ; GET THE STRUCT'S CTR, STORE IT IN ACTIVEDACCTR
+0269              484 
+0269              485         ; switch to ActiveDacBank|ActiveDacLoc 
+0269 3a 35 04     486         ld a,(ActiveDacBank)     ; = 0
+026c 32 86 00     487         ld (RomBank),a 
+026f cd 39 06     488         call BANKSWAP 
+0272              489         ; output 267 bytes from the bank (TODO DacFrequency)
+0272              490         ; 1. CHECK ACTIVEDACCTR+2~3 - IF > 0, BC = $10B
+0272              491         ; 2. COMPARE ADC+0~1 WITH $10B - IF >, BC=$10B
+0272              492         ;    ELSE BC = ADC+0~1
+0272              493         ; STORE BC IN DACWRAM
+0272              494         
+0272 cd 7e 06     495         CALL ZWAIT 
+0275 3e 2b        496         ld a,$2b 
+0277 32 00 40     497         ld ($4000),a 
+027a cd 7e 06     498         CALL ZWAIT 
+027d 3e 80        499         ld a,$80 
+027f 32 01 40     500         ld ($4001),a 
+0282 2a 31 04     501         LD HL,(ActiveDacCtr+2) 
+0285 7c           502         LD A,H 
+0286 b5           503         or L 
+0287 20 1a        504         JR NZ,_norm   ; if either of the two high bytes are > 0, normal.
+0289              505         
+0289 ed 4b 2f 04  506         ld bc,(ActiveDacCtr) 
+028d 3a 8b 03     507         ld a,(DacFrequency)
+0290 91           508         sub c 
+0291 3a 8c 03     509         ld a,(DacFrequency+1)
+0294 98           510         sbc a,b 
+0295 38 0c        511         jr c,_norm 
+0297              512         ; else, short dac 
+0297 ed 4b 2f 04  513         ld bc,(ActiveDacCtr) 
+029b 79           514         ld a,c 
+029c b0           515         or b
+029d ca f1 02     516         jp z,_enddac
+02a0 c3 a7 02     517         jp _nr
+02a3              518 _norm:
+02a3              519 ;BREAKPOINT: JP BREAKPOINT 
+02a3 ed 4b 8b 03  520         ld bc,(DacFrequency) ;; (DacFrequency) ; hopefully 267: debug me
+02a7              521 _nr:
+02a7 ed 43 50 02  522         ld (DacWRAM),bc 
+02ab 2a 33 04     523         ld hl,(ActiveDacLoc) ; already -1!
+02ae              524 dacwriteloop:
+02ae cd 7e 06     525         call ZWAIT 
+02b1 3e 2a        526         ld a,$2a
+02b3 32 00 40     527         ld ($4000),a
+02b6 cd bf 01     528         call GetNextSongByte
+02b9 cd 7e 06     529         call ZWAIT  
+02bc 7e           530         ld a,(hl)
+02bd 32 01 40     531         ld ($4001),a 
+02c0              532         
+02c0 0b           533         dec bc
+02c1 79           534         ld a,c 
+02c2 b0           535         or b 
+02c3 20 e9        536         jr nz,dacwriteloop ; a360 bank 0
+02c5              537         ; 3. SUBTRACT DACWRAM FROM ADC (32BIT-16BIT)
+02c5 3a 86 00     538         ld a,(RomBank) 
+02c8 32 35 04     539         ld (ActiveDacBank),a ; may be unnecessary 
+02cb 22 33 04     540         ld (ActiveDacLoc),hl 
+02ce              541         
+02ce b7           542         or a ; clc 
+02cf e5           543         push hl 
+02d0 c5           544          push bc 
+02d1 2a 2f 04     545           ld hl,(ActiveDacCtr) 
+02d4 ed 4b 50 02  546           ld bc,(DacWRAM) 
+02d8 b7           547           or a  ; clc 
+02d9 ed 42        548           sbc hl,bc 
+02db 22 2f 04     549           ld (ActiveDacCtr),hl 
+02de ca f1 02     550           jp z,_enddac 
+02e1 f2 f8 02     551           jp p,_nouflow
+02e4 da f1 02     552           jp c,_enddac 
+02e7              553           ; else dec adc+2 
+02e7 2a 31 04     554           ld hl,(ActiveDacCtr+2) 
+02ea 2b           555           dec hl 
+02eb 22 31 04     556           ld (ActiveDacCtr+2),hl 
+02ee              557         ; 4. IF ADC UNDERFLOWS, END DAC (or check loop if its there)
+02ee f2 f8 02     558           jp p,_nouflow ; if < 0, we're done with this. 
+02f1              559 _enddac:
+02f1 cd 16 03     560           CALL QUICKSTOP
+02f4 af           561           xor a 
+02f5 32 8a 03     562           ld (DacTransferActive),a 
+02f8              563 _nouflow: 
+02f8 c1           564          pop bc 
+02f9 e1           565         pop hl 
+02fa              566 _daclpend:
+02fa cd 7e 06     567         call ZWAIT 
+02fd 3e 2b        568         ld a,$2b 
+02ff 32 00 40     569         ld ($4000),a
+0302 cd 7e 06     570         CALL ZWAIT  
+0305 af           571         xor a
+0306 32 01 40     572         ld ($4001),a 
+0309              573         
+0309 3a 52 02     574         ld a,(DACWORK) 
+030c 32 86 00     575         ld (RomBank),a 
+030f cd 39 06     576         call BANKSWAP 
+0312 2a 54 02     577         ld hl,(DACWORK+2) 
+0315              578         ; dont get next song byte outside the loop.
+0315 c9           579         ret 
+0316              580 ;;;;
+0316              581 
+0316              582 QUICKSTOP:
+0316              583         
+0316              584 ; TODO 
+0316              585 ; get the active dac block (this is set inside the transfer each loop)
+0316              586 ;  (ActiveDacBlock) is not used anywhere else
+0316              587 ; set that block's "active" byte and counter to 0
+0316 3a 2e 04     588         ld a,(ActiveDacBlock)   ; ? 
+0319 e5           589         push hl 
+031a c5           590          push bc 
+031b cd 17 04     591           call GETBLOCKSTRUCT
+031e 01 0c 00     592           ld bc,12 ; +12 = ACTIVE BYTE 
+0321 b7           593           or a 
+0322 ed 4a        594           adc hl,bc 
+0324 af           595           xor a 
+0325 77           596           ld (hl),a 
+0326              597           ;ld (DacTransferActive),a 
+0326              598           ;ld (ActiveDacBank),a 
+0326 c1           599          pop bc 
+0327 e1           600         pop hl 
+0328              601         ;?
+0328 32 2e 04     602         ld (ActiveDacBlock),a 
+032b 32 2f 04     603         ld (ActiveDacCtr),a 
+032e 32 30 04     604         ld (ActiveDacCtr+1),a 
+0331 32 31 04     605         ld (ActiveDacCtr+2),a 
+0334 32 32 04     606         ld (ActiveDacCtr+3),a 
+0337 32 33 04     607         ld (ActiveDacLoc),a 
+033a 32 34 04     608         ld (ActiveDacLoc+1),a 
+033d              609 ;       block transfer method takes care of turning off DAC mode 
+033d c9           610         RET 
+033e              611 
+033e              612 STOPDAC:
+033e              613 ;;;;;;;;;;;;;;
+033e              614 ; Stops DAC and disables DAC mode on CH6
+033e              615 ; FIXME broken ?
+033e cd bf 01     616         call GetNextSongByte ; unused 
+0341 af           617         xor a 
+0342 32 8a 03     618         ld (DacTransferActive),a 
+0345 32 35 04     619         ld (ActiveDacBank),a 
+0348 32 2e 04     620         ld (ActiveDacBlock),a 
+034b 32 2f 04     621         ld (ActiveDacCtr),a 
+034e 32 30 04     622         ld (ActiveDacCtr+1),a 
+0351 32 31 04     623         ld (ActiveDacCtr+2),a 
+0354 32 32 04     624         ld (ActiveDacCtr+3),a 
+0357 32 33 04     625         ld (ActiveDacLoc),a 
+035a 32 34 04     626         ld (ActiveDacLoc+1),a 
+035d              627         ;call ZWAIT 
+035d              628         ;ld a,$2b 
+035d              629         ;ld ($4000),a 
+035d              630         ;call ZWAIT 
+035d              631         ;xor a 
+035d              632         ;;ld ($4001),a 
+035d c3 17 01     633         jp PLAYLOOP  
+0360              634 ;;;
+0360              635 
+0360 00           636 StreamID: defb 0
+0361              637 ; 90 0 2 0 2a 
+0361              638 ; TODO SUPPORT MORE THAN ONE DAC STREAM :)
+0361              639 DACSETUP:
+0361              640         ;INC HL  ; STREAM ID 
+0361 cd bf 01     641         call GetNextSongByte ; 0 
+0364 7e           642         LD A,(HL) 
+0365 32 60 03     643         LD (StreamID),A 
+0368              644         ; We only want DAC mode on while transferring, so we leave that to
+0368              645         ; the block transfer method
+0368              646         ;INC HL  ; CHIP TYPE 
+0368 cd bf 01     647         call GetNextSongByte ; 2 
+036b              648         ;LD A,(HL) ; for genesis this should only ever be 02
+036b              649         ;CP 2
+036b              650         ;JR NZ,fail
+036b              651         ; I ignore these two bytes because VGM files appear to have
+036b              652         ; discrepency over the byte order.
+036b cd bf 01     653         call GetNextSongByte ; write this byte 
+036e cd bf 01     654         call GetNextSongByte ; to this reg
+0371              655         
+0371 c3 17 01     656         jp PLAYLOOP 
+0374              657 
+0374              658 SETDACSTREAM:        
+0374              659 ; 0X91 <STREAM> <DATABANK ID> <STEP SIZE> <STEP BASE>
+0374              660 ;         0           0            1           0 
+0374              661 ; Preserves BC 
+0374 c5           662        push bc 
+0375 cd bf 01     663         call GetNextSongByte ; Stream ID is for multiple DAC channels.
+0378              664         ; Genesis only supports one, so we skip it
+0378 cd bf 01     665         call GetNextSongByte ; Databank
+037b              666         ; Set the active block
+037b 7e           667         ld a,(hl) 
+037c              668         ;ld (ActiveDacBlock),a 
+037c              669         ; always call DAC TRANSFER every frame, but loop it through the 
+037c              670         ;  data structs instead to find Active Byte = 1
+037c              671         ;push hl 
+037c              672          ;call GETBLOCKSTRUCT
+037c              673          ;or a 
+037c              674          ;ld bc,12 
+037c              675          ;adc hl,bc 
+037c              676          ;push hl 
+037c              677          ;pop bc 
+037c              678         ;pop hl   ; HL = song ptr, BC = address of block A active byte 
+037c              679         ;LD A,1
+037c              680         ;LD (BC),A 
+037c              681 
+037c cd bf 01     682         call GetNextSongByte ; always 1? (step)
+037f cd bf 01     683         call GetNextSongByte ; always 0? (step base)
+0382 c1           684        pop bc 
+0383              685 
+0383 c3 17 01     686         jp PLAYLOOP  
+0386              687 
+0386              688 _invfreq
+0386 88           689         defb $88
+0387 c3 87 03     690 INVALIDFREQ: JP INVALIDFREQ 
+038a              691 
+038a              692 DacTransferActive: 
+038a 00           693         defb 0
+038b              694 DacFrequency:
+038b 00 00        695         defb 0, 0
+038d              696 RealFrequency: 
+038d 00 00 00 00  697         defb 0,0,0,0
+0391              698 
+0391              699 ; 
+0391              700 FreqTable:
+0391 86 00 b8 00 0b 01 70 01 15 02  701         DEFW 134,184,267,368,533
+039b              702 PALFreqTable:
+039b a0 00 dd 00 40 01 b9 01 80 02  703         DEFW 160,221,320,441,640
+03a5              704 
+03a5              705 ; $92
+03a5              706 SETDACFREQ: ; 7D00 == 32000
+03a5              707 ; 7D00 = 32000 = 533 N 640P ; 
+03a5              708 ; 5622 = 22050 = 368 N 441P ; 
+03a5              709 ; 3E80 = 16000 = 267 N 320P ; 
+03a5              710 ; 2b11 = 11025 = 184 N 221P
+03a5              711 ; 1f40 = 8000 =  134 N 160P
+03a5              712 ;BREAKPOINT: JP BREAKPOINT
+03a5 cd bf 01     713         call GetNextSongByte ; STREAM I
+03a8 cd bf 01     714         call GetNextSongByte ; LOW BYTE FREQ 
+03ab 7e           715         ld a,(hl) 
+03ac 32 8d 03     716         ld (RealFrequency),a 
+03af cd bf 01     717         call GetNextSongByte ; 8-15
+03b2 7e           718         ld a,(hl) 
+03b3 32 8e 03     719         ld (RealFrequency+1),a
+03b6 cd bf 01     720         call GetNextSongByte ; byte 3
+03b9 cd bf 01     721         call GetNextSongByte ; byte 4
+03bc              722 
+03bc e5           723         push hl 
+03bd d5           724         push de 
+03be              725 
+03be 3a 88 00     726         ld a,(PALFlag)
+03c1 fe 01        727         cp 1
+03c3 20 05        728         jr nz,__2 
+03c5 21 9b 03     729         ld hl,PALFreqTable
+03c8 18 03        730         jr __1
+03ca              731 __2
+03ca 21 91 03     732         ld hl,FreqTable
+03cd              733 __1
+03cd              734 
+03cd 3a 8e 03     735         ld a,(RealFrequency+1)               ; high byte of real freq is all we care about        
+03d0 fe 1f        736         cp $1f
+03d2 28 13        737         jr z,_set8
+03d4 fe 2b        738         cp $2b 
+03d6 28 11        739         jr z,_set11
+03d8 fe 3e        740         cp $3e 
+03da 28 15        741         jr z,_set16 
+03dc fe 56        742         cp $56 
+03de 28 19        743         jr z,_set22 
+03e0 fe 7d        744         cp $7d 
+03e2 28 1d        745         jr z,_set32 
+03e4 c3 87 03     746         jp INVALIDFREQ 
+03e7              747 _set8:
+03e7 18 1e        748         jr _endfset
+03e9              749 _set11:
+03e9 b7           750         or a 
+03ea 11 02 00     751         ld de,2 
+03ed ed 5a        752         adc hl,de 
+03ef 18 16        753         jr _endfset
+03f1              754 _set16:
+03f1 b7           755         or a 
+03f2 11 04 00     756         ld de,4 
+03f5 ed 5a        757         adc hl,de 
+03f7 18 0e        758         jr _endfset
+03f9              759 _set22:
+03f9 b7           760         or a 
+03fa 11 06 00     761         ld de,6 
+03fd ed 5a        762         adc hl,de 
+03ff 18 06        763         jr _endfset
+0401              764 _set32:
+0401 b7           765         or a 
+0402 11 08 00     766         ld de,8 
+0405 ed 5a        767         adc hl,de 
+0407              768 
+0407              769 _endfset
+0407 7e           770         ld a,(hl) 
+0408 32 8b 03     771         ld (DacFrequency),a  
+040b 23           772         inc hl 
+040c 7e           773         ld a,(hl) 
+040d 32 8c 03     774         ld (DacFrequency+1),a 
+0410              775         
+0410 d1           776         pop de
+0411 e1           777         pop hl 
+0412              778         ;call GetNextSongByte ; (theres an extra 0?)
+0412              779 
+0412 c3 17 01     780         jp PLAYLOOP 
+0415              781 
+0415              782 
+0415              783 ;;;;;;;;;;;;;;;;;
+0415              784 STARTDACSTREAM:
+0415              785 ;        inc hl  ; stream id 
+0415              786         ; TODO NOT USED IN MY EXAMPLES
+0415 18 fe        787         JR STARTDACSTREAM
+0417              788 
+0417              789 GETBLOCKSTRUCT:
+0417              790 ;;;;;;;;;;;;;;;;;;
+0417              791 ; IN: [A]
+0417              792 ; OUT: HL
+0417              793 ; PRESERVES BC 
+0417              794 ; * A H L 
+0417 c5           795         push bc 
+0418 21 96 04     796         ld hl,DataType ; block 0 byte 0
+041b cb 27        797         sla a ; * 2
+041d cb 27        798         sla a ; * 4
+041f cb 27        799         sla a ; * 8 
+0421 cb 27        800         sla a ; * 16  ; we are 16 bytes large 
+0423 85           801         add a,l   ; carry?
+0424 6f           802         ld l,a 
+0425 3e 00        803         ld a,0 
+0427 4f           804         ld c,a 
+0428 06 00        805         ld b,0   ; < this is to preserve carry 
+042a ed 4a        806         adc hl,bc ; HL now has (DataType) + blockID*8
+042c c1           807         pop bc 
+042d c9           808         RET 
+042e              809 
+042e              810 ; 95 00 (0-15) 00
+042e 00           811 ActiveDacBlock: defb 0  ; which block 0-15 stored below
+042f 00 00 00 00  812 ActiveDacCtr: defb 0,0,0,0 ; 32bit count
+0433 00 00        813 ActiveDacLoc: defb 0,0  ; what is the memory offset
+0435 00           814 ActiveDacBank: defb 0   ; which 68000 memory bank
+0436 00           815 LoopDac: defb 0
+0437              816 
+0437              817 DACFASTCALL:
+0437              818 ;;;;;;;;;;;;;;;;;;;;;;;;
+0437              819 ; This should start the DAC playback
+0437              820 ; 95 00 
+0437              821 ; for data block info:
+0437              822 ; data type 1
+0437              823 ; datasize 4
+0437              824 ; dataloc 2  (hl) 
+0437              825 ; databank 1 (rom)
+0437              826 ; datacounter 4 (bytes left this loop)
+0437              827 ; blockactive 1 (gogogo)
+0437              828 ; 0X95
+0437 cd bf 01     829         call GetNextSongByte ; STREAM ID - ALWAYS 0 FOR NOW
+043a              830         ;ld a, 1
+043a              831         ;ld (DacTransferActive),a  ; SET TRANSFER TO ACTIVE SO WE DO IT LOL
+043a cd bf 01     832         call GetNextSongByte
+043d 7e           833         ld a,(hl)       ; [A] contains block ID 
+043e 87           834         add a,a 
+043f 20 52        835         jr nz, _nope  ; FIXME: ONE STREAM FOR NOW
+0441              836         ; warning! only have ram for 0-15!
+0441 32 2e 04     837         ld (ActiveDacBlock),a ; low byte 
+0444 e5           838         push hl 
+0445 cd 17 04     839          call GETBLOCKSTRUCT
+0448 e5           840          push HL 
+0449 c1           841          pop bc ; put it in BC
+044a e1           842         pop hl ; recover song pointer 
+044b cd bf 01     843         call GetNextSongByte ; block ID high 8 bits - skip this 
+044e              844         ;ld a,(bc) ; data type
+044e 03           845         INC BC 
+044f 03           846         INC BC 
+0450 03           847         INC BC 
+0451 03           848         INC BC  ; SKIP FOUR SIZE BYTES
+0452              849 
+0452 03           850         inc bc 
+0453 0a           851         ld a,(bc) 
+0454              852 ;        LD E,4 
+0454              853 ;        ADD A,E 
+0454 32 33 04     854         ld (ActiveDacLoc),a 
+0457 03           855         inc bc         
+0458 0a           856         ld a,(bc)
+0459              857 ;        ADC A,0 
+0459 32 34 04     858         ld (ActiveDacLoc+1),a ; 16bit dac offset ;a1e0
+045c              859 
+045c 03           860         inc bc 
+045d 0a           861         ld a,(bc) ; data rom bank #
+045e 32 35 04     862         ld (ActiveDacBank),a 
+0461              863 
+0461 d5           864         push de 
+0462 03           865         inc bc 
+0463 0a           866         ld a,(bc) ; CTR+0
+0464 57           867         ld d,a 
+0465 32 2f 04     868         ld (ActiveDacCtr),a 
+0468 03           869         inc bc 
+0469 0a           870         ld a,(bc) 
+046a 32 30 04     871         ld (ActiveDacCtr+1),a 
+046d b2           872         or d 
+046e 57           873         ld d,a 
+046f 03           874         inc bc 
+0470 0a           875         ld a,(bc) 
+0471 32 31 04     876         ld (ActiveDacCtr+2),a 
+0474 b2           877         or d 
+0475 57           878         ld d,a 
+0476 03           879         inc bc 
+0477 0a           880         ld a,(bc) 
+0478 32 32 04     881         ld (ActiveDacCtr+3),a ; store 32bit dac size
+047b b2           882         or d 
+047c fe 00        883         cp 0 
+047e 20 04        884         jr nz,_active
+0480              885 _inactive 
+0480 03           886         inc bc 
+0481 af           887         xor a 
+0482 18 03        888         jr _setblockon
+0484              889 _active
+0484 03           890         inc bc 
+0485 3e 01        891         ld a,1
+0487              892 _setblockon
+0487 02           893         ld (bc),a 
+0488 d1           894         pop de 
+0489              895         ;INC HL          ; FLAGS 
+0489 cd bf 01     896         call GetNextSongByte
+048c 7e           897         ld a, (hl)      ; AM I LOOPING?
+048d 32 36 04     898         ld (LoopDac),a  ; FIXME - NO LOOP FOR NOW
+0490              899         ; enable!
+0490 c3 17 01     900         jp PLAYLOOP 
+0493              901 _nope: 
+0493              902         ;call GetNextSongByte
+0493              903         ;call GetNextSongByte
+0493 c3 17 01     904         jp PLAYLOOP
+0496              905 
+0496              906 ; Data Block struct:
+0496 ff           907 DataType: defb $ff
+0497 00 00 00 00  908 DataSize: defb 0,0,0,0
+049b 00 00        909 DataLoc: defb 0,0
+049d 00           910 DataBank: defb 0
+049e 00 00 00 00  911 DataCounter: defb 0,0,0,0 
+04a2 00           912 BlockActive: defb 0
+04a3 00 00 00     913 _buffer: defb 0,0,0          ; 16 bytes 
+04a6              914 ;Type (ff means empty) 1
+04a6              915 ; Compatible types:
+04a6              916 ; 0: YM2612 PCM data 
+04a6              917 ;Size 4
+04a6              918 ; 32 bit size (from VGM file)
+04a6              919 ;Loc 2 (HL offset of data start)
+04a6              920 ;Bank 1 (bank of data start)
+04a6              921 ;Counter 4 (32bit offset remaining to play of this loop)
+04a6              922 ;BlockActive: 1 if we need to dac stream it, 0 skips
+04a6              923 ;_buffer 3 : to align to 16 bytes
+04a6 ff 00 00 00 00 00 00 00  924 Block1: defb $ff,0,0,0,0,0,0,0
+04ae 00 00 00 00 00 00 00 00  925         defb $0,0,0,0,0,0,0,0
+04b6 ff 00 00 00 00 00 00 00  926 Block2: defb $ff,0,0,0,0,0,0,0
+04be 00 00 00 00 00 00 00 00  927         defb $0,0,0,0,0,0,0,0
+04c6 ff 00 00 00 00 00 00 00  928 Block3: defb $ff,0,0,0,0,0,0,0
+04ce 00 00 00 00 00 00 00 00  929         defb $0,0,0,0,0,0,0,0
+04d6 ff 00 00 00 00 00 00 00  930 Block4: defb $ff,0,0,0,0,0,0,0
+04de 00 00 00 00 00 00 00 00  931         defb $0,0,0,0,0,0,0,0
+04e6 ff 00 00 00 00 00 00 00  932 Block5: defb $ff,0,0,0,0,0,0,0
+04ee 00 00 00 00 00 00 00 00  933         defb $0,0,0,0,0,0,0,0
+04f6 ff 00 00 00 00 00 00 00  934 Block6: defb $ff,0,0,0,0,0,0,0
+04fe 00 00 00 00 00 00 00 00  935         defb $0,0,0,0,0,0,0,0
+0506 ff 00 00 00 00 00 00 00  936 Block7: defb $ff,0,0,0,0,0,0,0
+050e 00 00 00 00 00 00 00 00  937         defb $0,0,0,0,0,0,0,0
+0516 ff 00 00 00 00 00 00 00  938 Block8: defb $ff,0,0,0,0,0,0,0
+051e 00 00 00 00 00 00 00 00  939         defb $0,0,0,0,0,0,0,0
+0526 ff 00 00 00 00 00 00 00  940 Block9: defb $ff,0,0,0,0,0,0,0
+052e 00 00 00 00 00 00 00 00  941         defb $0,0,0,0,0,0,0,0
+0536 ff 00 00 00 00 00 00 00  942 Block10: defb $ff,0,0,0,0,0,0,0
+053e 00 00 00 00 00 00 00 00  943         defb $0,0,0,0,0,0,0,0
+0546 ff 00 00 00 00 00 00 00  944 Block11: defb $ff,0,0,0,0,0,0,0
+054e 00 00 00 00 00 00 00 00  945         defb $0,0,0,0,0,0,0,0
+0556 ff 00 00 00 00 00 00 00  946 Block12: defb $ff,0,0,0,0,0,0,0
+055e 00 00 00 00 00 00 00 00  947         defb $0,0,0,0,0,0,0,0
+0566 ff 00 00 00 00 00 00 00  948 Block13: defb $ff,0,0,0,0,0,0,0
+056e 00 00 00 00 00 00 00 00  949         defb $0,0,0,0,0,0,0,0
+0576 ff 00 00 00 00 00 00 00  950 Block14: defb $ff,0,0,0,0,0,0,0
+057e 00 00 00 00 00 00 00 00  951         defb $0,0,0,0,0,0,0,0
+0586 ff 00 00 00 00 00 00 00  952 Block15: defb $ff,0,0,0,0,0,0,0
+058e 00 00 00 00 00 00 00 00  953         defb $0,0,0,0,0,0,0,0
+0596              954 
+0596 00 00        955 DBWORK: defb 0,0
+0598              956 
+0598              957 DATABLOCK:
+0598              958 ;;;;;;;;;;;;
+0598              959 ;
+0598 d5           960       push de 
+0599 cd bf 01     961         call GetNextSongByte ; should be 0x66
+059c 7e           962         ld a,(hl) 
+059d              963         ; find an empty block of pointers
+059d e5           964         push hl ;9f43 = 66
+059e 21 86 04     965          ld hl,DataType-16
+05a1 01 10 00     966          ld bc,16      ; 16 BYTES IN SIZE 
+05a4              967 _blockfind:
+05a4 af           968          xor a 
+05a5 ed 4a        969          adc hl,bc 
+05a7 7e           970          ld a,(hl)    ; hl += 16
+05a8 fe ff        971          cp $ff 
+05aa 28 02        972          jr z,_blockok 
+05ac 18 f6        973          jr _blockfind 
+05ae              974 _blockok:         
+05ae e5           975          push hl 
+05af c1           976          pop bc ; now BC has block struct pointer. 
+05b0 ed 43 96 05  977          LD (DBWORK),BC 
+05b4 e1           978         pop hl                  
+05b5              979 
+05b5              980 ; FIXME I dont work with empty data blocks.
+05b5 cd bf 01     981         call GetNextSongByte
+05b8 7e           982         ld a,(hl) 
+05b9 02           983         ld (bc),a  ; data type  ; = 0
+05ba cd bf 01     984         call GetNextSongByte
+05bd              985         ; TODO: Check data type
+05bd              986         
+05bd 03           987         inc bc 
+05be 7e           988         ld a,(hl)  ; 9f45 = 77
+05bf 02           989         ld (bc),a ; data size
+05c0 32 29 00     990         ld (WORKRAM),a 
+05c3              991         ;ld d,a
+05c3 cd bf 01     992         call GetNextSongByte
+05c6              993         
+05c6 7e           994         ld a,(hl)
+05c7 03           995         inc bc  
+05c8 02           996         ld (bc),a ; data size+1 = 0c
+05c9 32 2a 00     997         ld (WORKRAM+1),a ; for later
+05cc              998         ;or d 
+05cc              999         ;ld d,a
+05cc cd bf 01    1000         call GetNextSongByte
+05cf             1001         
+05cf 03          1002         inc bc 
+05d0 7e          1003         ld a,(hl) 
+05d1 02          1004         ld (bc),a ; data size+2 = 00
+05d2 32 2b 00    1005         ld (WORKRAM+2),a 
+05d5             1006         ;or d  
+05d5             1007         ;ld d,a 
+05d5 cd bf 01    1008         call GetNextSongByte
+05d8             1009         
+05d8 03          1010         inc bc 
+05d9 7e          1011         ld a,(hl) 
+05da 02          1012         ld (bc),a ; data size+3 = 00
+05db 32 2c 00    1013         ld (WORKRAM+3),a 
+05de             1014         ;or d
+05de             1015         ;CP 0             ; D contains 0 if all bytes were 0 
+05de             1016         ;jr z,_emptyblock ; so don't use this 
+05de             1017         
+05de             1018         ; now store HL, which is right before data start...
+05de 03          1019         inc bc 
+05df 7d          1020         ld a,l   ; dataloc l...
+05e0 02          1021         ld (bc),a 
+05e1             1022         
+05e1 7c          1023         ld a,h   ; and h
+05e2             1024         ;and $7f 
+05e2 03          1025         inc bc 
+05e3 02          1026         ld (bc),a ;
+05e4             1027         
+05e4 3a 86 00    1028         ld a,(RomBank) 
+05e7 03          1029         inc bc     ; DataBank
+05e8 02          1030         ld (bc),a ; and store current rom bank, cuz this must be where it starts
+05e9 32 e0 01    1031         ld (ZadrWork),a 
+05ec af          1032         xor a 
+05ed 32 e1 01    1033         ld (ZadrWork+1),a 
+05f0 22 e2 01    1034         ld (ZadrWork+2),hl ; 0, 0, 9a9f ( = 1a9f)
+05f3             1035 ;Counter 4 (32bit offset remaining to play of this loop)
+05f3 2a 29 00    1036         ld hl,(WORKRAM) 
+05f6 7d          1037         ld a,l 
+05f7 03          1038         inc bc     ; ctr+0
+05f8 02          1039         ld (bc),a 
+05f9 7c          1040         ld a,h 
+05fa 03          1041         inc bc 
+05fb 02          1042         ld (bc),a  ; ctr+1 
+05fc 2a 2b 00    1043         ld hl,(WORKRAM+2) 
+05ff 7d          1044         ld a,l 
+0600 03          1045         inc bc   ; ctr+2
+0601 02          1046         ld (bc),a 
+0602 7c          1047         ld a,h 
+0603 03          1048         inc bc 
+0604 02          1049         ld (bc),a  ; ctr+3 
+0605             1050         ; BlockActive starts at 0, we set it to 1 when we hit FASTCALL. 
+0605             1051         ; so ignore the rest.
+0605             1052 
+0605             1053         ; NEW FUNCTION: Get 68000 address from current bank/HL
+0605 cd 20 02    1054         call GETROMADDRESS
+0608             1055         ; ZadrWork = 32bit address of data bank start 
+0608             1056         ; WORKRAM = data size 
+0608             1057         ; add WORKRAM to ZadrWork
+0608 2a e0 01    1058         ld hl,(ZadrWork) ; 
+060b ed 4b 29 00 1059         ld bc,(WORKRAM)  ; data size low 16 
+060f b7          1060         or a 
+0610 ed 4a       1061         adc hl,bc ; check carry 
+0612 22 e0 01    1062         ld (ZadrWork),hl ; save low 16
+0615 2a e2 01    1063         ld hl,(ZadrWork+2) 
+0618 01 00 00    1064         ld bc,$0000
+061b ed 4a       1065         adc hl,bc  ; ok  ; carry is cleared here)
+061d ed 4b 2b 00 1066         ld bc,(WORKRAM+2) 
+0621 ed 4a       1067         adc hl,bc  ; upper 16
+0623 22 e2 01    1068         ld (ZadrWork+2),hl 
+0626 cd e4 01    1069         call SETZADDRESS  ; s
+0629             1070         ; now our song pointer and rom window should be
+0629             1071         ; at the byte following the data block -1.
+0629 d1          1072      pop de 
+062a             1073 _compressed: ; TODO do extra stuff for compressed data
+062a             1074 _uncompressed:
+062a             1075 
+062a c3 17 01    1076         jp PLAYLOOP     
+062d             1077 
+062d             1078 _emptyblock
+062d 3e ff       1079         LD A,$FF 
+062f e5          1080         PUSH HL 
+0630 2a 96 05    1081         LD HL,(DBWORK) 
+0633 77          1082         LD (HL),A 
+0634 e1          1083         POP HL 
+0635 d1          1084         POP DE 
+0636 c3 17 01    1085         JP PLAYLOOP 
+0639             1086 
+0639             1087 BANKSWAP:
+0639             1088 ;;;;;;;;;;;;;
+0639             1089 ; * A (preserve bc)
+0639             1090 ; RomBank has the # of the 32kb block to write to 6001.
+0639             1091 ;  Keep it 8 bits for now FIXME for > 8MB song locations 
+0639 c5          1092         push bc 
+063a 0e 01       1093         ld c, 1         ; = 0b00000001
+063c b7          1094         or a 
+063d             1095 _bswp2: 
+063d 3a 86 00    1096         ld a,(RomBank)
+0640 a1          1097         and c 
+0641 fe 00       1098         cp 0 
+0643 28 02       1099         jr z,_bzero 
+0645 18 03       1100         jr _bone
+0647             1101 _bzero: 
+0647             1102         ;call ZWAIT 
+0647 af          1103         xor a 
+0648 18 02       1104         jr _bwrt 
+064a             1105 _bone:
+064a             1106         ;call ZWAIT 
+064a 3e 01       1107         ld a,1
+064c             1108 _bwrt:
+064c 32 01 60    1109         ld ($6001),a 
+064f cb 21       1110         sla c           ; = 0b00000010
+0651 30 ea       1111         jr nc,_bswp2    ; loop until bit goes into carry
+0653             1112 
+0653             1113         ;call ZWAIT 
+0653 af          1114         xor a 
+0654 32 01 60    1115         ld ($6001),a       ; 9 bit = 0 ( works for < 8MB)
+0657 c1          1116         pop bc 
+0658 c9          1117         ret 
+0659             1118 ;;;;
+0659             1119 
+0659             1120 BANKUP:
+0659             1121 ;;;;;;;;;;;;;;
+0659             1122 ; * A H L
+0659             1123 ; Pops up the rom bank by 1 and 
+0659             1124 ; sets HL back to $8000
+0659 3a 86 00    1125         ld a,(RomBank) 
+065c 3c          1126         inc a 
+065d 32 86 00    1127         ld (RomBank),a 
+0660 cd 39 06    1128         call BANKSWAP 
+0663 21 00 80    1129         ld hl,$8000
+0666 c9          1130         ret 
+0667             1131 ;;;;
+0667             1132 
+0667             1133 
+0667             1134 WRITEFM1:
+0667             1135 ;;;;;;;;;;;;;;;;;;;
+0667             1136 ; HL - location of song byte
+0667             1137 ; * A  
+0667 cd bf 01    1138         call GetNextSongByte ; register 
+066a cd 7e 06    1139         CALL ZWAIT 
+066d 7e          1140         LD A,(HL) 
+066e 32 00 40    1141         LD (FMREG0),A
+0671 cd bf 01    1142         call GetNextSongByte ; data byte 
+0674 cd 7e 06    1143         CALL ZWAIT  
+0677 7e          1144         LD A,(HL) 
+0678 32 01 40    1145         LD (FMDAT0),A 
+067b c3 17 01    1146         JP PLAYLOOP
+067e             1147 ;;;;
+067e             1148 
+067e             1149 ZWAIT:
+067e             1150 ;;;;;;;;;;;;;;;;;;
+067e             1151 ; * A C
+067e 3a 00 40    1152         LD A,($4000) 
+0681 87          1153         ADD A, A 
+0682 38 fa       1154         JR C,ZWAIT   
+0684 c9          1155         RET 
+0685             1156 ;;;;
+0685             1157 
+0685             1158 WRITEFM2:
+0685             1159 ;;;;;;;;;;;;;;;;
+0685             1160 ; HL = song byte
+0685             1161 ; * A
+0685 cd bf 01    1162         call GetNextSongByte
+0688 cd 7e 06    1163         CALL ZWAIT 
+068b 7e          1164         LD A,(HL) 
+068c 32 02 40    1165         LD (FMREG1),A 
+068f cd bf 01    1166         call GetNextSongByte
+0692 cd 7e 06    1167         CALL ZWAIT 
+0695 7e          1168         LD A,(HL) 
+0696 32 03 40    1169         LD (FMDAT1),A 
+0699 c3 17 01    1170         JP PLAYLOOP 
+069c             1171 ;;;;
+069c             1172 
+069c             1173 WRITEPSG:
+069c             1174 ;;;;;;;;;;;;;;;;
+069c             1175 ; HL = song byte 
+069c             1176 ; * A
+069c cd bf 01    1177         call GetNextSongByte
+069f             1178         ;CALL ZWAIT 
+069f 7e          1179         LD A,(HL) 
+06a0 32 11 7f    1180         ld (PSGREG),a 
+06a3 c3 17 01    1181         JP PLAYLOOP 
+06a6             1182 ;;;;
+06a6             1183 
+06a6             1184 
+06a6             1185 
+06a6             1186 SAMPLEWAIT:
+06a6             1187 ;;;;;;;;;;;
+06a6             1188 ; * A, B, C
+06a6             1189 ; HL = song byte 
+06a6             1190         ;jp SAMPLEWAIT 
+06a6 cd bf 01    1191         call GetNextSongByte
+06a9 7e          1192         LD A,(HL)
+06aa 4f          1193         LD C,A  
+06ab cd bf 01    1194         call GetNextSongByte
+06ae 7e          1195         LD A,(HL)
+06af 47          1196         LD B,A          ; BC = SAMPLE WAIT 16BIT
+06b0             1197 _sw2 
+06b0 cd 56 02    1198         call DACBLOCKTRANSFER
+06b3             1199 _sampwt:        
+06b3 3a 80 00    1200         LD A,(PlayNext)  ; check the 'play next frame' var
+06b6 fe 00       1201         CP 0             ; is it = 1?
+06b8 28 f9       1202         JR Z,_sampwt    ; if not, wait until frame is over
+06ba             1203         ;call DACBLOCKTRANSFER
+06ba af          1204         xor a
+06bb 32 80 00    1205         ld (PlayNext),a  ; clear play var
+06be             1206         ; subtract 735 from BC 
+06be e5          1207         push hl         ; save song pointer
+06bf c5          1208           push bc       ; sample wait value:
+06c0 e1          1209           pop hl        ; bc to hl 
+06c1 3a 88 00    1210          ld a,(PALFlag) 
+06c4 fe 01       1211          cp 1 
+06c6 20 0f       1212          jr nz,_palsize
+06c8 e5          1213          push hl 
+06c9 21 df 02    1214           ld hl,735
+06cc ed 4b 8b 03 1215           ld bc,(DacFrequency) 
+06d0 ed 42       1216           sbc hl,bc 
+06d2 e5          1217           push hl 
+06d3 c1          1218           pop bc 
+06d4 e1          1219          pop hl ;  bc = 735-dacfreq
+06d5 18 03       1220          jr __3
+06d7             1221 _palsize 
+06d7 01 72 03    1222          ld bc,882      ; PAL
+06da             1223 __3 
+06da ed 42       1224          sbc hl,bc      ; samplewait - 735 -> HL
+06dc e5          1225          push hl 
+06dd c1          1226          pop bc         ; store it back in bc 
+06de e1          1227         pop hl          ; recover song pointer
+06df 30 cf       1228         jr nc,_sw2   ; wait another frame if samplewait is still > 0
+06e1             1229 
+06e1 c3 17 01    1230         JP PLAYLOOP 
+06e4             1231 ;;;;
+06e4             1232 
+06e4             1233 
+06e4             1234 CLEARPSG:
+06e4             1235 ;;;;;;;;;;;;;;;;;;;;
+06e4             1236 ; clear the SSG (mute)
+06e4             1237 ; * A, B (preserve HL)
+06e4 e5          1238         push hl 
+06e5 21 20 00    1239         LD HL,CLRTB 
+06e8 06 04       1240         ld b,4
+06ea             1241 _clearlp:
+06ea 7e          1242         ld a,(hl) 
+06eb 32 11 7f    1243         ld (PSGREG),a 
+06ee cd bf 01    1244         call GetNextSongByte
+06f1 10 f7       1245         djnz _clearlp
+06f3 e1          1246         pop hl 
+06f4 c9          1247         RET
+06f5             1248 ;;;;
+1702 bytes code generated and 149 labels defined
