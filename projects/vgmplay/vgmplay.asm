@@ -2,14 +2,23 @@
 ;;
 ;; Z80 VGM Player
 ;; 
-; (c) Ben Ferguson 2021
+;; v 0.21
+; WARNING: 68k side addresses changed from a00080+ to a00100+
+; Set to NTSC 
+; Samples currently OFF while debugging
+
+; by RetroDevDiscord
+
+; Special thanks to: 
+;  Stef 
+;  vytah
 
 ;;; TO USE: 
-; Set byte a00080 to 1 every vblank to play!
-; read byte a00081 to see if song is playing or not.
-; Set SongBaseAddress (82h-85h) to full 32bit address 
-; and RomBank (86h) to bit 15+ of the 68000 memory bank
-; If PAL, set the PAL flag to 1 (88h), otherwise, 0=NTSC
+; Set byte a00100 to 1 every vblank to play!
+; read byte a00101 to see if song is playing or not.
+; Set SongBaseAddress (102h-105h) to full 32bit address 
+; and RomBank (106h) to bit 15+ of the 68000 memory bank
+; If PAL, set the PAL flag to 1 (108h), otherwise, 0=NTSC
 
 ; TODOS:
 ; - Tie z80 to vblank interrupt so it isn't driven by 68000
@@ -20,9 +29,9 @@
 
 ;;;;;
 ; FIXMEs
-; copy and paste CurDac stuff within dac loop 
-; dac block transfer should be queued as often as it can be within a frame 
-; start at 735, and 
+; - copy and paste CurDac stuff within dac loop 
+; - dac block transfer size needs adjusting / delay based on sample width!
+
 
 FMREG0 EQU $4000
 FMDAT0 EQU $4001
@@ -104,27 +113,39 @@ WORKRAM: defb 0,0,0,0
 SongDataStart: defb 0,0,0,0
 
 
+; sub 50h then times 2
+CMDJUMPTABLE: ; starts at 50h
+        defw WRITEPSG, 0, WRITEFM1, WRITEFM2, 0, 0, 0, 0 ; 50-57
+        DEFW 0, 0, 0, 0, 0, 0, 0, 0 ;   58-5F
+        defw 0, SAMPLEWAIT, FRAMEOVER2, FRAMEOVER2, 0, 0, SONGOVER, DATABLOCK ; 60-67
+        DEFW WRITEPCM, 0, 0, 0, 0, 0, 0, 0
+        DEFW QWAIT, QWAIT, QWAIT, QWAIT, QWAIT, QWAIT, QWAIT, QWAIT ;70
+        DEFW QWAIT, QWAIT, QWAIT, QWAIT, QWAIT, QWAIT, QWAIT, QWAIT ;7F   
+        DEFW QFMWAIT, QFMWAIT, QFMWAIT, QFMWAIT, QFMWAIT, QFMWAIT, QFMWAIT, QFMWAIT
+        DEFW QFMWAIT, QFMWAIT, QFMWAIT, QFMWAIT, QFMWAIT, QFMWAIT, QFMWAIT, QFMWAIT ;..8f
+        DEFW DACSETUP, SETDACSTREAM, SETDACFREQ, STARTDACSTREAM, STOPDAC, DACFASTCALL ; 90-95
+        DEFW ERROR  ; 96
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-        org $80
+        org $100
 
 ; Vars
-
 PlayNext:
-        defb 0          ; 80h
+        defb 0          ; 100h
 SongPlaying: 
-        defb 0          ; 81h
+        defb 0          ; 101h
 SongBaseAddress:        ; Set me when loading the song from the 68000!
-        defb $0, $0, 0, 0 ; 82-85h
+        defb $0, $0, 0, 0 ; 102-105h
 RomBank:
-        defb 0          ; 86h
+        defb 0          ; 106h
 StartBank:
         defb 0          ; --
 ; This is 0 if NTSC, and 1 if PAL.
-PALFlag: defb 0         ; 88h
+PALFlag: defb 0         ; 108h
 ; Set this to 1 and the next frame the Z80 will reset (jp 0). 
 ; Do this after changing SongBaseAddress to change songs. 
-ResetFlag: defb 0       ; 89h
+ResetFlag: defb 0       ; 109h
  
 
 LOADVGM:
@@ -219,47 +240,64 @@ noloop:
 PLAYLOOP:
 ;;;;;;;;;;;;;;;;
         call GetNextSongByte
-        LD A,(HL) 
-        cp $50 
-         jp c,ERROR      ; 0-49f - ERROR, invalid control byte
-        JP z,WRITEPSG   ; 50f - write PSG
-        cp $52          ; 0x52 a b - 2612 port 0 (gen FM1) <-
-        JP z,WRITEFM1
-        cp $53          ; 0x53 a b - 2612 port 1 (gen FM2) <-
-        JP z,WRITEFM2
-        CP $61          ; 0X61 a b - wait ba samples
-        JP Z,SAMPLEWAIT 
-        CP $62          ; 0x62 wait 1/60 second
-        JP Z,FRAMEOVER  ; (until next vblank)
-        CP $63
-        JP Z,FRAMEOVER  ; Same frame wait code won't make a difference on PAL
-        CP $66          
-         JP C,ERROR      ; 64-65 error 
-        JP Z,SONGOVER   ; 0x66 stop music playback
-        CP $67          ; DATA BLOCK 
-        JP Z,DATABLOCK  ;  sets up all pointers
-        cp $68 
-        JP Z,WRITEPCM   ;  probably not used 
-        CP $7C
-        JP Z,VOLUMESET    ; discrete volume control
-        CP $80
-        JP C,QWAIT        ; 69-7f (not 7c) quick wait
-        CP $90 
-        JP C,ERROR      ; QFMWAIT      ; 80-8f quick fm write/wait
-        jp z,DACSETUP     ; 90 setup dac stream
-        CP $91 
-        JP Z,SETDACSTREAM
-        CP $92 
-        JP Z,SETDACFREQ
-        CP $93 
-        JP Z,STARTDACSTREAM ; UNSUPPORTED FIXME
-        CP $94 
-        JP Z,STOPDAC
-        CP $95
-        JP Z,DACFASTCALL
-        CP $FF 
-         JP C,ERROR     ; 96-fe goto ERROR
-        
+        LD A,(HL)
+;BREAKPOINT: JP BREAKPOINT  
+        ; sub 50h, times 2 + &CMDJUMPTABLE
+        ld b,$50
+        sub b ; a-50
+        sla a   ; *2
+        push hl 
+         ld hl,CMDJUMPTABLE
+         add a,l   
+         ld l,a  ; jump table is < 256 so no high byte
+         ld a,(HL) 
+         ld c,a 
+         inc hl 
+         ld a,(HL) ; command address in bc 
+         ld b,a  
+         push bc 
+         pop hl     ; to hl (dont forget to pop hl) 
+         jp (hl) 
+
+        ;cp $50 
+        ; jp c,ERROR      ; 0-49f - ERROR, invalid control byte
+        ;JP z,WRITEPSG   ; 50f - write PSG
+        ;cp $52          ; 0x52 a b - 2612 port 0 (gen FM1) <-
+        ;JP z,WRITEFM1
+        ;cp $53          ; 0x53 a b - 2612 port 1 (gen FM2) <-
+        ;JP z,WRITEFM2
+        ;CP $61          ; 0X61 a b - wait ba samples
+        ;JP Z,SAMPLEWAIT 
+        ;CP $62          ; 0x62 wait 1/60 second
+        ;JP Z,FRAMEOVER  ; (until next vblank)
+        ;CP $63
+        ;JP Z,FRAMEOVER  ; Same frame wait code won't make a difference on PAL
+        ;CP $66          
+        ; JP C,ERROR      ; 64-65 error 
+        ;JP Z,SONGOVER   ; 0x66 stop music playback
+        ;CP $67          ; DATA BLOCK 
+        ;JP Z,DATABLOCK  ;  sets up all pointers
+        ;cp $68 
+        ;JP Z,WRITEPCM   ;  probably not used 
+       ; CP $80
+       ; JP C,QWAIT        ; 69-7f (not 7c) quick wait
+       ; CP $90 
+       ; JP C,QFMWAIT      ; QFMWAIT      ; 80-8f quick fm write/wait
+       ; jp z,DACSETUP     ; 90 setup dac stream
+       ; CP $91 
+       ; JP Z,SETDACSTREAM
+       ; CP $92 
+       ; JP Z,SETDACFREQ
+       ; CP $93 
+       ; JP Z,STARTDACSTREAM ; UNSUPPORTED FIXME
+       ; CP $94 
+       ; JP Z,STOPDAC
+       ; CP $95
+       ; JP Z,DACFASTCALL
+       ; CP $FF 
+       ;  JP C,ERROR     ; 96-fe goto ERROR
+FRAMEOVER2:
+        pop hl ; jp table
 FRAMEOVER:
 ;;;;;;;;;;;
 ; * A
@@ -268,7 +306,7 @@ FRAMEOVER:
         ; Before checking 68k vbl, we need to see if DAC are queued.
         ;LD A,(DacTransferActive) 
         ;cp 0 
-        call DACBLOCKTRANSFER ; MAD TESTING BRUH
+        ;call DACBLOCKTRANSFER ; MAD TESTING BRUH
 _framewait:
         LD A,(PlayNext)  ; check the 'play next frame' var
         CP 1             ; is it = 1?
@@ -278,12 +316,15 @@ _framewait:
         JP PLAYLOOP
 ;;;; 
 
+
+;;;;;;;;;;;;;;;;;;;
 ERRDEFB: DEFB $99
 ; This error handling is super rudimentary and only intended to get songs to
 ;  play without crashing!
 ERROR:  
+        ;pop hl  ; jp table
         ;cp $28    ; probably just got lost 
-        jr _fixsongptr
+        ;jr _fixsongptr
         jp ERROR 
 
 _fixsongptr: 
@@ -296,6 +337,7 @@ SONGOVER:
 ; * A
 ; Stops the song when hits command byte 0x66
 ;  Or, if looping, jumps to loop
+        pop hl 
         ld a,(LoopPlay) 
         cp 0 
         jr z, _endsong  
@@ -336,6 +378,7 @@ WRITEPCM:
 bbb: defb $22
 ; Waits 1-16 samples
 QWAIT:
+        pop hl 
         ; TOO SHORT TO NOTICE?
         and $0f 
         ld b,a 
@@ -517,8 +560,9 @@ _found
         jp _nr
 _norm:
 ;BREAKPOINT: JP BREAKPOINT 
-        ld bc,(DacFrequency) ;; (DacFrequency) ; hopefully 267: debug me
+        ;ld bc,(DacFrequency) ;; (DacFrequency) ; hopefully 267: debug me
 _nr:
+        ;LD BC,765
         ld (DacWRAM),bc 
         ld hl,(ActiveDacLoc) ; already -1!
 dacwriteloop:
@@ -580,11 +624,11 @@ _daclpend:
 ;;;;
 
 QUICKSTOP:
-        
 ; TODO 
 ; get the active dac block (this is set inside the transfer each loop)
 ;  (ActiveDacBlock) is not used anywhere else
 ; set that block's "active" byte and counter to 0
+        pop hl ; * 
         ld a,(ActiveDacBlock)   ; ? 
         push hl 
          push bc 
@@ -613,6 +657,7 @@ STOPDAC:
 ;;;;;;;;;;;;;;
 ; Stops DAC and disables DAC mode on CH6
 ; FIXME broken ?
+        pop hl  ;  * 
         call GetNextSongByte ; unused 
         xor a 
         ld (DacTransferActive),a 
@@ -637,6 +682,7 @@ StreamID: defb 0
 ; 90 0 2 0 2a 
 ; TODO SUPPORT MORE THAN ONE DAC STREAM :)
 DACSETUP:
+        pop hl 
         ;INC HL  ; STREAM ID 
         call GetNextSongByte ; 0 
         LD A,(HL) 
@@ -659,6 +705,7 @@ SETDACSTREAM:
 ; 0X91 <STREAM> <DATABANK ID> <STEP SIZE> <STEP BASE>
 ;         0           0            1           0 
 ; Preserves BC 
+        pop hl 
        push bc 
         call GetNextSongByte ; Stream ID is for multiple DAC channels.
         ; Genesis only supports one, so we skip it
@@ -709,7 +756,7 @@ SETDACFREQ: ; 7D00 == 32000
 ; 3E80 = 16000 = 267 N 320P ; 
 ; 2b11 = 11025 = 184 N 221P
 ; 1f40 = 8000 =  134 N 160P
-;BREAKPOINT: JP BREAKPOINT
+        pop hl 
         call GetNextSongByte ; STREAM I
         call GetNextSongByte ; LOW BYTE FREQ 
         ld a,(hl) 
@@ -771,6 +818,7 @@ _endfset
         ld (DacFrequency),a  
         inc hl 
         ld a,(hl) 
+        inc a  ; FIXME 
         ld (DacFrequency+1),a 
         
         pop de
@@ -826,6 +874,7 @@ DACFASTCALL:
 ; datacounter 4 (bytes left this loop)
 ; blockactive 1 (gogogo)
 ; 0X95
+        pop hl 
         call GetNextSongByte ; STREAM ID - ALWAYS 0 FOR NOW
         ;ld a, 1
         ;ld (DacTransferActive),a  ; SET TRANSFER TO ACTIVE SO WE DO IT LOL
@@ -899,8 +948,8 @@ _setblockon
         ; enable!
         jp PLAYLOOP 
 _nope: 
-        ;call GetNextSongByte
-        ;call GetNextSongByte
+        call GetNextSongByte
+        call GetNextSongByte
         jp PLAYLOOP
 
 ; Data Block struct:
@@ -957,6 +1006,7 @@ DBWORK: defb 0,0
 DATABLOCK:
 ;;;;;;;;;;;;
 ;
+        pop hl 
       push de 
         call GetNextSongByte ; should be 0x66
         ld a,(hl) 
@@ -1135,6 +1185,7 @@ WRITEFM1:
 ;;;;;;;;;;;;;;;;;;;
 ; HL - location of song byte
 ; * A  
+        pop hl 
         call GetNextSongByte ; register 
         CALL ZWAIT 
         LD A,(HL) 
@@ -1159,6 +1210,7 @@ WRITEFM2:
 ;;;;;;;;;;;;;;;;
 ; HL = song byte
 ; * A
+        pop hl 
         call GetNextSongByte
         CALL ZWAIT 
         LD A,(HL) 
@@ -1174,6 +1226,7 @@ WRITEPSG:
 ;;;;;;;;;;;;;;;;
 ; HL = song byte 
 ; * A
+        pop hl 
         call GetNextSongByte
         ;CALL ZWAIT 
         LD A,(HL) 
@@ -1187,7 +1240,7 @@ SAMPLEWAIT:
 ;;;;;;;;;;;
 ; * A, B, C
 ; HL = song byte 
-        ;jp SAMPLEWAIT 
+        pop hl 
         call GetNextSongByte
         LD A,(HL)
         LD C,A  
@@ -1195,7 +1248,7 @@ SAMPLEWAIT:
         LD A,(HL)
         LD B,A          ; BC = SAMPLE WAIT 16BIT
 _sw2 
-        call DACBLOCKTRANSFER
+        ;call DACBLOCKTRANSFER
 _sampwt:        
         LD A,(PlayNext)  ; check the 'play next frame' var
         CP 0             ; is it = 1?
@@ -1210,13 +1263,14 @@ _sampwt:
          ld a,(PALFlag) 
          cp 1 
          jr nz,_palsize
-         push hl 
-          ld hl,735
-          ld bc,(DacFrequency) 
-          sbc hl,bc 
-          push hl 
-          pop bc 
-         pop hl ;  bc = 735-dacfreq
+         ;push hl 
+         ; ld hl,267  ;735
+         ; ld bc,(DacFrequency) 
+         ; sbc hl,bc 
+         ; push hl 
+         ; pop bc 
+         ;pop hl ;  bc = 735-dacfreq
+         ld bc,735     ;  267
          jr __3
 _palsize 
          ld bc,882      ; PAL

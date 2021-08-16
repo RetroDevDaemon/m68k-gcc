@@ -13,7 +13,7 @@
 #include "font.h"
 #include "palette.h"
 #include "vgmplayer.h"
-#include "def.h"
+#include "bmaster.h"
 
 static u16 tileindex;
 static u16 joyState1;
@@ -70,7 +70,7 @@ void PlaySong()
 	asm("z80busreqwait:");
 	asm("btst #0,(z80_bus_request).l");
 	asm("bne.s z80busreqwait");
-	asm("move.b #1,(0xa00080).l");
+	asm("move.b #1,(0xa00100).l");
 	asm("move.w #0,(z80_bus_request).l");
 }
 
@@ -101,12 +101,12 @@ void LoadSong(u8* son)
 	"bne 	.Z80COPYLOOP\n\t"\
 	:::"d0","d1","a0","a1");
 // set up vgm address on the z80
-	asm("move.b %0,(0xa00086).l"::"g"(bank)); // Rom bank # (A15-A23)
+	asm("move.b %0,(0xa00106).l"::"g"(bank)); // Rom bank # (A15-A23)
 	// 0x82-0x85 = start address 32 bit 
-	asm("move.b %0,(0xa00082).l"::"g"(stadr & 0xff));
-	asm("move.b %0,(0xa00083).l"::"g"((stadr >> 8)));
-	asm("move.b %0,(0xa00084).l"::"g"((stadr >>16)));
-	asm("move.b %0,(0xa00085).l"::"g"((stadr >>24)));
+	asm("move.b %0,(0xa00102).l"::"g"(stadr & 0xff));
+	asm("move.b %0,(0xa00103).l"::"g"((stadr >> 8)));
+	asm("move.b %0,(0xa00104).l"::"g"((stadr >>16)));
+	asm("move.b %0,(0xa00105).l"::"g"((stadr >>24)));
 	
 // reset, start z80
 	asm("\t\
