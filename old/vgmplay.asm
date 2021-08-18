@@ -1027,7 +1027,6 @@ _blockok:
          LD (DBWORK),BC 
         pop hl                  
 
-; FIXME I dont work with empty data blocks.
         call GetNextSongByte
         ld a,(hl) 
         ld (bc),a  ; data type  ; = 0
@@ -1038,32 +1037,24 @@ _blockok:
         ld a,(hl)  ; 9f45 = 77
         ld (bc),a ; data size
         ld (WORKRAM),a 
-        ;ld d,a
         call GetNextSongByte
         
         ld a,(hl)
         inc bc  
         ld (bc),a ; data size+1 = 0c
         ld (WORKRAM+1),a ; for later
-        ;or d 
-        ;ld d,a
         call GetNextSongByte
         
         inc bc 
         ld a,(hl) 
         ld (bc),a ; data size+2 = 00
         ld (WORKRAM+2),a 
-        ;or d  
-        ;ld d,a 
         call GetNextSongByte
         
         inc bc 
         ld a,(hl) 
         ld (bc),a ; data size+3 = 00
         ld (WORKRAM+3),a 
-        ;or d
-        ;CP 0             ; D contains 0 if all bytes were 0 
-        ;jr z,_emptyblock ; so don't use this 
         
         ; now store HL, which is right before data start...
         inc bc 
@@ -1071,7 +1062,6 @@ _blockok:
         ld (bc),a 
         
         ld a,h   ; and h
-        ;and $7f 
         inc bc 
         ld (bc),a ;
         
@@ -1300,3 +1290,5 @@ _clearlp:
         pop hl 
         RET
 ;;;;
+
+
