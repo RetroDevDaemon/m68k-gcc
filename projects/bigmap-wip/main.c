@@ -196,6 +196,7 @@ void DrawMetaTile(metaTile* mt, u8 layer, u16 tx_ofs, u16 ty_ofs)
 			break;
 		
 		case(3):
+			p = mt->pal;
 			SetVRAMWriteAddress(addr);
 			WRITE_DATAREG16(TILEATTR(mt->ia, NO_HFLIP, NO_VFLIP, p, PRIORITY_LOW));
 			WRITE_DATAREG16(TILEATTR(mt->ia+1, NO_HFLIP, NO_VFLIP, p, PRIORITY_LOW));
@@ -220,8 +221,8 @@ void GAME_DRAW()
 	if(joyState1 & BTN_C_PRESSED) // Is (C) pressed?
 		bgb_hscroll_pos++;
 
-	// draw 2 queued tiles per frame for now
-	for(u8 g = 0; g < 2; g++){
+	// draw 8 queued tiles per frame for now
+	for(u8 g = 0; g < 8; g++){
 		if(cur_qt->tile != nullptr)
 		{
 			DrawMetaTile(cur_qt->tile, BG_A, cur_qt->tx, cur_qt->ty);
