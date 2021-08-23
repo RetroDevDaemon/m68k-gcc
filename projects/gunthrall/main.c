@@ -144,7 +144,7 @@ void main()
     // Tile number 32 (start of ascii table) * 32 bytes per tile = 1024 = $400
     //WriteVDPRegister(WRITE|REG(0xf)|4);
 #define ASCIIBASETILE 32
-    SetVRAMWriteAddress(0x400);
+    SetVRAMWriteAddress(ASCIIBASETILE*0x20);
     for(c = 0; c < 0x300; c++) 
     {
         cr = (u32*)&font_0;
@@ -154,7 +154,7 @@ void main()
     // + c00 = 1000
     // Copy in ship
 #define PSHIPBASETILE 128
-    SetVRAMWriteAddress(0x1000); // 128
+    SetVRAMWriteAddress(PSHIPBASETILE*0x20); // 128
     for(c = 0; c < (12*8); c++) 
     {
         cr = (u32*)&player1b_0;  

@@ -141,9 +141,9 @@ typedef struct spriteAttribute {
 } Sprite;
 
 #define SPR_ATTR(tileno, hf, vf, pal, pri) \
-    (u16)(tileno|(hf<<11)|(vf<<12)|(pal<<13)|(pri<<15))
+    (u16)((tileno)|((hf)<<11)|((vf)<<12)|((pal)<<13)|((pri)<<15))
 #define TILEATTR(n, hf, vf, pal, pri) \
-    (u16)(n|(hf<<11)|(vf<<12)|(pal<<13)|(pri<<15))
+    (u16)((n)|((hf)<<11)|((vf)<<12)|((pal)<<13)|((pri)<<15))
 
 void _start();
 void main();
