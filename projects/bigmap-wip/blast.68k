@@ -1,0 +1,23 @@
+    org $1000
+
+START:
+* Push everything to the stack 
+*    MOVEM.L D0-D7/A0-A6,-(A7)
+
+* Start/end
+    MOVEA.L #$ff0002,A0
+    MOVEA.L #$ff0000,A1 
+* Lets use 8 registers to align it to 8 words.
+* 8 registers, 2 bytes each = 16 bytes, 
+* 8 loops is 128 bytes shifted left 1 word
+    MOVE.L #00000001,D0
+CPYLOOP:
+    MOVEM.W (A0)+,D2-D5/A2-A5
+    MOVEM.W D2-D5/A2-A5,(A1)
+    ADDA.L #16,A1
+    DBRA D0,CPYLOOP
+* recover stack 
+*    MOVEM.L (A7)+,D0-D7/A0-A6
+
+END:
+    BRA END

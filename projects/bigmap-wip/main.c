@@ -58,14 +58,24 @@ typedef struct queued_tile {
 } queuedTile;
 queuedTile queued_tiles[32];
 queuedTile* cur_qt; // = &queued_tiles[0];
+bool tileQueue = true;
 
-Sprite sprites[80];
-metaTile wmtiles[150];
+typedef u16 VDPTile; // use TILEATTR()
+#define METAMAP_DISPLAY_WIDTH 10
+#define METAMAP_DISPLAY_HEIGHT 10
+static VDPTile displayMap[METAMAP_DISPLAY_HEIGHT * METAMAP_DISPLAY_WIDTH];
+
+static Sprite sprites[80];
+static metaTile wmtiles[150];
 
 void PopulateMetatileList(u16 st_t, u16 en_t, u8 sz, metaTile* mt, u8 pal); 
 void DrawMetaTile(metaTile* mt, u8 layer, u16 tx_ofs, u16 ty_ofs);
-bool tileQueue = true;
 void QueueMetaTile(metaTile* mt, u8 tx, u8 ty);
+void ShiftDisplayMap(s8 x_shift, s8 y_shift);
+void LoadSong(u8* son);
+void PlaySong();
+
+// *** MAIN *** //
 
 void main()
 {       
@@ -137,6 +147,29 @@ void QueueMetaTile(metaTile* mt, u8 tx, u8 ty)
 	nx->tile = mt;
 	nx->tx = tx;
 	nx->ty = ty;
+
+	u16 flags = TILEATTR(0, NO_HFLIP, NO_VFLIP, mt->pal, PRIORITY_LOW);
+
+	switch(mt->size)
+	{
+		case(2):
+			displayMap[(ty * METAMAP_DISPLAY_WIDTH) + tx] = mt->ia | flags;
+			displayMap[(ty * METAMAP_DISPLAY_WIDTH) + tx + 1] = mt->ia+1 | flags;
+			displayMap[((ty+1) * METAMAP_DISPLAY_WIDTH) + tx] = mt->ib | flags;
+			displayMap[((ty+1) * METAMAP_DISPLAY_WIDTH) + tx + 1] = mt->ib+1 | flags;
+			break;
+		case(3):
+			displayMap[(ty * METAMAP_DISPLAY_WIDTH) + tx] = mt->ia | flags;
+			displayMap[(ty * METAMAP_DISPLAY_WIDTH) + tx + 1] = mt->ia+1 | flags;
+			displayMap[(ty * METAMAP_DISPLAY_WIDTH) + tx + 2] = mt->ia+2 | flags;
+			displayMap[((ty+1) * METAMAP_DISPLAY_WIDTH) + tx] = mt->ib | flags;
+			displayMap[((ty+1) * METAMAP_DISPLAY_WIDTH) + tx + 1] = mt->ib+1 | flags;
+			displayMap[((ty+1) * METAMAP_DISPLAY_WIDTH) + tx + 2] = mt->ib+2 | flags;
+			displayMap[((ty+2) * METAMAP_DISPLAY_WIDTH) + tx] = mt->ic | flags;
+			displayMap[((ty+2) * METAMAP_DISPLAY_WIDTH) + tx + 1] = mt->ic+1 | flags;
+			displayMap[((ty+2) * METAMAP_DISPLAY_WIDTH) + tx + 2] = mt->ic+2 | flags;
+			break;
+	}
 }
 
 // TODO bigger than 3x3
@@ -175,6 +208,7 @@ void DrawMetaTile(metaTile* mt, u8 layer, u16 tx_ofs, u16 ty_ofs)
 	// write mt.size rows using macro 
 	u32 addr = 0x00000000;
 	u8 p = 0;
+	u16 flags = TILEATTR(0, NO_HFLIP, NO_VFLIP, mt->pal, PRIORITY_LOW);
 	switch(layer)
 	{
 		case(BG_A): 
@@ -187,40 +221,80 @@ void DrawMetaTile(metaTile* mt, u8 layer, u16 tx_ofs, u16 ty_ofs)
 	switch(mt->size)
 	{
 		case(2): 	//#TODO bg layer size 
-			p = mt->pal;
 			SetVRAMWriteAddress(addr);
-			WRITE_DATAREG16(TILEATTR(mt->ia, NO_HFLIP, NO_VFLIP, p, PRIORITY_LOW));
-			WRITE_DATAREG16(TILEATTR(mt->ia+1, NO_HFLIP, NO_VFLIP, p, PRIORITY_LOW));
+			WRITE_DATAREG16(mt->ia | flags);
+			WRITE_DATAREG16(mt->ia+1 | flags);
 			addr += (BG_WIDTH*2); // 128; // 128 - 4
 			SetVRAMWriteAddress(addr);
-			WRITE_DATAREG16(TILEATTR(mt->ib, NO_HFLIP, NO_VFLIP, p, PRIORITY_LOW));
-			WRITE_DATAREG16(TILEATTR(mt->ib+1, NO_HFLIP, NO_VFLIP, p, PRIORITY_LOW));
+			WRITE_DATAREG16(mt->ib | flags);
+			WRITE_DATAREG16(mt->ib+1 | flags);
 			break;
 		
 		case(3):
-			p = mt->pal;
 			SetVRAMWriteAddress(addr);
-			WRITE_DATAREG16(TILEATTR(mt->ia, NO_HFLIP, NO_VFLIP, p, PRIORITY_LOW));
-			WRITE_DATAREG16(TILEATTR(mt->ia+1, NO_HFLIP, NO_VFLIP, p, PRIORITY_LOW));
-			WRITE_DATAREG16(TILEATTR(mt->ia+2, NO_HFLIP, NO_VFLIP, p, PRIORITY_LOW));
+			WRITE_DATAREG16(mt->ia | flags);
+			WRITE_DATAREG16(mt->ia+1 | flags);
+			WRITE_DATAREG16(mt->ia+2 | flags);
 			addr += (BG_WIDTH*2);
 			SetVRAMWriteAddress(addr);
-			WRITE_DATAREG16(TILEATTR(mt->ib, NO_HFLIP, NO_VFLIP, p, PRIORITY_LOW));
-			WRITE_DATAREG16(TILEATTR(mt->ib+1, NO_HFLIP, NO_VFLIP, p, PRIORITY_LOW));
-			WRITE_DATAREG16(TILEATTR(mt->ib+2, NO_HFLIP, NO_VFLIP, p, PRIORITY_LOW));
+			WRITE_DATAREG16(mt->ib | flags);
+			WRITE_DATAREG16(mt->ib+1 | flags);
+			WRITE_DATAREG16(mt->ib+2 | flags);
 			addr += (BG_WIDTH*2);
 			SetVRAMWriteAddress(addr);
-			WRITE_DATAREG16(TILEATTR(mt->ic, NO_HFLIP, NO_VFLIP, p, PRIORITY_LOW));
-			WRITE_DATAREG16(TILEATTR(mt->ic+1, NO_HFLIP, NO_VFLIP, p, PRIORITY_LOW));
-			WRITE_DATAREG16(TILEATTR(mt->ic+2, NO_HFLIP, NO_VFLIP, p, PRIORITY_LOW));
+			WRITE_DATAREG16(mt->ic | flags);
+			WRITE_DATAREG16(mt->ic+1 | flags);
+			WRITE_DATAREG16(mt->ic+2 | flags);
 			break;
 	}
 }
 
-void ShiftPlane(u8 plane, s8 x_shift, s8 y_shift)
+void ShiftDisplayMapRight()
 {
-	// blast entire plane, destroy the first column
+	for(u16 i = 0; i < METAMAP_DISPLAY_HEIGHT; i++)
+	{
+		for(u16 j = 0; j < METAMAP_DISPLAY_WIDTH-1; j++)
+		{
+			displayMap[(i*METAMAP_DISPLAY_WIDTH)+j] = \
+				displayMap[(i*METAMAP_DISPLAY_WIDTH)+j+1]; 
+		}
+	}
+}
 
+void ShiftDisplayMapLeft()
+{
+	for(u16 i = 0; i < METAMAP_DISPLAY_HEIGHT; i++)
+	{
+		for(u16 j = 1; j < METAMAP_DISPLAY_WIDTH; j++)
+		{
+			displayMap[(i*METAMAP_DISPLAY_WIDTH)+j] = \
+				displayMap[(i*METAMAP_DISPLAY_WIDTH)+j-1]; 
+		}
+	}
+}
+
+void ShiftDisplayMapDown()
+{
+	for(u16 i = 1; i < METAMAP_DISPLAY_HEIGHT; i++)
+	{
+		for(u16 j = 0; j < METAMAP_DISPLAY_WIDTH; j++)
+		{
+			displayMap[(i*METAMAP_DISPLAY_WIDTH)+j] = \
+				displayMap[((i-1)*METAMAP_DISPLAY_WIDTH)+j]; 
+		}
+	}
+}
+
+void ShiftDisplayMapUp()
+{
+	for(u16 i = 0; i < METAMAP_DISPLAY_HEIGHT-1; i++)
+	{
+		for(u16 j = 0; j < METAMAP_DISPLAY_WIDTH; j++)
+		{
+			displayMap[(i*METAMAP_DISPLAY_WIDTH)+j] = \
+				displayMap[((i+1)*METAMAP_DISPLAY_WIDTH)+j]; 
+		}
+	}
 }
 
 void GAME_DRAW()
@@ -240,7 +314,7 @@ void GAME_DRAW()
 				cur_qt = &queued_tiles[0];
 		}
 	}
-	ShiftPlane(BG_A, 1, 0);
+	//ShiftDisplayMapRight();
 
 	PlaySong();
 
