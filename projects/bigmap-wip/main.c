@@ -106,10 +106,12 @@ void main()
 	QueueMetaTile(&wmtiles[4], 4, 2);
 	QueueMetaTile(&wmtiles[5], 6, 2);
 	QueueMetaTile(&wmtiles[6], 8, 2);
-	
+	// as we move right, 
+
 	// sprites 
 	spriteRamBase = &sprites[0];
 	LinkAllSpriteData();
+
 	// Enable VBlank on VDP 
 	WriteVDPRegister(WRITE|REG(1)|0x64);
 
@@ -215,6 +217,12 @@ void DrawMetaTile(metaTile* mt, u8 layer, u16 tx_ofs, u16 ty_ofs)
 	}
 }
 
+void ShiftPlane(u8 plane, s8 x_shift, s8 y_shift)
+{
+	// blast entire plane, destroy the first column
+
+}
+
 void GAME_DRAW()
 {
 	GETJOYSTATE1(joyState1);
@@ -232,6 +240,7 @@ void GAME_DRAW()
 				cur_qt = &queued_tiles[0];
 		}
 	}
+	ShiftPlane(BG_A, 1, 0);
 
 	PlaySong();
 
