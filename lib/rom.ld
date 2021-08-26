@@ -23,6 +23,13 @@ SECTIONS
     . = ALIGN(2);
     _edata = .;
   } > RAM
+  .funcram : { 
+    . = ALIGN(2);
+    _sfuncram = .;
+    *(.funcram*)
+    . = ALIGN(2);
+    _efuncram = .;
+  } > RAM 
   .bss :  { 
     . = ALIGN(2);
     _sbss = .;

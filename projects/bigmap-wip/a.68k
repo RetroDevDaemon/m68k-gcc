@@ -1,0 +1,18 @@
+
+    ORG $0 
+LAB:
+    BRA LAB
+
+
+TARGET EQU $C108
+ADDR EQU $40000000+((TARGET&$3fff)<<16)+((TARGET&$c000)>>14)
+
+    MOVE.L  #ADDR,-(A7)
+    MOVE.L  (A7)+,D0
+    MOVE.L  D0,($C00004)
+M1TEST:
+    MOVE.B  ($C00004),D0 
+    BTST    #1,D0
+    BNE     M1TEST
+    
+    RTS

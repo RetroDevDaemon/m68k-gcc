@@ -35,6 +35,17 @@ typedef signed char s8;
 #define WRITE_PAL3 (u32)(0xc0600000)
 #define SPRSIZE(x,y) (u8)(((x-1)<<2)|(y-1))
 
+#define Video_ON (1 << 6)
+#define Video_OFF (0)
+#define VBLIRQ_ON (1 << 5) 
+#define VBLIRQ_OFF (0)
+#define DMA_ON (1 << 4) 
+#define DMA_OFF (0) 
+#define NTSC (0) 
+#define PAL (1 << 3) 
+#define MODE (1 << 2)
+// MODE|Video_ON|VBLIRQ_ON|DMA_ON|NTSC
+
 #define WRITE_CTRLREG(n) asm("move.l %0,(0xc00004).l"::"g"(n))
 #define WRITE_DATAREG8(n) asm("move.b %0,(0xC00000).l"::"g"(n))
 #define WRITE_DATAREG16(n) asm("move.w %0,(0xc00000).l"::"g"(n))
@@ -153,7 +164,9 @@ void __attribute__((interrupt)) HBlank();
 void __attribute__((interrupt)) VBlank();
 void __attribute__((optimize("Os"))) LoadPalette(u8 palNo, u16* p);
 void SetVDPPlaneAddress(u8 plane, u16 addr);
+//void __attribute__((section(".funcram"))) SetVRAMWriteAddress(u16 address);
 void SetVRAMWriteAddress(u16 address);
+void SetDMAWriteAddress(u16 address);
 void SetVRAMReadAddress(u16 address);
 void print(u8 plane, u8 x, u8 y, String str);
 u16 VDPLoadTiles(u16 ti, u32* src, u16 numTiles);
@@ -344,6 +357,16 @@ void _start() {
 void SetVRAMWriteAddress(u16 address)
 {
     u32 loc = 0x40000000 + ((address & 0x3fff) << 16) + ((address & 0xc000) >> 14);
+    asm("move.l %0,(0xc00004).l"
+    :
+    :"g"(loc));
+    // MOVE.L #$40000000 + ((0xc000 & 0x3fff) << 16) + ((0xc000 & 0xc000) >> 14);
+}
+
+void SetDMAWriteAddress(u16 address)
+{
+    u32 loc = 0x40000080 + ((address & 0x3fff) << 16) + ((address & 0xc000) >> 14);
+    //loc |= 0x80; // flag for DMA
     asm("move.l %0,(0xc00004).l"
     :
     :"g"(loc));
@@ -608,4 +631,12 @@ enable_ints:	macro
 		endm
 
 */
+#define SetDMATargetAddress(_a) WriteVDPRegister(WRITE|REG(0x15)|(u8)(((_a)>>1) & 0xff));\
+		WriteVDPRegister(WRITE|REG(0x16)|(u8)((((_a)>>1) & 0xff00) >> 8));\
+		WriteVDPRegister(WRITE|REG(0x17)|(u8)((((_a)>>1) & 0x7f0000) >> 16));
+
+#define SetDMALength(_L) WriteVDPRegister(WRITE|REG(0x13)|(u8)(_L & 0xff));\
+		WriteVDPRegister(WRITE|REG(0x14)|(u8)(_L >> 8));
+		
+
 #endif
