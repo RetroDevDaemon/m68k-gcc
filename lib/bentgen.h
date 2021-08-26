@@ -20,6 +20,19 @@ typedef signed char s8;
 #define true TRUE 
 #define false FALSE 
 
+#define NO_HFLIP 0
+#define YES_HFLIP 1
+#define NO_VFLIP 0
+#define YES_VFLIP 1
+#define PAL0 0
+#define PAL1 1
+#define PAL2 2
+#define PAL3 3
+#define PRIORITY_LOW 0
+#define PRIORITY_HI 1
+
+#define nullptr 0
+
 #define WRITE 0x8000
 #define READ 0
 #define REG(n) (n << 8)
@@ -631,7 +644,7 @@ enable_ints:	macro
 		endm
 
 */
-#define SetDMATargetAddress(_a) WriteVDPRegister(WRITE|REG(0x15)|(u8)(((_a)>>1) & 0xff));\
+#define SetDMASourceAddress(_a) WriteVDPRegister(WRITE|REG(0x15)|(u8)(((_a)>>1) & 0xff));\
 		WriteVDPRegister(WRITE|REG(0x16)|(u8)((((_a)>>1) & 0xff00) >> 8));\
 		WriteVDPRegister(WRITE|REG(0x17)|(u8)((((_a)>>1) & 0x7f0000) >> 16));
 

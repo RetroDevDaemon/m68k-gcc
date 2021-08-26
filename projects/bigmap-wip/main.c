@@ -401,11 +401,11 @@ void DMADisplayMap(u8 layer)
 		SetDMALength(METAMAP_DISPLAY_WIDTH); // Amount (in words) to transfer over DMA
 		// Write source address (in WORD): 
 		u32 ab = (u32)&mapBuffer + (METAMAP_DISPLAY_WIDTH*i);
-		SetDMATargetAddress(ab);
+		SetDMASourceAddress(ab);
 		WRITE_CTRLREG(staddr); // This triggers DMA
 		// Done! DMA off 
 		WriteVDPRegister(WRITE|REG(1)|(MODE|VBLIRQ_ON|DMA_OFF|NTSC|Video_ON));
-		staddr += (u32)(128<<15); // increment by 128 bytes
+		staddr += (u32)(128<<16); // increment by 128 bytes
 	}
 	DMA_TEST = true;
 }
