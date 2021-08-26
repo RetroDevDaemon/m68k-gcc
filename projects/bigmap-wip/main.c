@@ -67,11 +67,9 @@ bool DMA_TEST;
 typedef u16 VDPTile; // use TILEATTR()
 // testing with 30x20 tile view port
 #define METATILESIZE 2 // 2x2 tiles 
-#define METAMAP_DISPLAY_WIDTH (15 * METATILESIZE) 
-#define METAMAP_DISPLAY_HEIGHT (14 * METATILESIZE) 
-#define METAMAP_X0 8
-#define METAMAP_Y0 0
-VDPTile mapBuffer[METAMAP_DISPLAY_HEIGHT * METAMAP_DISPLAY_WIDTH];
+#define METAMAP_DISPLAY_WIDTH (32 * METATILESIZE) 
+#define METAMAP_DISPLAY_HEIGHT (16 * METATILESIZE) 
+VDPTile mapBuffer[METAMAP_DISPLAY_WIDTH*METAMAP_DISPLAY_HEIGHT]; // 64x32
 
 Sprite sprites[80];
 metaTile wmtiles[150];
@@ -79,12 +77,27 @@ metaTile wmtiles[150];
 void PopulateMetatileList(u16 st_t, u16 en_t, u8 sz, metaTile* mt, u8 pal); 
 void DrawMetaTile(metaTile* mt, u8 layer, u16 tx_ofs, u16 ty_ofs);
 void QueueMetaTile(metaTile* mt, u8 layer, u16 tx, u16 ty, u8 priority);
-//void ShiftDisplayMap(s8 x_shift, s8 y_shift);
 void LoadSong(u8* son);
 void PlaySong();
-//u8 SetVRAMCall[0x4a];
 
 u32 cycles;
+
+#define BGBH_CAM_OFFSET (-16)
+#define BGBV_CAM_OFFSET (16)
+
+static u8 BYTOHEXWORK[3] = "  ";
+u8* byToHex(u8 by)
+{
+	//u8 BYTOHEXWORK[3] = "  ";
+    u8 a = by & 0xf;
+    u8 b = (by & 0xf0) >> 4;
+    if (a > 9) a += 7;
+    if (b > 9) b += 7;
+    a += 0x30;
+    b += 0x30;
+    BYTOHEXWORK[0] = b; BYTOHEXWORK[1] = a; BYTOHEXWORK[2] = 0;
+    return &BYTOHEXWORK;
+}
 
 // *** MAIN *** //
 
@@ -118,8 +131,8 @@ void main()
 	// when you hit the edge of a tile, copy from the vram scratch into the
 	// bga area - entire row or column of tiles at once. (BLAST it!)
 	// for up and down, you're dealing with the edges of the bg boundary
-	bga_hscroll_pos = 0;
-	bga_vscroll_pos = 0;
+	bga_hscroll_pos = 0; //BGAH_CAM_OFFSET;
+	bga_vscroll_pos = 0; //BGAV_CAM_OFFSET;
 	//bga_hscroll_pos = (u8)(((BG_WIDTH  * 8)-320)/2); // 96
 	//bga_vscroll_pos = (u8)(((BG_HEIGHT * 8)-212)/2); // 16
 	bgb_hscroll_pos = 0;
@@ -130,9 +143,9 @@ void main()
 	// initialize tile queue
 	cur_qt = &queued_tiles[0];
 	DMA_TEST = false;
-	for(u16 v = 0; v < (METAMAP_DISPLAY_HEIGHT * METAMAP_DISPLAY_WIDTH); v++)
+	for(u16 v = 0; v < (64*32); v++)
 	{
-		mapBuffer[v] = 0;
+		mapBuffer[v] = 0x31;
 	}
 	// sprites 
 	spriteRamBase = &sprites[0];
@@ -149,60 +162,74 @@ void main()
 	QueueMetaTile(&wmtiles[3], BG_B,  16, 10, PRIORITY_LOW);
 
 	QueueMetaTile(&wmtiles[15], BG_B,  8, 0, PRIORITY_LOW);
-	QueueMetaTile(&wmtiles[3], BG_B,  10, 2, PRIORITY_LOW);
-	QueueMetaTile(&wmtiles[45], BG_B,  12, 2, PRIORITY_LOW);
+	QueueMetaTile(&wmtiles[3], BG_B,  10, 22, PRIORITY_LOW);
+	QueueMetaTile(&wmtiles[45], BG_B,  12, 24, PRIORITY_LOW);
 	
 	while(1)
 	{
+		cycles = 0;
 		// Wait for VBL to finish
 		VBL_DONE = false;
-		while(!VBL_DONE){}
+		while(!VBL_DONE){
+			cycles++;
+		}
 
 		PlaySong();
 		
 		GETJOYSTATE1(joyState1);
 
 		// BACKGROUND SCROLLING TEST
+		#define SCROLLSPEED 1
 		if(joyState1 & BTN_RIGHT_PRESSED) // Is (C) pressed?
-			bgb_hscroll_pos-=4;
+			bgb_hscroll_pos -= SCROLLSPEED;
 		if(joyState1 & BTN_LEFT_PRESSED) // Is (C) pressed?
-			bgb_hscroll_pos+=4;
+			bgb_hscroll_pos += SCROLLSPEED;
 		if(joyState1 & BTN_UP_PRESSED) // Is (C) pressed?
-			bgb_vscroll_pos-=4;
+			bgb_vscroll_pos -= SCROLLSPEED;
 		if(joyState1 & BTN_DOWN_PRESSED) // Is (C) pressed?
-			bgb_vscroll_pos+=4;
+			bgb_vscroll_pos += SCROLLSPEED;
 
-		if(bgb_hscroll_pos & 0b1000000000000000)
-		{
-			bgb_hscroll_pos = 15;
-			ShiftDisplayMapRight();
-			DMA_TEST = false;
+		bool flipping = false;
+
+		if(!flipping){
+			if(bgb_hscroll_pos < BGBH_CAM_OFFSET)
+			{
+				flipping = true;
+				bgb_hscroll_pos = BGBH_CAM_OFFSET + (8*METATILESIZE);
+				ShiftDisplayMapRight();
+				DMA_TEST = false;
+			}
+			else if(bgb_hscroll_pos >= (BGBH_CAM_OFFSET)+(8*METATILESIZE))
+			{
+				flipping = true;
+				bgb_hscroll_pos = BGBH_CAM_OFFSET;
+				ShiftDisplayMapLeft();
+				DMA_TEST = false;
+			}
 		}
-		else if(bgb_hscroll_pos >= (8*METATILESIZE))
-		{
-			bgb_hscroll_pos = 0;
-			ShiftDisplayMapLeft();
-			DMA_TEST = false;
-		}
-		if(bgb_vscroll_pos & 0b1000000000000000)
-		{
-			bgb_vscroll_pos = 15;
-			ShiftDisplayMapDown();
-			DMA_TEST = false;
-		}
-		else if(bgb_vscroll_pos >= (8*METATILESIZE))
-		{
-			bgb_vscroll_pos = 0;
-			ShiftDisplayMapUp();
-			DMA_TEST = false;
+		if(!flipping){
+			if(bgb_vscroll_pos < BGBV_CAM_OFFSET)
+			{
+				bgb_vscroll_pos = BGBV_CAM_OFFSET + (8*METATILESIZE);
+				ShiftDisplayMapDown();
+				DMA_TEST = false;
+			}
+			else if(bgb_vscroll_pos >= (BGBV_CAM_OFFSET)+(8*METATILESIZE))
+			{
+				bgb_vscroll_pos = BGBV_CAM_OFFSET;
+				ShiftDisplayMapUp();
+				DMA_TEST = false;
+			}
 		}
 		//
 
 		//Print test string
 		if(DMA_TEST){
-			SetVRAMWriteAddress(VRAM_BG_A + (BG_WIDTH*5*2) + (5*2)); // Screen address + 5 Y, 5 X (BG_A)
-			u8* chp = (u8*)&hw[0];       // String address
-			for(c = 0; c < sizeof(hw); c++) WRITE_DATAREG16((u16)*chp++); // Loop
+			SetVRAMWriteAddress(VRAM_BG_A + (BG_WIDTH*5*2) + (16*2)); 
+			u8* chp = (u8*)byToHex((u8)((cycles & 0xff00)>>8));  
+			for(c = 0; c < 2; c++) WRITE_DATAREG16((u16)*chp++); 
+			chp = (u8*)byToHex((u8)((cycles & 0xff)));  
+			for(c = 0; c < 2; c++) WRITE_DATAREG16((u16)*chp++);
 		}
 	}
 }
@@ -253,8 +280,8 @@ void PopulateMetatileList(u16 st_t, u16 en_t, u8 sz, metaTile* mt, u8 pal)
 	metaTile* tile = mt;
 	u16 d = st_t;
 	u8 r = 0;
-	//u8 tilemap_w = 10;
-	for(i = 0; i < (METAMAP_DISPLAY_WIDTH*METAMAP_DISPLAY_HEIGHT); i++)
+	
+	for(i = 0; i < 150; i++)
 	{
 		tile[i].pal = pal;
 		tile[i].size = sz;
@@ -323,9 +350,9 @@ void DrawMetaTile(metaTile* mt, u8 layer, u16 tx_ofs, u16 ty_ofs)
 
 void __attribute__((optimize("Os"))) ShiftDisplayMapRight()
 {
-	for(u16 i = 0; i < (METAMAP_DISPLAY_HEIGHT*2); i++)
+	for(s16 i = 0; i < (METAMAP_DISPLAY_HEIGHT*2); i++)
 	{
-		for(u16 j = 0; j < (METAMAP_DISPLAY_WIDTH)-2; j+=2)
+		for(s16 j = 0; j < (METAMAP_DISPLAY_WIDTH)-(2*11); j+=2)
 		{
 			mapBuffer[(i*METAMAP_DISPLAY_WIDTH)+j] = \
 				mapBuffer[(i*METAMAP_DISPLAY_WIDTH)+j+2]; 
@@ -338,9 +365,9 @@ void __attribute__((optimize("Os"))) ShiftDisplayMapRight()
 
 void __attribute__((optimize("Os"))) ShiftDisplayMapLeft()
 {
-	for(u16 i = 0; i < (METAMAP_DISPLAY_HEIGHT*2); i++)
+	for(s16 i = 0; i < (METAMAP_DISPLAY_HEIGHT*2); i++)
 	{
-		for(s16 j = (METAMAP_DISPLAY_WIDTH)-4; j >= 0; j-=2)
+		for(s16 j = (METAMAP_DISPLAY_WIDTH)-(2*11); j >= 0; j-=2)
 		{
 			mapBuffer[(i*METAMAP_DISPLAY_WIDTH)+j+2] = \
 				mapBuffer[(i*METAMAP_DISPLAY_WIDTH)+j+0];	
@@ -353,60 +380,60 @@ void __attribute__((optimize("Os"))) ShiftDisplayMapLeft()
 
 void __attribute__((optimize("Os"))) ShiftDisplayMapUp()
 {
-	for(u16 i = 0; i < (METAMAP_DISPLAY_HEIGHT)-2; i+=2)
+	
+	for(s16 i = 0; i < (METAMAP_DISPLAY_HEIGHT)-2; i+=2)
 	{
-		for(s16 j = 0; j < (METAMAP_DISPLAY_WIDTH); j++)
+		for(s16 j = 0; j < (METAMAP_DISPLAY_WIDTH)-(11*2); j++)
 		{
-			mapBuffer[(i*METAMAP_DISPLAY_WIDTH)+0+j] = \
-				mapBuffer[(i*METAMAP_DISPLAY_WIDTH)+60+j];
+			mapBuffer[(i*METAMAP_DISPLAY_WIDTH)+j] = \
+				mapBuffer[((i+2)*METAMAP_DISPLAY_WIDTH)+j];
 			mapBuffer[((i+1)*METAMAP_DISPLAY_WIDTH)+j] = \
-				mapBuffer[((i+1)*METAMAP_DISPLAY_WIDTH)+60+j];
+				mapBuffer[((i+3)*METAMAP_DISPLAY_WIDTH)+j];
 		}
 	}
+	
 	// queue tile row on bottom 
 }
 
 void __attribute__((optimize("Os"))) ShiftDisplayMapDown()
 {
-	for(s16 i = METAMAP_DISPLAY_HEIGHT-2; i >= 0; i-=2)
+	
+	for(s16 i = METAMAP_DISPLAY_HEIGHT; i >= 2; i-=2)
 	{
-		for(s16 j = 0; j < METAMAP_DISPLAY_WIDTH; j++)
+		for(s16 j = METAMAP_DISPLAY_WIDTH-(11*2); j >= 0; j-=1)
 		{
-			mapBuffer[((i)*METAMAP_DISPLAY_WIDTH)+60+j] = \
-				mapBuffer[(i*METAMAP_DISPLAY_WIDTH)+0+j];
-			mapBuffer[((i)*METAMAP_DISPLAY_WIDTH)+90+j] = \
-				mapBuffer[(i*METAMAP_DISPLAY_WIDTH)+30+j];
+			mapBuffer[((i+2)*METAMAP_DISPLAY_WIDTH)+j] = \
+				mapBuffer[((i+0)*METAMAP_DISPLAY_WIDTH)+j];
+			mapBuffer[((i+3)*METAMAP_DISPLAY_WIDTH)+j] = \
+				mapBuffer[((i+1)*METAMAP_DISPLAY_WIDTH)+j];
+			
 		}
 	}
+	
 	// queue tile row on top 
 }
-
 void DMADisplayMap(u8 layer)
 {
 	u32 TARGET;
+	u32 src;
+	u32 dest;
 	if (layer == BG_A)
-		TARGET = (VRAM_BG_A + (METAMAP_Y0*BG_WIDTH) + METAMAP_X0);
+		TARGET = (VRAM_BG_A); // calculate offset here 
 	else 
-		TARGET = (VRAM_BG_B + (METAMAP_Y0*BG_WIDTH) + METAMAP_X0);
-	
-	u32 staddr = 0x40000000+((TARGET & 0x3fff)<<16)+((TARGET & 0xc000)>>14);
-	staddr |= (u32)(0x80); // BIT 7 MUST BE SET (d5) FOR DMA!
-	
-	for(u8 i = 0; i < METAMAP_DISPLAY_HEIGHT*2; i++)
-	{
-		// DMA on
+		TARGET = (VRAM_BG_B); 
+
+	src = (u32)&mapBuffer;
+	for(u8 i = 0; i < 4; i++){
 		WriteVDPRegister(WRITE|REG(1)|(MODE|VBLIRQ_ON|DMA_ON|NTSC|Video_ON));
-		WriteVDPRegister(WRITE|REG(0xf)|2); // Auto-increment must be 2
-		// TILE NUMBER TO COPY
-		SetDMALength(METAMAP_DISPLAY_WIDTH); // Amount (in words) to transfer over DMA
-		// Write source address (in WORD): 
-		u32 ab = (u32)&mapBuffer + (METAMAP_DISPLAY_WIDTH*i);
-		SetDMASourceAddress(ab);
-		WRITE_CTRLREG(staddr); // This triggers DMA
-		// Done! DMA off 
+		SetDMALength(64*8); // Amount (in words) to transfer over DMA (1kbmax?)
+		SetDMASourceAddress(src); // source (in words)
+		dest = 0x40000000|(((TARGET & 0x3fff)<<16)|((TARGET & 0xc000)>>14));
+		dest |= (u32)(0x80); // BIT 7 MUST BE SET (d5) FOR DMA!
+		WRITE_CTRLREG(dest); // This triggers DMA
 		WriteVDPRegister(WRITE|REG(1)|(MODE|VBLIRQ_ON|DMA_OFF|NTSC|Video_ON));
-		staddr += (u32)(128<<16); // increment by 128 bytes
-	}
+		TARGET += 64*8*2;
+		src += 64*8*2;
+	}	
 	DMA_TEST = true;
 }
 
@@ -426,11 +453,12 @@ void GAME_DRAW()
 			cur_qt = &queued_tiles[0];
 	}
 
+	// all DMAs at the end 
+	//if(!DMA_TEST)
+		DMADisplayMap(BG_B);
+
 	UpdateBGScroll();	// update background position
 
-	// all DMAs at the end 
-	if(!DMA_TEST)
-		DMADisplayMap(BG_B);
 	VBL_DONE = true;
 }
 
