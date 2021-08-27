@@ -507,10 +507,10 @@ void UpdateBGScroll()
 {
     //WriteVDPRegister(WRITE|REG(0xf)|4);
     SetVRAMWriteAddress(VRAM_SCROLL);
-    WRITE_DATAREG32((u32)(bga_hscroll_pos << 16) | (u16)(bgb_hscroll_pos));
+    WRITE_DATAREG32((bga_hscroll_pos << 16) | (bgb_hscroll_pos));
     asm("move.l %0,(0xc00004).l":
         :"g"(0x7c000013):); // i think this is broke
-    WRITE_DATAREG32((u32)(bga_vscroll_pos << 16) | (u16)(bgb_vscroll_pos));
+    WRITE_DATAREG32((bga_vscroll_pos << 16) | (bgb_vscroll_pos));
     //WriteVDPRegister(WRITE|REG(0xf)|2);
 }
 

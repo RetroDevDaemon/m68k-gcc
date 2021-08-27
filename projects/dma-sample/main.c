@@ -39,6 +39,8 @@ void main()
 	u32* cr; 
 	// Configure bg size 
 	WriteVDPRegister(WRITE|REG(0x10)|0b00000001);
+
+	
 	// Load palette
 	LoadPalette(0, (u16*)&palette);
 	// Load font
@@ -99,7 +101,7 @@ void DMAExample(u16* buffer, u8 layer)
 	dest |= (u32)(0x80); // BIT 7 MUST BE SET (CD5) FOR DMA RAM->VRAM
 	
 	// DMA on
-	WriteVDPRegister(WRITE|REG(1)|(MODE|VBLIRQ_ON|DMA_ON|NTSC|Video_ON));
+	WriteVDPRegister(WRITE|REG(1)|(MODE|VBLIRQ_OFF|DMA_ON|NTSC|Video_OFF));
 	//WriteVDPRegister(WRITE|REG(0xf)|2); // Auto-increment to 2, if needed
 	SetDMALength(2048); // Amount (in words) to transfer over DMA
 	// Write source address (in WORD): 
@@ -132,7 +134,7 @@ void DMAExampleLoop(u16* buffer, u8 layer)
 		TARGET = (VRAM_BG_B); 
 
 	src = (u32)buffer;
-	WriteVDPRegister(WRITE|REG(1)|(MODE|VBLIRQ_ON|DMA_ON|NTSC|Video_ON));
+	WriteVDPRegister(WRITE|REG(1)|(MODE|VBLIRQ_OFF|DMA_ON|NTSC|Video_OFF));
 	//WriteVDPRegister(WRITE|REG(0xf)|2); // Auto-increment to 2 if needed
 	for(u8 i = 0; i < 32; i++)
 	{
