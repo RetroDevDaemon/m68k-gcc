@@ -3,6 +3,7 @@
 #include <fcntl.h>  
 #include <stdlib.h> // malloc
 
+
 #define ED_FIFO_RAM 0x1810000
 #define CMD_MEM_RD 0x19
 #define CMD_MEM_WR 0x1a
@@ -175,16 +176,17 @@ int ed_write_mem(int addr, char* data, unsigned int length)
 
 int get_error(int* fd)
 {
-  if(*fd == -1)
+  while(*fd == -1)
     {
       close(*fd);
       *fd = open(&ptstr, O_RDWR);
       if(*fd == -1)
       {
         close(*fd);
-        printf("Error opening %s.\n", &ptstr);
-        return 1;
+        printf("Error opening %s. Retrying...\n", &ptstr);
+        //return 1;
       }
+      sleep(3);
     }
   return 0;
 }

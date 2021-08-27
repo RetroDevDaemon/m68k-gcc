@@ -99,6 +99,10 @@ u8* byToHex(u8 by)
     return &BYTOHEXWORK;
 }
 
+static u8 right_tile_q;
+static u8 left_tile_q;
+static u8 up_tile_q;
+static u8 down_tile_q;
 // *** MAIN *** //
 
 void main()
@@ -145,7 +149,7 @@ void main()
 	DMA_TEST = false;
 	for(u16 v = 0; v < (64*32); v++)
 	{
-		mapBuffer[v] = 0x31;
+		mapBuffer[v] = 0x0;
 	}
 	// sprites 
 	spriteRamBase = &sprites[0];
@@ -164,7 +168,11 @@ void main()
 	QueueMetaTile(&wmtiles[15], BG_B,  8, 0, PRIORITY_LOW);
 	QueueMetaTile(&wmtiles[3], BG_B,  10, 22, PRIORITY_LOW);
 	QueueMetaTile(&wmtiles[45], BG_B,  12, 24, PRIORITY_LOW);
+	QueueMetaTile(&wmtiles[45], BG_B,  38, 24, PRIORITY_LOW);
 	
+	
+	right_tile_q = 0;
+
 	while(1)
 	{
 		cycles = 0;
@@ -180,44 +188,74 @@ void main()
 
 		// BACKGROUND SCROLLING TEST
 		#define SCROLLSPEED 1
-		if(joyState1 & BTN_RIGHT_PRESSED) // Is (C) pressed?
+		if(joyState1 & BTN_RIGHT_PRESSED) 
+		{
 			bgb_hscroll_pos -= SCROLLSPEED;
-		if(joyState1 & BTN_LEFT_PRESSED) // Is (C) pressed?
+			right_tile_q++;
+			QueueMetaTile(&wmtiles[3], BG_B, (u16)40, (u16)(0 + (right_tile_q*2)), 0);
+		}
+		if(joyState1 & BTN_LEFT_PRESSED) {
 			bgb_hscroll_pos += SCROLLSPEED;
-		if(joyState1 & BTN_UP_PRESSED) // Is (C) pressed?
+			left_tile_q++;
+			QueueMetaTile(&wmtiles[3], BG_B, (u16)0, (u16)(0 + (left_tile_q*2)), 0);
+		}
+		if(joyState1 & BTN_UP_PRESSED) {
 			bgb_vscroll_pos -= SCROLLSPEED;
-		if(joyState1 & BTN_DOWN_PRESSED) // Is (C) pressed?
+			if(up_tile_q < 20){
+				QueueMetaTile(&wmtiles[3], BG_B, up_tile_q*2, 2, 0);
+				up_tile_q++;
+				QueueMetaTile(&wmtiles[3], BG_B, up_tile_q*2, 2, 0);
+				up_tile_q++;
+			}
+		}
+		if(joyState1 & BTN_DOWN_PRESSED)
+		{
 			bgb_vscroll_pos += SCROLLSPEED;
+			if(down_tile_q < 20){
+				QueueMetaTile(&wmtiles[3], BG_B, down_tile_q*2, 30, 0);
+				down_tile_q++;
+				QueueMetaTile(&wmtiles[3], BG_B, down_tile_q*2, 30, 0);
+				down_tile_q++;
+			}
+		}
 
 		bool flipping = false;
 
 		if(!flipping){
 			if(bgb_hscroll_pos < BGBH_CAM_OFFSET)
 			{
+				right_tile_q = 0;
+				left_tile_q = 0;
 				flipping = true;
 				bgb_hscroll_pos = BGBH_CAM_OFFSET + (8*METATILESIZE);
-				ShiftDisplayMapRight();
+				//ShiftDisplayMapRight();
 				DMA_TEST = false;
 			}
 			else if(bgb_hscroll_pos >= (BGBH_CAM_OFFSET)+(8*METATILESIZE))
 			{
+				left_tile_q = 0;
+				right_tile_q = 0;
 				flipping = true;
 				bgb_hscroll_pos = BGBH_CAM_OFFSET;
-				ShiftDisplayMapLeft();
+				//ShiftDisplayMapLeft();
 				DMA_TEST = false;
 			}
 		}
 		if(!flipping){
 			if(bgb_vscroll_pos < BGBV_CAM_OFFSET)
 			{
+				up_tile_q = 0;
+				down_tile_q = 0;
 				bgb_vscroll_pos = BGBV_CAM_OFFSET + (8*METATILESIZE);
-				ShiftDisplayMapDown();
+				//ShiftDisplayMapDown();
 				DMA_TEST = false;
 			}
 			else if(bgb_vscroll_pos >= (BGBV_CAM_OFFSET)+(8*METATILESIZE))
 			{
+				up_tile_q = 0;
+				down_tile_q = 0;
 				bgb_vscroll_pos = BGBV_CAM_OFFSET;
-				ShiftDisplayMapUp();
+				//ShiftDisplayMapUp();
 				DMA_TEST = false;
 			}
 		}
@@ -252,10 +290,10 @@ void QueueMetaTile(metaTile* mt, u8 layer, u16 tx, u16 ty, u8 priority)
 	switch(mt->size)
 	{
 		case(2):
-			mapBuffer[(ty * METAMAP_DISPLAY_WIDTH) + tx] = (u16)(mt->ia | flags);
-			mapBuffer[(ty * METAMAP_DISPLAY_WIDTH) + tx + 1] = mt->ia+1 | flags;
-			mapBuffer[((ty+1) * METAMAP_DISPLAY_WIDTH) + tx] = mt->ib | flags;
-			mapBuffer[((ty+1) * METAMAP_DISPLAY_WIDTH) + tx + 1] = mt->ib+1 | flags;
+			mapBuffer[(ty * 64) + tx] = (u16)(mt->ia | flags);
+			mapBuffer[(ty * 64) + tx + 1] = mt->ia+1 | flags;
+			mapBuffer[((ty+1) * 64) + tx] = mt->ib | flags;
+			mapBuffer[((ty+1) * 64) + tx + 1] = mt->ib+1 | flags;
 			break;
 		case(3):
 			mapBuffer[(ty * METAMAP_DISPLAY_WIDTH) + tx] = mt->ia | flags;
@@ -348,40 +386,43 @@ void DrawMetaTile(metaTile* mt, u8 layer, u16 tx_ofs, u16 ty_ofs)
 	}
 }
 
-void __attribute__((optimize("Os"))) ShiftDisplayMapRight()
+#define REPT10(n) n;n;n;n;n;n;n;n;n;n;
+#define REPT4(n) n;n;n;n;
+#define REPT8(n) REPT4(n);REPT4(n);
+#define REPT3(n) n;n;n;
+#define REPT9(n) REPT3(REPT3(n))
+
+void ShiftDisplayMapRight()
 {
-	for(s16 i = 0; i < (METAMAP_DISPLAY_HEIGHT*2); i++)
+	s16 i;
+	s16 j;
+	u16* ar;
+	for(i = 0; i < (METAMAP_DISPLAY_HEIGHT*2); i++)
 	{
-		for(s16 j = 0; j < (METAMAP_DISPLAY_WIDTH)-(2*11); j+=2)
-		{
-			mapBuffer[(i*METAMAP_DISPLAY_WIDTH)+j] = \
-				mapBuffer[(i*METAMAP_DISPLAY_WIDTH)+j+2]; 
-			mapBuffer[(i*METAMAP_DISPLAY_WIDTH)+j+1] = \
-				mapBuffer[(i*METAMAP_DISPLAY_WIDTH)+j+3]; 
-		}
+		ar = &mapBuffer[(i*METAMAP_DISPLAY_WIDTH)];
+		REPT3(REPT10(*ar++ = *(ar + 1)))
+		REPT9(*ar++ = *(ar + 1))
 	}
-	// Queue tile column on right
 }
 
-void __attribute__((optimize("Os"))) ShiftDisplayMapLeft()
+void ShiftDisplayMapLeft()
 {
-	for(s16 i = 0; i < (METAMAP_DISPLAY_HEIGHT*2); i++)
+	s16 i;
+	s16 j;
+	u16* ar;
+	for(i = 0; i < (METAMAP_DISPLAY_HEIGHT*2); i++)
 	{
-		for(s16 j = (METAMAP_DISPLAY_WIDTH)-(2*11); j >= 0; j-=2)
-		{
-			mapBuffer[(i*METAMAP_DISPLAY_WIDTH)+j+2] = \
-				mapBuffer[(i*METAMAP_DISPLAY_WIDTH)+j+0];	
-			mapBuffer[(i*METAMAP_DISPLAY_WIDTH)+j+3] = \
-				mapBuffer[(i*METAMAP_DISPLAY_WIDTH)+j+1];
-		}
+		ar = &mapBuffer[(i*METAMAP_DISPLAY_WIDTH)+39];
+		REPT3(REPT10(*ar-- = *(ar-1);))	
+		REPT9(*ar-- = *(ar-1);)
+		
 	}
-	// Queue tile column on left 
 }
 
-void __attribute__((optimize("Os"))) ShiftDisplayMapUp()
+void ShiftDisplayMapUp()
 {
 	
-	for(s16 i = 0; i < (METAMAP_DISPLAY_HEIGHT)-2; i+=2)
+	for(s16 i = 0; i < (METAMAP_DISPLAY_HEIGHT)-4; i+=2)
 	{
 		for(s16 j = 0; j < (METAMAP_DISPLAY_WIDTH)-(11*2); j++)
 		{
@@ -391,11 +432,9 @@ void __attribute__((optimize("Os"))) ShiftDisplayMapUp()
 				mapBuffer[((i+3)*METAMAP_DISPLAY_WIDTH)+j];
 		}
 	}
-	
-	// queue tile row on bottom 
 }
 
-void __attribute__((optimize("Os"))) ShiftDisplayMapDown()
+void ShiftDisplayMapDown()
 {
 	
 	for(s16 i = METAMAP_DISPLAY_HEIGHT; i >= 2; i-=2)
@@ -409,8 +448,6 @@ void __attribute__((optimize("Os"))) ShiftDisplayMapDown()
 			
 		}
 	}
-	
-	// queue tile row on top 
 }
 void DMADisplayMap(u8 layer)
 {
@@ -431,8 +468,8 @@ void DMADisplayMap(u8 layer)
 		dest |= (u32)(0x80); // BIT 7 MUST BE SET (d5) FOR DMA!
 		WRITE_CTRLREG(dest); // This triggers DMA
 		WriteVDPRegister(WRITE|REG(1)|(MODE|VBLIRQ_ON|DMA_OFF|NTSC|Video_ON));
-		TARGET += 64*8*2;
-		src += 64*8*2;
+		TARGET += 64*8;
+		src += 64*8;
 	}	
 	DMA_TEST = true;
 }
@@ -442,7 +479,8 @@ void DMADisplayMap(u8 layer)
 void GAME_DRAW()
 {
 	// draw 8 queued tiles per frame for now
-	for(u8 g = 0; g < 8; g++){
+	for(u8 g = 0; g < 8; g++)
+	{
 		if(cur_qt->tile != nullptr)
 		{
 			DrawMetaTile(cur_qt->tile, cur_qt->layer, cur_qt->tx, cur_qt->ty);
@@ -454,7 +492,7 @@ void GAME_DRAW()
 	}
 
 	// all DMAs at the end 
-	//if(!DMA_TEST)
+	if(!DMA_TEST)
 		DMADisplayMap(BG_B);
 
 	UpdateBGScroll();	// update background position
