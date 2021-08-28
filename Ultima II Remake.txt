@@ -1,0 +1,75 @@
+Ultima II Remake
+
+- All Monsters drop all items?
+: This will not change, but instead, items will be given a rarity (1-5). 
+:  All creatures can drop all items (including lith), but level 8 monsters 
+:  have a higher chance to drop 5-stars. 
+:  Drop rate per mob does not need to increase. 
+; 1-star: Gems (thieves and gremlins always steal this first) 
+; 2-star: keys, torches, trap kits (tools)
+; 3-star: magic eye (helm), strange coins, magic boot, magic cloak, magic idol
+; 4-star: blue tassle, skull key, brass button
+; 5-star: trilithiums, sign of the avatar (ankh)
+
+- XP and GP are random?
+: Definitely change to FIXED values per creature. 
+: This means you can farm items from townsfolk, but will hardly get XP/GP 
+: Guards can still give decent XP/GP.
+: e.g. Dragon - 80 XP, 40 GP 
+:      Rogue  - 10 XP, 6 GP 
+:      Guard  - 50 XP, 20 GP 
+:    Townsfolk-  1 XP, 2 GP
+
+- Shops level up?
+: Shops will only level up when you spend appropriate XP at 
+: the Hotel California. You must do this 7 times to unlock the most 
+: powerful weapons and armor (and thus space travel). 
+
+- Food? 
+: Food will not drain in dungeons.
+
+- Dungeons? 
+: Hit points (up to 50% of what you lost) will be recovered when you 
+: exit, similarly to Ultima 1. 
+-  and Treasure? 
+: Items are more heavily distributed throughout dungeons.
+: e.g. there is a dungeon with a lot of lith, a dungeon with a lot of 
+:  blue ribbons, etc. 
+
+- Hotel California? 
+: Still only place in the game to LEVEL UP. 
+: New level up mechanics:
+:  -SPEND XP ON GAINS. 
+:  All gains are 100 GP. 
+:    100 XP: +100 max HP
+:    250 XP: +5 to 1 stat (YOU PICK) 
+:    500 XP: +1 to all shop levels 
+: You can still tip the bellhop 100 GP to get a random boost. 
+:  50% chance to do nothing, 50% chance to raise a stat to 99 
+;   for 200 turns. 
+
+- Lord British?
+: Instead of just giving HP he heals you to max hp/mp, AND gives a minimum 
+:  of 100 FOOD. 
+
+- Offer gold?
+: NPCs will automatically ask for money if they can be bribed.
+:  Makes getting Quickblade and Magic Ring much easier.
+
+- Minax fight?
+: Minax can ONLY be harmed by the Quickblade. 
+: Instead of teleporting to the furthest corners of the castle, she will instead
+:  teleport around the map 1 turn after being HIT in a leading fashion. 
+:  This will give the frozen monsters more opportunity to fight. 
+
+- Dialogue?
+: Certain things are unlocked through dialogue, like bribing the old man under 
+: A TREE and planet coordinates. Many redundant NPCs will be removed. 
+
+- Space? 
+: -NO NAVIGATION REQUIRED. 
+: -Warnings without compression suit and enough trilithiums. 
+: -Fly to location and back, no landing mini-game. 
+: -No space fights.
+: -No XYZ coordinates - either you know the planet or you don't. 
+: -Planets are more thematically independant. 

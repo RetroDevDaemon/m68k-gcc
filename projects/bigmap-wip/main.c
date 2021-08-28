@@ -81,12 +81,15 @@ void LoadSong(u8* son);
 void PlaySong();
 
 static s32 cycles;
+static s32 vcycles;
+
+static bool printUpdate;
 
 #define BGBH_CAM_OFFSET (-16)
 #define BGBV_CAM_OFFSET (16)
 
 static u8 BYTOHEXWORK[3] = "  ";
-u8* byToHex(u8 by)
+void byToHex(u8 by, u8* ar)
 {
 	//u8 BYTOHEXWORK[3] = "  ";
     u8 a = by & 0xf;
@@ -95,8 +98,7 @@ u8* byToHex(u8 by)
     if (b > 9) b += 7;
     a += 0x30;
     b += 0x30;
-    BYTOHEXWORK[0] = b; BYTOHEXWORK[1] = a; BYTOHEXWORK[2] = 0;
-    return &BYTOHEXWORK;
+    ar[0] = b; ar[1] = a; ar[2] = 0x20;
 }
 static bool flipping;
 static u8 right_tile_q;
@@ -106,9 +108,33 @@ static u8 down_tile_q;
 static s8 target_row;
 static u8 LAST_DIR_PRESSED;
 static s8 target_col;
+#define FRAMERATE 60
+static s8 frameCounter;
+static bool debug_text_enabled;
+static s8 thirtyFrameCounter;
+
+static u8 vch[3];
+static u8 vcl[3];
+static u8 _zero = 0;
+static u8 ch[3];
+static u8 cl[3];
+
+void UpdateDebugText()
+{
+	byToHex(vcycles >> 8, &vch);
+	byToHex(vcycles & 0xff, &vcl);
+	byToHex(cycles >> 8, &ch);
+	byToHex(cycles & 0xff, &cl);
+	// Every word write to the VDP is ~2 cycles.
+	print(BG_A, 5, 0, (String*)"CPU Cycles left:");
+	print(BG_A, 5, 1, ch);
+	print(BG_A, 7, 1, cl);
+	print(BG_A, 5, 2, (String*)"VDP Cycles left:");
+	print(BG_A, 5, 3, vch);
+	print(BG_A, 7, 3, vcl);
+}
 
 // *** MAIN *** //
-
 void main()
 {       
 	u32 c;
@@ -154,6 +180,7 @@ void main()
 	cur_qt = &queued_tiles[0];
 	DMA_TEST = false;
 	flipping = false;
+	debug_text_enabled = false;
 	for(u16 v = 0; v < (64*32); v++)
 	{
 		mapBuffer[v] = 0x0;
@@ -171,6 +198,8 @@ void main()
 	target_row = 0;
 	target_col = 0;
 	z = 0;
+
+	printUpdate = true;
 	// tile test for scrolling bigmap
 	WaitVBlank();
 	
@@ -179,20 +208,31 @@ void main()
 
 	while(1)
 	{
-		cycles = 0;
-		// Wait for VBL to finish
+		// Wait for VBL, count the cycles we wait until VBL
 		VBL_DONE = false;
-		
-		while(!VBL_DONE){
+		cycles = 0;
+		while(!VBL_DONE)
 			cycles++;
+		// DRAW interrupt occurs here
+		frameCounter++;
+		thirtyFrameCounter++;
+		if(frameCounter > 60) 
+		{
+			frameCounter = 0;
+		}
+		if(thirtyFrameCounter > 30)
+		{
+			thirtyFrameCounter = 0;
+			if(debug_text_enabled) UpdateDebugText();
 		}
 
 		PlaySong();
 		
-		GETJOYSTATE1(joyState1);
-
+		last_joyState1 = joyState1;
+    	GETJOYSTATE1(joyState1);
+		
 		// BACKGROUND SCROLLING TEST
-		#define SCROLLSPEED 4
+#define SCROLLSPEED 4
 		if(joyState1 & BTN_RIGHT_PRESSED) 
 		{
 			bgb_hscroll_pos -= SCROLLSPEED;
@@ -245,25 +285,39 @@ void main()
 			}
 			LAST_DIR_PRESSED = BTN_DOWN_PRESSED;
 		}
-	
-		//Print test string
-		if(DMA_TEST){
-			SetVRAMWriteAddress(VRAM_BG_A + (BG_WIDTH*5*2) + (16*2)); 
-			u8* chp = (u8*)byToHex((u8)((cycles & 0xff00)>>8));  
-			for(c = 0; c < 2; c++) WRITE_DATAREG16((u16)*chp++); 
-			chp = (u8*)byToHex((u8)((cycles & 0xff)));  
-			for(c = 0; c < 2; c++) WRITE_DATAREG16((u16)*chp++);
+		// end bg test
+		/* Debug Menu */
+		if(Joy1Down(BTN_START_PRESSED))
+		{
+			if(debug_text_enabled) 
+			{
+				debug_text_enabled = false;
+				print(BG_A, 5, 0, "                ");
+				print(BG_A, 5, 1, "         ");
+				print(BG_A, 5, 2, "                ");
+				print(BG_A, 5, 3, "         ");
+				
+			}
+			else 
+			{
+				debug_text_enabled = true;
+				UpdateDebugText();
+			}
 		}
-	}
-}
+	} // end main game loop 
+} // end main()
 
-
-
+// todo: convert all prints to DMA, maybe 
 void GAME_DRAW()
 {
 	DMADisplayMap(BG_B);
-
 	UpdateBGScroll();	// update background position
+	
+	// Idle and count remaining vblank cycles
+	vcycles = 0;
+	while(*((u32*)0xc00004) & 0b1000)
+		vcycles++;
+	
 	VBL_DONE = true;
 }
 
@@ -383,6 +437,8 @@ void DrawMetaTile(metaTile* mt, u8 layer, u8 tx_ofs, u8 ty_ofs)
 #define REPT9(n) REPT3(REPT3(n))
 #define REPT20(n) REPT10(n);REPT10(n);
 
+#define DMA_SIZE 2048
+
 void DMADisplayMap(u8 layer)
 {
 	u32 TARGET;
@@ -395,16 +451,14 @@ void DMADisplayMap(u8 layer)
 
 	src = (u32)&mapBuffer;
 	WriteVDPRegister(WRITE|REG(1)|(MODE|VBLIRQ_OFF|DMA_ON|NTSC|Video_OFF));
-	for(u8 i = 0; i < 8; i++){
-		SetDMALength(256); // Amount (in words) to transfer over DMA (1kbmax?)
-		SetDMASourceAddress(src); // source (in words)
-		dest = 0x40000000|(((TARGET & 0x3fff)<<16)|((TARGET & 0xc000)>>14));
-		dest |= (u32)(0x80); // BIT 7 MUST BE SET (d5) FOR DMA!
-		WRITE_CTRLREG(dest); // This triggers DMA
-		while(*((vu8*)0xc00004) & 0b10000000){};
-		TARGET += 256*2; // bytes
-		src += 256*2; // bytes
-	}	
+	SetDMALength(DMA_SIZE); // Amount (in words) to transfer over DMA (1kbmax?)
+	SetDMASourceAddress(src); // source (in words)
+	dest = 0x40000000|(((TARGET & 0x3fff)<<16)|((TARGET & 0xc000)>>14));
+	dest |= (u32)(0x80); // BIT 7 MUST BE SET (d5) FOR DMA!
+	WRITE_CTRLREG(dest); // This triggers DMA
+	while(*((vu8*)0xc00004) & 0b10000000){};
+	TARGET += DMA_SIZE*2; // bytes
+	src += DMA_SIZE*2; // bytes
 	WriteVDPRegister(WRITE|REG(1)|(MODE|VBLIRQ_ON|DMA_OFF|NTSC|Video_ON));
 	
 	DMA_TEST = true;
