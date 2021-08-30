@@ -198,7 +198,10 @@ void UpdateBGScroll();
 void FlashAllPalettes();
 
 static u16 tempPalettes[4][16];     
-
+static s16 bga_hscroll_pos = 0;
+static s16 bga_vscroll_pos = 0;
+static s16 bgb_hscroll_pos = 0;
+static s16 bgb_vscroll_pos = 0;
 // required defs
 typedef s32 fp32;
 typedef s16 fp16;
@@ -497,20 +500,16 @@ void DrawTile(u8 plane, u16 TILEATTR, u8 x, u8 y, u8 w, u8 h)
 }
 
 
-s16 bga_hscroll_pos = 0;
-s16 bga_vscroll_pos = 0;
-s16 bgb_hscroll_pos = 0;
-s16 bgb_vscroll_pos = 0;
 // Ensure VRAM_SCROLL is defined first: default 0xf800
 ///// WARNING: THIS ONLY WORKS FOR FC00
 void UpdateBGScroll()
 {
     //WriteVDPRegister(WRITE|REG(0xf)|4);
     SetVRAMWriteAddress(VRAM_SCROLL);
-    WRITE_DATAREG32((bga_hscroll_pos << 16) | (bgb_hscroll_pos));
+    WRITE_DATAREG32((u32)(bga_hscroll_pos << 16) | (bgb_hscroll_pos));
     asm("move.l %0,(0xc00004).l":
         :"g"(0x7c000013):); // i think this is broke
-    WRITE_DATAREG32((bga_vscroll_pos << 16) | (bgb_vscroll_pos));
+    WRITE_DATAREG32((u32)(bga_vscroll_pos << 16) | (bgb_vscroll_pos));
     //WriteVDPRegister(WRITE|REG(0xf)|2);
 }
 

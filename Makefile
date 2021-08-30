@@ -1,12 +1,20 @@
 # Makefile for MD / Genesis ROM
 # @RetroDevDiscord
 #==============================
-CC=m68k-elf-gcc 
+UNAME_:=$(shell uname -s)
+ifeq ($(UNAME_),Darwin)
+  TCDIR:=/Users/shram/Projects/Retro68-chain/bin
+  CC:=$(TCDIR)/m68k-apple-macos-gcc
+  AS:=$(TCDIR)/m68k-apple-macos-as
+  LD:=$(TCDIR)/m68k-apple-macos-ld
+else
+  CC:=m68k-elf-gcc
+  AS:=m68k-elf-as
+  LD:=m68k-elf-ld
+endif 
 CFLAGS=-nostdlib -O0 -m68000 -std=gnu11 -fno-pie -no-pie -fno-use-linker-plugin\
 	-fomit-frame-pointer -fno-inline -fno-builtin-inline 
-AS=m68k-elf-as
 ASFLAGS=-march=68000 --register-prefix-optional 
-LD=m68k-elf-ld 
 LDFLAGS=
 MKDIR=mkdir 
 BUILDDIR=build

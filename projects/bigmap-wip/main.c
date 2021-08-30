@@ -79,6 +79,7 @@ void DrawMetaTile(metaTile* mt, u8 layer, u8 tx_ofs, u8 ty_ofs);
 void QueueMetaTile(metaTile* mt, u8 layer, u8 tx, u8 ty, u8 priority);
 void LoadSong(u8* son);
 void PlaySong();
+void DMADisplayMap(u8 layer);
 
 static s32 cycles;
 static s32 vcycles;
@@ -134,6 +135,7 @@ void UpdateDebugText()
 	print(BG_A, 7, 3, vcl);
 }
 
+
 // *** MAIN *** //
 void main()
 {       
@@ -144,9 +146,12 @@ void main()
 	// Configure bg size 
 	WriteVDPRegister(WRITE|REG(0x10)|0b00000001);
 	// VSRAM location
-	WriteVDPRegister(WRITE|REG(13)|0b00111111);
-	WriteVDPRegister(WRITE|REG(14)|0);
-	
+	//WriteVDPRegister(WRITE|REG(13)|0b00111111);
+	//WriteVDPRegister(WRITE|REG(14)|0);
+	bga_hscroll_pos = 0;
+	bga_vscroll_pos = 0;
+	bgb_hscroll_pos = 0;
+	bgb_vscroll_pos = 0;
 	// Load palette
 	LoadPalette(0, (u16*)&palette);
 	LoadPalette(1, (u16*)&wm_pal);
@@ -232,7 +237,7 @@ void main()
     	GETJOYSTATE1(joyState1);
 		
 		// BACKGROUND SCROLLING TEST
-#define SCROLLSPEED 4
+#define SCROLLSPEED 1
 		if(joyState1 & BTN_RIGHT_PRESSED) 
 		{
 			bgb_hscroll_pos -= SCROLLSPEED;
@@ -287,6 +292,7 @@ void main()
 		}
 		// end bg test
 		/* Debug Menu */
+		
 		if(Joy1Down(BTN_START_PRESSED))
 		{
 			if(debug_text_enabled) 
@@ -304,6 +310,7 @@ void main()
 				UpdateDebugText();
 			}
 		}
+		
 	} // end main game loop 
 } // end main()
 
