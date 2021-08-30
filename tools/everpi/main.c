@@ -254,6 +254,7 @@ int ed_load_rom()
       bw = ed_read_mem(fs, 32);
       while(bw != 32) {
         printf("READ ERROR\n");
+        return -1;
         bw = ed_read_mem(fs, 32);
       }
       for(int j = 0; j < 32; j++){

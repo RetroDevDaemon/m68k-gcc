@@ -77,10 +77,10 @@ static metaTile wmtiles[150];
 void PopulateMetatileList(u16 st_t, u16 en_t, u8 sz, metaTile* mt, u8 pal); 
 void DrawMetaTile(metaTile* mt, u8 layer, u8 tx_ofs, u8 ty_ofs);
 void QueueMetaTile(metaTile* mt, u8 layer, u8 tx, u8 ty, u8 priority);
-void LoadSong(u8* son);
+void LoadSong(const u8* son);
 void PlaySong();
 void DMADisplayMap(u8 layer);
-
+void byToHex(u8 by, u8* ar);
 static s32 cycles;
 static s32 vcycles;
 
@@ -89,10 +89,8 @@ static bool printUpdate;
 #define BGBH_CAM_OFFSET (-16)
 #define BGBV_CAM_OFFSET (16)
 
-static u8 BYTOHEXWORK[3] = "  ";
 void byToHex(u8 by, u8* ar)
 {
-	//u8 BYTOHEXWORK[3] = "  ";
     u8 a = by & 0xf;
     u8 b = (by & 0xf0) >> 4;
     if (a > 9) a += 7;
@@ -122,22 +120,22 @@ static u8 cl[3];
 
 void UpdateDebugText()
 {
-	byToHex(vcycles >> 8, &vch);
-	byToHex(vcycles & 0xff, &vcl);
-	byToHex(cycles >> 8, &ch);
-	byToHex(cycles & 0xff, &cl);
+	byToHex(vcycles >> 8, (u8*)&vch);
+	byToHex(vcycles & 0xff, (u8*)&vcl);
+	byToHex(cycles >> 8, (u8*)&ch);
+	byToHex(cycles & 0xff, (u8*)&cl);
 	// Every word write to the VDP is ~2 cycles.
-	print(BG_A, 5, 0, (String*)"CPU Cycles left:");
-	print(BG_A, 5, 1, ch);
-	print(BG_A, 7, 1, cl);
-	print(BG_A, 5, 2, (String*)"VDP Cycles left:");
-	print(BG_A, 5, 3, vch);
-	print(BG_A, 7, 3, vcl);
+	print(BG_A, 5, 0, (u8*)"CPU Cycles left:");
+	print(BG_A, 5, 1, (u8*)ch);
+	print(BG_A, 7, 1, (u8*)cl);
+	print(BG_A, 5, 2, (u8*)"VDP Cycles left:");
+	print(BG_A, 5, 3, (u8*)vch);
+	print(BG_A, 7, 3, (u8*)vcl);
 }
 
 
 // *** MAIN *** //
-void main()
+int main()
 {       
 	u32 c;
 	u16* zp;
@@ -298,10 +296,10 @@ void main()
 			if(debug_text_enabled) 
 			{
 				debug_text_enabled = false;
-				print(BG_A, 5, 0, "                ");
-				print(BG_A, 5, 1, "         ");
-				print(BG_A, 5, 2, "                ");
-				print(BG_A, 5, 3, "         ");
+				print(BG_A, 5, 0, (u8*)"                ");
+				print(BG_A, 5, 1, (u8*)"         ");
+				print(BG_A, 5, 2, (u8*)"                ");
+				print(BG_A, 5, 3, (u8*)"         ");
 				
 			}
 			else 
@@ -312,6 +310,7 @@ void main()
 		}
 		
 	} // end main game loop 
+	return 0;
 } // end main()
 
 // todo: convert all prints to DMA, maybe 
@@ -341,21 +340,21 @@ void QueueMetaTile(metaTile* mt, u8 layer, u8 tx, u8 ty, u8 priority)
 		case(2):
 		
 			mapBuffer[ofs] = (u16)(mt->ia | flags);
-			mapBuffer[ofs+1] = mt->ia+1 | flags;
+			mapBuffer[ofs+1] = (mt->ia+1) | flags;
 			ofs += 64;
 			mapBuffer[ofs] = mt->ib | flags;
-			mapBuffer[ofs+1] = mt->ib+1 | flags;
+			mapBuffer[ofs+1] = (mt->ib+1) | flags;
 			break;
 		case(3): // FIXME
 			mapBuffer[(ty * METAMAP_DISPLAY_WIDTH) + tx] = mt->ia | flags;
-			mapBuffer[(ty * METAMAP_DISPLAY_WIDTH) + tx + 1] = mt->ia+1 | flags;
-			mapBuffer[(ty * METAMAP_DISPLAY_WIDTH) + tx + 2] = mt->ia+2 | flags;
+			mapBuffer[(ty * METAMAP_DISPLAY_WIDTH) + tx + 1] = (mt->ia+1) | flags;
+			mapBuffer[(ty * METAMAP_DISPLAY_WIDTH) + tx + 2] = (mt->ia+2) | flags;
 			mapBuffer[((ty+1) * METAMAP_DISPLAY_WIDTH) + tx] = mt->ib | flags;
-			mapBuffer[((ty+1) * METAMAP_DISPLAY_WIDTH) + tx + 1] = mt->ib+1 | flags;
-			mapBuffer[((ty+1) * METAMAP_DISPLAY_WIDTH) + tx + 2] = mt->ib+2 | flags;
+			mapBuffer[((ty+1) * METAMAP_DISPLAY_WIDTH) + tx + 1] = (mt->ib+1) | flags;
+			mapBuffer[((ty+1) * METAMAP_DISPLAY_WIDTH) + tx + 2] = (mt->ib+2) | flags;
 			mapBuffer[((ty+2) * METAMAP_DISPLAY_WIDTH) + tx] = mt->ic | flags;
-			mapBuffer[((ty+2) * METAMAP_DISPLAY_WIDTH) + tx + 1] = mt->ic+1 | flags;
-			mapBuffer[((ty+2) * METAMAP_DISPLAY_WIDTH) + tx + 2] = mt->ic+2 | flags;
+			mapBuffer[((ty+2) * METAMAP_DISPLAY_WIDTH) + tx + 1] = (mt->ic+1) | flags;
+			mapBuffer[((ty+2) * METAMAP_DISPLAY_WIDTH) + tx + 2] = (mt->ic+2) | flags;
 			break;
 	}
 }
@@ -411,28 +410,28 @@ void DrawMetaTile(metaTile* mt, u8 layer, u8 tx_ofs, u8 ty_ofs)
 		case(2): 	
 			SetVRAMWriteAddress(addr);
 			WRITE_DATAREG16(mt->ia | flags);
-			WRITE_DATAREG16(mt->ia+1 | flags);
+			WRITE_DATAREG16((mt->ia+1) | flags);
 			addr += (BG_WIDTH*2); // 128; // 128 - 4
 			SetVRAMWriteAddress(addr);
 			WRITE_DATAREG16(mt->ib | flags);
-			WRITE_DATAREG16(mt->ib+1 | flags);
+			WRITE_DATAREG16((mt->ib+1) | flags);
 			break;
 		
 		case(3):
 			SetVRAMWriteAddress(addr);
 			WRITE_DATAREG16(mt->ia | flags);
-			WRITE_DATAREG16(mt->ia+1 | flags);
-			WRITE_DATAREG16(mt->ia+2 | flags);
+			WRITE_DATAREG16((mt->ia+1) | flags);
+			WRITE_DATAREG16((mt->ia+2) | flags);
 			addr += (BG_WIDTH*2);
 			SetVRAMWriteAddress(addr);
 			WRITE_DATAREG16(mt->ib | flags);
-			WRITE_DATAREG16(mt->ib+1 | flags);
-			WRITE_DATAREG16(mt->ib+2 | flags);
+			WRITE_DATAREG16((mt->ib+1) | flags);
+			WRITE_DATAREG16((mt->ib+2) | flags);
 			addr += (BG_WIDTH*2);
 			SetVRAMWriteAddress(addr);
 			WRITE_DATAREG16(mt->ic | flags);
-			WRITE_DATAREG16(mt->ic+1 | flags);
-			WRITE_DATAREG16(mt->ic+2 | flags);
+			WRITE_DATAREG16((mt->ic+1) | flags);
+			WRITE_DATAREG16((mt->ic+2) | flags);
 			break;
 	}
 }
@@ -483,9 +482,9 @@ void PlaySong()
 	asm("move.w #0,(z80_bus_request).l");
 }
 
-void LoadSong(u8* son)
+void LoadSong(const u8* son)
 {
-	u32 stadr = &son[0];
+	u32 stadr = (u32)son;
 	u8 bank = (u8)((stadr >> 15));
 	//stadr += 0x80;
 #define z80_base_ram 0xa00000 

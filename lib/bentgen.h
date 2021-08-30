@@ -8,7 +8,7 @@ typedef unsigned char u8;
 typedef volatile u8 vu8;
 // fix me 
 typedef u8 bool;
-typedef const char String[];
+typedef const unsigned char String[];
 typedef signed long s32;
 typedef signed short s16;
 typedef signed char s8;
@@ -35,8 +35,8 @@ typedef signed char s8;
 
 #define WRITE 0x8000
 #define READ 0
-#define REG(n) (n << 8)
-#define bit(n) (1 << n)
+#define REG(n) ((n) << 8)
+#define bit(n) (1 << (n))
 
 #define BG_A 0 
 #define BG_B 1 
@@ -92,14 +92,14 @@ typedef signed char s8;
 #define VDP_VSRAM_READ 0x10000000
 //#define VDP_VSRAM_WRITE 0x14000000 bad
 //; buttons
-#define BTN_UP_PRESSED bit(0)
-#define BTN_DOWN_PRESSED bit(1)
-#define BTN_LEFT_PRESSED bit(10)
-#define BTN_RIGHT_PRESSED bit(11)
-#define BTN_B_PRESSED bit(12)
-#define BTN_C_PRESSED bit(13)
-#define BTN_A_PRESSED bit(4)
-#define BTN_START_PRESSED bit(5)
+#define BTN_UP_PRESSED (u16)bit(0)
+#define BTN_DOWN_PRESSED (u16)bit(1)
+#define BTN_LEFT_PRESSED (u16)bit(10)
+#define BTN_RIGHT_PRESSED (u16)bit(11)
+#define BTN_B_PRESSED (u16)bit(12)
+#define BTN_C_PRESSED (u16)bit(13)
+#define BTN_A_PRESSED (u16)bit(4)
+#define BTN_START_PRESSED (u16)bit(5)
 
 // standard vram map:
 // 0000 - C000 : pattern defs (enough for 1536, max 2047=0xffeo)
@@ -170,7 +170,7 @@ typedef struct spriteAttribute {
     (u16)((n)|((hf)<<11)|((vf)<<12)|((pal)<<13)|((pri)<<15))
 
 void _start();
-void main();
+int main();
 void GAME_DRAW();
 void __attribute__((interrupt)) catch();
 void __attribute__((interrupt)) HBlank();
@@ -467,11 +467,11 @@ void print(u8 plane, u8 x, u8 y, String str)
 void DrawSpriteAsTile(u8 plane, u16 tileNo, u8 x, u8 y, u8 w, u8 h)
 {
     //WriteVDPRegister(WRITE|REG(0xf)|2); // auto - inc
-    u16* start = VRAM_BG_A + (2 * ((BG_WIDTH * y) + x));
+    u16 start = VRAM_BG_A + (2 * ((BG_WIDTH * y) + x));
     if(plane == BG_B) start = VRAM_BG_B + (2 * ((BG_WIDTH + y) + x));
     for(u8 xx = 0; xx < w; xx++) { 
         for(u8 yy = 0; yy < h; yy++) {
-            SetVRAMWriteAddress(start + (0x40*yy) + xx); // much slower iteration loop
+            SetVRAMWriteAddress((u16)start + (0x40*yy) + xx); // much slower iteration loop
             WRITE_DATAREG16(tileNo++);
         }
     }
@@ -488,11 +488,11 @@ void DrawTile(u8 plane, u16 TILEATTR, u8 x, u8 y, u8 w, u8 h)
 {
     //WriteVDPRegister(WRITE|REG(0xf)|2); // auto - inc
     // 2 bytes per character, 64 chars per plane row * 2 = 128 or $40 for newline
-    u16* start = 0;
+    u16 start = 0;
     if(plane == BG_A) start = VRAM_BG_A + (2 * ((BG_WIDTH * y) + x));
     if(plane == BG_B) start = VRAM_BG_B + (2 * ((BG_WIDTH + y) + x));
     for(u8 yy = 0; yy < h; yy++) { 
-        SetVRAMWriteAddress((u16*)(start + (0x40*yy)));
+        SetVRAMWriteAddress((u16)(start + (0x40*yy)));
         for(u8 xx = 0; xx < w; xx++) {
             WRITE_DATAREG16(TILEATTR++);
         }
