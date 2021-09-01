@@ -2,7 +2,7 @@
 ;;
 ;; Z80 VGM Player
 ;; 
-;; v 0.22
+;; v 0.23
 ; WARNING: 68k side addresses changed from a00080+ to a00100+
 ; Set to NTSC 
 ; Samples currently OFF while debugging
@@ -118,7 +118,7 @@ SongDataStart: defb 0,0,0,0
 CMDJUMPTABLE: ; starts at 50h
         defw WRITEPSG, 0, WRITEFM1, WRITEFM2, 0, 0, 0, 0 ; 50-57
         DEFW 0, 0, 0, 0, 0, 0, 0, 0 ;   58-5F
-        defw 0, SAMPLEWAIT, FRAMEOVER2, FRAMEOVER2, 0, 0, SONGOVER, DATABLOCK ; 60-67
+        defw 0, SAMPLEWAIT, FRAMEOVER, FRAMEOVER, 0, 0, SONGOVER, DATABLOCK ; 60-67
         DEFW WRITEPCM, 0, 0, 0, 0, 0, 0, 0
         DEFW QWAIT, QWAIT, QWAIT, QWAIT, QWAIT, QWAIT, QWAIT, QWAIT ;70
         DEFW QWAIT, QWAIT, QWAIT, QWAIT, QWAIT, QWAIT, QWAIT, QWAIT ;7F   
@@ -147,7 +147,9 @@ PALFlag: defb 0         ; 108h
 ; Set this to 1 and the next frame the Z80 will reset (jp 0). 
 ; Do this after changing SongBaseAddress to change songs. 
 ResetFlag: defb 0       ; 109h
- 
+
+FREECYCLES: ; 10Ah
+        defw 0 
 
 LOADVGM:
 ;;;;;;;;;;;;;;;;
@@ -172,7 +174,7 @@ LOADVGM:
 ; Is the loop variable = 00 00 ?
         ld a,(hl)               ; pointer is at loop portion of header. 
         ld c,a 
-        %GETNEXTSONGBYTEM    
+        %GETNEXTSONGBYTEM
         ld a,(hl)               ; Is there loop location?
         or c  
         jr z, noloop            ; checks first two bytes only~~~
@@ -239,66 +241,25 @@ noloop:
 
         dec hl  ;) < go down one because we call GetNextSongByte below
 PLAYLOOP:
-;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;               ; +27..400
         %GETNEXTSONGBYTEM
         LD A,(HL)
-;BREAKPOINT: JP BREAKPOINT  
         ; sub 50h, times 2 + &CMDJUMPTABLE
-        ld b,$50
-        sub b ; a-50
-        sla a   ; *2
-        push hl 
-         ld hl,CMDJUMPTABLE
-         add a,l   
-         ld l,a  ; jump table is < 256 so no high byte
-         ld a,(HL) 
-         ld c,a 
-         inc hl 
-         ld a,(HL) ; command address in bc 
-         ld b,a  
-         push bc 
-         pop hl     ; to hl (dont forget to pop hl) 
-         jp (hl) 
+        ld d,$50
+        sub d 
+        sla a ; a = (a-50)*2 + jumptab
+        ld bc,CMDJUMPTABLE 
+        add a,c   ; bc+a =>
+        ld c,a    ;  de
+        ld a,(bc) 
+        ld e,a 
+        inc bc 
+        ld a,(bc) 
+        ld d,a
+        push de 
+        ret 
 
-        ;cp $50 
-        ; jp c,ERROR      ; 0-49f - ERROR, invalid control byte
-        ;JP z,WRITEPSG   ; 50f - write PSG
-        ;cp $52          ; 0x52 a b - 2612 port 0 (gen FM1) <-
-        ;JP z,WRITEFM1
-        ;cp $53          ; 0x53 a b - 2612 port 1 (gen FM2) <-
-        ;JP z,WRITEFM2
-        ;CP $61          ; 0X61 a b - wait ba samples
-        ;JP Z,SAMPLEWAIT 
-        ;CP $62          ; 0x62 wait 1/60 second
-        ;JP Z,FRAMEOVER  ; (until next vblank)
-        ;CP $63
-        ;JP Z,FRAMEOVER  ; Same frame wait code won't make a difference on PAL
-        ;CP $66          
-        ; JP C,ERROR      ; 64-65 error 
-        ;JP Z,SONGOVER   ; 0x66 stop music playback
-        ;CP $67          ; DATA BLOCK 
-        ;JP Z,DATABLOCK  ;  sets up all pointers
-        ;cp $68 
-        ;JP Z,WRITEPCM   ;  probably not used 
-       ; CP $80
-       ; JP C,QWAIT        ; 69-7f (not 7c) quick wait
-       ; CP $90 
-       ; JP C,QFMWAIT      ; QFMWAIT      ; 80-8f quick fm write/wait
-       ; jp z,DACSETUP     ; 90 setup dac stream
-       ; CP $91 
-       ; JP Z,SETDACSTREAM
-       ; CP $92 
-       ; JP Z,SETDACFREQ
-       ; CP $93 
-       ; JP Z,STARTDACSTREAM ; UNSUPPORTED FIXME
-       ; CP $94 
-       ; JP Z,STOPDAC
-       ; CP $95
-       ; JP Z,DACFASTCALL
-       ; CP $FF 
-       ;  JP C,ERROR     ; 96-fe goto ERROR
-FRAMEOVER2:
-        pop hl ; jp table
+
 FRAMEOVER:
 ;;;;;;;;;;;
 ; * A
@@ -308,12 +269,15 @@ FRAMEOVER:
         ;LD A,(DacTransferActive) 
         ;cp 0 
         ;call DACBLOCKTRANSFER ; MAD TESTING BRUH
+        ld bc,0
 _framewait:
+        inc bc 
         LD A,(PlayNext)  ; check the 'play next frame' var
         CP 1             ; is it = 1?
         JR NZ,_framewait  ; if not, loop.
         xor a            ; if it is, clear it.
         ld (PlayNext),a 
+        ld (FREECYCLES),bc
         JP PLAYLOOP
 ;;;; 
 
@@ -323,7 +287,6 @@ ERRDEFB: DEFB $99
 ; This error handling is super rudimentary and only intended to get songs to
 ;  play without crashing!
 ERROR:  
-        ;pop hl  ; jp table
         ;cp $28    ; probably just got lost 
         ;jr _fixsongptr
         jp ERROR 
@@ -338,7 +301,6 @@ SONGOVER:
 ; * A
 ; Stops the song when hits command byte 0x66
 ;  Or, if looping, jumps to loop
-        pop hl 
         ld a,(LoopPlay) 
         cp 0 
         jr z, _endsong  
@@ -359,12 +321,12 @@ _overloop
         JP _overloop
 
 
-GetNextSongByte:
-        inc hl 
-        ld a,h 
-        and $80 
-        call z,BANKUP ; this also sets HL to 8000
-        ret 
+;GetNextSongByte:
+;        inc hl 
+;        ld a,h 
+;        and $80 
+;        call z,BANKUP ; this also sets HL to 8000
+;        ret 
 
 
 VOLUMESET:
@@ -379,7 +341,6 @@ WRITEPCM:
 bbb: defb $22
 ; Waits 1-16 samples
 QWAIT:
-        pop hl 
         ; TOO SHORT TO NOTICE?
         and $0f 
         ld b,a 
@@ -389,7 +350,6 @@ _qwl:   ; idk what to do other than skip 256*n cycles
         ld a,c 
         or b 
         jr nz, _qwl
-        ;JP QWAIT 
         JP PLAYLOOP 
 ccc: defb $33
 QFMWAIT:
@@ -490,7 +450,6 @@ DACWORK
 
 DACBLOCKTRANSFER:
         ;ret 
-
 ;; Step through me again
         ; PRESERVE CURRENT ROM BANK AND SONG PTR IN WORKRAM~+3
         ld a,(RomBank)          
@@ -525,7 +484,6 @@ _found
         ; now [A] has active data bank 0-15
         ; TODO 
         ; GET THE STRUCT'S CTR, STORE IT IN ACTIVEDACCTR
-
         ; switch to ActiveDacBank|ActiveDacLoc 
         ld a,(ActiveDacBank)     ; = 0
         ld (RomBank),a 
@@ -534,8 +492,7 @@ _found
         ; 1. CHECK ACTIVEDACCTR+2~3 - IF > 0, BC = $10B
         ; 2. COMPARE ADC+0~1 WITH $10B - IF >, BC=$10B
         ;    ELSE BC = ADC+0~1
-        ; STORE BC IN DACWRAM
-        
+        ; STORE BC IN DACWRAM   
         %ZWAITM 
         ld a,$2b 
         ld ($4000),a 
@@ -560,7 +517,6 @@ _found
         jp z,_enddac
         jp _nr
 _norm:
-;BREAKPOINT: JP BREAKPOINT 
         ;ld bc,(DacFrequency) ;; (DacFrequency) ; hopefully 267: debug me
 _nr:
         ;LD BC,765
@@ -629,7 +585,6 @@ QUICKSTOP:
 ; get the active dac block (this is set inside the transfer each loop)
 ;  (ActiveDacBlock) is not used anywhere else
 ; set that block's "active" byte and counter to 0
-        pop hl ; * 
         ld a,(ActiveDacBlock)   ; ? 
         push hl 
          push bc 
@@ -658,7 +613,6 @@ STOPDAC:
 ;;;;;;;;;;;;;;
 ; Stops DAC and disables DAC mode on CH6
 ; FIXME broken ?
-        pop hl  ;  * 
         %GETNEXTSONGBYTEM 
         ; unused 
         xor a 
@@ -684,7 +638,6 @@ StreamID: defb 0
 ; 90 0 2 0 2a 
 ; TODO SUPPORT MORE THAN ONE DAC STREAM :)
 DACSETUP:
-        pop hl 
         ;INC HL  ; STREAM ID 
         %GETNEXTSONGBYTEM 
         ; 0 
@@ -711,7 +664,6 @@ SETDACSTREAM:
 ; 0X91 <STREAM> <DATABANK ID> <STEP SIZE> <STEP BASE>
 ;         0           0            1           0 
 ; Preserves BC 
-        pop hl 
        push bc 
         %GETNEXTSONGBYTEM 
         ; Stream ID is for multiple DAC channels.
@@ -764,7 +716,6 @@ SETDACFREQ: ; 7D00 == 32000
 ; 3E80 = 16000 = 267 N 320P ; 
 ; 2b11 = 11025 = 184 N 221P
 ; 1f40 = 8000 =  134 N 160P
-        pop hl 
         %GETNEXTSONGBYTEM
         %GETNEXTSONGBYTEM
         ld a,(hl) 
@@ -786,7 +737,6 @@ SETDACFREQ: ; 7D00 == 32000
 __2
         ld hl,FreqTable
 __1
-
         ld a,(RealFrequency+1)               ; high byte of real freq is all we care about        
         cp $1f
         jr z,_set8
@@ -882,7 +832,6 @@ DACFASTCALL:
 ; datacounter 4 (bytes left this loop)
 ; blockactive 1 (gogogo)
 ; 0X95
-        pop hl 
         %GETNEXTSONGBYTEM 
         ;ld a, 1
         ;ld (DacTransferActive),a  ; SET TRANSFER TO ACTIVE SO WE DO IT LOL
@@ -1014,7 +963,6 @@ DBWORK: defb 0,0
 DATABLOCK:
 ;;;;;;;;;;;;
 ;
-        pop hl 
       push de 
         %GETNEXTSONGBYTEM 
         ld a,(hl) 
@@ -1120,7 +1068,6 @@ _blockok:
      pop de 
 _compressed: ; TODO do extra stuff for compressed data
 _uncompressed:
-
         jp PLAYLOOP     
 
 _emptyblock
@@ -1137,53 +1084,52 @@ BANKSWAP:
 ; * A (preserve bc)
 ; RomBank has the # of the 32kb block to write to 6001.
 ;  Keep it 8 bits for now FIXME for > 8MB song locations 
-        push bc 
-        ld c, 1         ; = 0b00000001
-        or a 
+        push bc                         ; +11
+        ld c, 1         ; = 0b00000001  ; +7
+        or a                            ; +4
 _bswp2: 
-        ld a,(RomBank)
-        and c 
-        cp 0 
-        jr z,_bzero 
-        jr _bone
+        ld a,(RomBank)                  ; +13
+        and c                           ; +4
+        cp 0                            ; +7
+        jr z,_bzero                     ; +12/+7
+        jr _bone                        ; +12
 _bzero: 
         ;call ZWAIT 
-        xor a 
-        jr _bwrt 
+        xor a                           ; +4
+        jr _bwrt                        ; +12
 _bone:
         ;call ZWAIT 
-        ld a,1
+        ld a,1                          ; +7
 _bwrt:
-        ld ($6001),a 
-        sla c           ; = 0b00000010
-        jr nc,_bswp2    ; loop until bit goes into carry
+        ld ($6001),a                    ; +13
+        sla c           ; = 0b00000010  ; +8
+        jr nc,_bswp2    ; loop until bit goes into carry; +12/+7
 
         ;call ZWAIT 
-        xor a 
-        ld ($6001),a       ; 9 bit = 0 ( works for < 8MB)
-        pop bc 
-        ret 
-;;;;
+        xor a                   ; +4
+        ld ($6001),a       ; 9 bit = 0 ( works for < 8MB); +13
+        pop bc                          ; +10
+        ret                             ; +10
+;;;;                                    ; ~300?
 
 BANKUP:
 ;;;;;;;;;;;;;;
 ; * A H L
 ; Pops up the rom bank by 1 and 
 ; sets HL back to $8000
-        ld a,(RomBank) 
-        inc a 
-        ld (RomBank),a 
-        call BANKSWAP 
-        ld hl,$8000
-        ret 
-;;;;
+        ld a,(RomBank)          ; +13
+        inc a                   ; +4   
+        ld (RomBank),a          ; +13
+        call BANKSWAP           ; +17 +(BANKSWAP)
+        ld hl,$8000             ; +10
+        ret                     ; +10
+;;;;                            ; Total : 67+~300
 
 
 WRITEFM1:
 ;;;;;;;;;;;;;;;;;;;
 ; HL - location of song byte
 ; * A  
-        pop hl 
         %GETNEXTSONGBYTEM 
         %ZWAITM 
         LD A,(HL) 
@@ -1211,18 +1157,17 @@ ZWAIT:
 .endmacro 
 
 .macro GETNEXTSONGBYTEM
-        inc hl 
-        ld a,h 
-        and $80 
-        call z,BANKUP ; this also sets HL to 8000
-.endmacro 
+        inc hl                  ; +6
+        ld a,h                  ; +4
+        and $80                 ; +7
+        call z,BANKUP ; this also sets HL to 8000 +17/10
+.endmacro                       ; Total: 27 or 400
 
 
 WRITEFM2:
 ;;;;;;;;;;;;;;;;
 ; HL = song byte
 ; * A
-        pop hl 
         %GETNEXTSONGBYTEM
         %ZWAITM 
         LD A,(HL) 
@@ -1238,7 +1183,6 @@ WRITEPSG:
 ;;;;;;;;;;;;;;;;
 ; HL = song byte 
 ; * A
-        pop hl 
         %GETNEXTSONGBYTEM
         ;CALL ZWAIT 
         LD A,(HL) 
@@ -1251,8 +1195,7 @@ WRITEPSG:
 SAMPLEWAIT:
 ;;;;;;;;;;;
 ; * A, B, C
-; HL = song byte 
-        pop hl 
+; HL = song byte
         %GETNEXTSONGBYTEM
         LD A,(HL)
         LD C,A  

@@ -25,31 +25,32 @@ static bool VBL_DONE = false;
 
 u8* songStart = (u8*)0x00008000;
 
-void main()
+int main()
 {       
-        u32 c;
+	u32 c;
 	u16* zp;
 	// Load palette
-        LoadPalette(0, (u16*)&palette);
+	LoadPalette(0, (u16*)&palette);
         
 	// Load font
 #define ASCIIBASETILE 32
-        tileindex = VDPLoadTiles(ASCIIBASETILE, (u32*)&font_0, 96);
+	tileindex = VDPLoadTiles(ASCIIBASETILE, (u32*)&font_0, 96);
 
 	LoadSong(song);
 
-        // Enable VBlank on VDP 
-        WriteVDPRegister(WRITE|REG(1)|0x64);
+	// Enable VBlank on VDP 
+	WriteVDPRegister(WRITE|REG(1)|0x64);
 
-        while(1)
-        {
-                VBL_DONE = false;
-                while(!VBL_DONE){}
-                //Print
+	while(1)
+	{
+		VBL_DONE = false;
+		while(!VBL_DONE){}
+		//Print
 		SetVRAMWriteAddress(VRAM_BG_A + (64*5*2) + (5*2)); // Screen address + 5 Y, 5 X (BG_A)
-                u8* chp = (u8*)&hw[0];       // String address
-                for(c = 0; c < sizeof(hw); c++) WRITE_DATAREG16((u16)*chp++); // Loop
-        }
+		u8* chp = (u8*)&hw[0];       // String address
+		for(c = 0; c < sizeof(hw); c++) WRITE_DATAREG16((u16)*chp++); // Loop
+	}
+	return 0;
 }
 
 void GAME_DRAW()
@@ -64,6 +65,9 @@ void GAME_DRAW()
         UpdateBGScroll();	// update background position
 }
 
+u8 zcyclesl;
+u8 zcyclesh;
+
 void PlaySong()
 {
 	asm("move.w #0x100,(z80_bus_request).l");
@@ -71,6 +75,10 @@ void PlaySong()
 	asm("btst #0,(z80_bus_request).l");
 	asm("bne.s z80busreqwait");
 	asm("move.b #1,(0xa00100).l");
+	asm("move.b (0xa0010a).l, %%d0\n\t\
+		 move.b %%d0,(%0)":"=g"(zcyclesl)::"d0");
+	asm("move.b (0xa0010b).l, %%d0\n\t\
+		 move.b %%d0,(%0)":"=g"(zcyclesh)::"d0");
 	asm("move.w #0,(z80_bus_request).l");
 }
 

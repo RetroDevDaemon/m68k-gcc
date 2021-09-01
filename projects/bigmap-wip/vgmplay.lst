@@ -148,7 +148,7 @@
 0109              148 ; Do this after changing SongBaseAddress to change songs. 
 0109 00           149 ResetFlag: defb 0       ; 109h
 010a              150 
-010a              151 FREECYCLES: ; 110h
+010a              151 FREECYCLES: ; 10Ah
 010a 00 00        152         defw 0 
 010c              153 
 010c              154 LOADVGM:
@@ -283,14 +283,14 @@
 01be              283         ;call DACBLOCKTRANSFER ; MAD TESTING BRUH
 01be 01 00 00     284         ld bc,0
 01c1              285 _framewait:
-01c1 3a 00 01     286         LD A,(PlayNext)  ; check the 'play next frame' var
-01c4 fe 01        287         CP 1             ; is it = 1?
-01c6 03           288         inc bc 
+01c1 03           286         inc bc 
+01c2 3a 00 01     287         LD A,(PlayNext)  ; check the 'play next frame' var
+01c5 fe 01        288         CP 1             ; is it = 1?
 01c7 20 f8        289         JR NZ,_framewait  ; if not, loop.
 01c9 af           290         xor a            ; if it is, clear it.
 01ca 32 00 01     291         ld (PlayNext),a 
 01cd ed 43 0a 01  292         ld (FREECYCLES),bc
-01d1 c3 a5 01     293         JP PLAYLOOP
+01d1 c3 a5 01     293         JP PLAYLOOP 
 01d4              294 ;;;; 
 01d4              295 
 01d4              296 

@@ -38,6 +38,8 @@ typedef struct meta_tile {
 } metaTile;
 const char hw[] = "\x80Hello BigMap";
 
+u8 zcyclesl;
+u8 zcyclesh;
 
 #define NO_HFLIP 0
 #define YES_HFLIP 1
@@ -117,6 +119,9 @@ static u8 vcl[3];
 static u8 _zero = 0;
 static u8 ch[3];
 static u8 cl[3];
+static u8 _zeroa = 0;
+static u8 zh[3];
+static u8 zl[3];
 
 void UpdateDebugText()
 {
@@ -124,6 +129,8 @@ void UpdateDebugText()
 	byToHex(vcycles & 0xff, (u8*)&vcl);
 	byToHex(cycles >> 8, (u8*)&ch);
 	byToHex(cycles & 0xff, (u8*)&cl);
+	byToHex(zcyclesh, (u8*)&zh);
+	byToHex(zcyclesl, (u8*)&zl);
 	// Every word write to the VDP is ~2 cycles.
 	print(BG_A, 5, 0, (u8*)"CPU Cycles left:");
 	print(BG_A, 5, 1, (u8*)ch);
@@ -131,6 +138,10 @@ void UpdateDebugText()
 	print(BG_A, 5, 2, (u8*)"VDP Cycles left:");
 	print(BG_A, 5, 3, (u8*)vch);
 	print(BG_A, 7, 3, (u8*)vcl);
+	print(BG_A, 5, 4, (u8*)"Z80 Cycles left:");
+	print(BG_A, 5, 5, (u8*)zh);
+	print(BG_A, 7, 5, (u8*)zl);
+	
 }
 
 
@@ -386,7 +397,6 @@ void PopulateMetatileList(u16 st_t, u16 en_t, u8 sz, metaTile* mt, u8 pal)
 			r = 0;
 		}
 	}
-
 }
 
 void DrawMetaTile(metaTile* mt, u8 layer, u8 tx_ofs, u8 ty_ofs)
@@ -471,7 +481,6 @@ void DMADisplayMap(u8 layer)
 }
 
 
-
 void PlaySong()
 {
 	asm("move.w #0x100,(z80_bus_request).l");
@@ -479,6 +488,10 @@ void PlaySong()
 	asm("btst #0,(z80_bus_request).l");
 	asm("bne.s z80busreqwait");
 	asm("move.b #1,(0xa00100).l");
+	asm("move.b (0xa0010a).l, %%d0\n\t\
+		 move.b %%d0,(%0)":"=g"(zcyclesl)::"d0");
+	asm("move.b (0xa0010b).l, %%d0\n\t\
+		 move.b %%d0,(%0)":"=g"(zcyclesh)::"d0");
 	asm("move.w #0,(z80_bus_request).l");
 }
 
