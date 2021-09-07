@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <unistd.h> // sleep
 #include <fcntl.h>  
+#include <string.h>
 #include <stdlib.h> // malloc
-
+#include <termios.h>
+#include <errno.h>
 
 #define ED_FIFO_RAM 0x1810000
 #define CMD_MEM_RD 0x19
@@ -36,6 +38,7 @@ FILE* romfile;
 char* filebuffer;
 int filelen;
 
+struct termios tty;
 
 int txCmd(u8 cmd)
 {
@@ -60,6 +63,36 @@ int ed_reset(unsigned char mode)
   buf[0] = mode;
   size_t r = write(ed_port, &buf[0], 1);
   return r;
+}
+
+int ed_read_mem(int addr, int length)
+{
+  //txCMD // 4 bytes
+  //  tx 8 0 // execute
+  //  tx data
+  clear_buffer();
+  if(txCmd(CMD_MEM_RD) != 4) return -1;
+  
+  // addr32
+  if(addr > 0xffffff) buf[4] = (unsigned char)(addr >> 24);
+  if(addr > 0xffff) buf[5] = (unsigned char)(addr >> 16);//0x81;
+  if(addr > 0xff) buf[6] = (unsigned char)(addr >> 8);//0;
+  buf[7] = (unsigned char)(addr & 0xff);//0;
+  int bw = write(ed_port, &buf[4], 4);
+  if(bw != 4) return -1;
+
+  // Size32
+  buf[8] = (u8)(length >> 24);
+  buf[9] = (u8)(length >> 16);
+  buf[10] = (u8)(length >> 8);
+  buf[11] = (u8)(length & 0xff);
+  bw = write(ed_port, &buf[8], 4);
+  if(bw != 4) return -1;
+  
+  buf[0] = 0;
+  bw = write(ed_port, &buf[0], 1);
+  int rb = read(ed_port, &buf, length);
+  return rb;
 }
 
 int dump_rom(char* outfile)
@@ -100,36 +133,6 @@ int dump_rom(char* outfile)
   fclose(f);
   printf("%s (%d bytes) written ok\n", outfile, size);
   printf("WARNING: Addresses 00h - FFh will not be read correctly!\n");
-}
-
-int ed_read_mem(int addr, int length)
-{
-  //txCMD // 4 bytes
-  //  tx 8 0 // execute
-  //  tx data
-  clear_buffer();
-  if(txCmd(CMD_MEM_RD) != 4) return -1;
-  
-  // addr32
-  if(addr > 0xffffff) buf[4] = (unsigned char)(addr >> 24);
-  if(addr > 0xffff) buf[5] = (unsigned char)(addr >> 16);//0x81;
-  if(addr > 0xff) buf[6] = (unsigned char)(addr >> 8);//0;
-  buf[7] = (unsigned char)(addr & 0xff);//0;
-  int bw = write(ed_port, &buf[4], 4);
-  if(bw != 4) return -1;
-
-  // Size32
-  buf[8] = (u8)(length >> 24);
-  buf[9] = (u8)(length >> 16);
-  buf[10] = (u8)(length >> 8);
-  buf[11] = (u8)(length & 0xff);
-  bw = write(ed_port, &buf[8], 4);
-  if(bw != 4) return -1;
-  
-  buf[0] = 0;
-  bw = write(ed_port, &buf[0], 1);
-  int rb = read(ed_port, &buf, length);
-  return rb;
 }
 
 int ed_write_fifo(char* data, unsigned int length)
@@ -179,14 +182,16 @@ int get_error(int* fd)
   while(*fd == -1)
     {
       close(*fd);
-      *fd = open(&ptstr, O_RDWR);
+      *fd = open((const char*)&ptstr, O_RDWR);
       if(*fd == -1)
       {
         close(*fd);
-        printf("Error opening %s. Retrying...\n", &ptstr);
-        //return 1;
+        printf("Error: %s (%d). ", strerror(errno), errno);
+        if(errno == 9) printf("Try: chmod +777 %s\n", (const char*)&ptstr);
+        printf("\nError opening %s. Quitting...\n", (const char*)&ptstr);
+        return 1;
       }
-      sleep(3);
+      //sleep(3);
     }
   return 0;
 }
@@ -214,7 +219,7 @@ void soft_reset()
   //if (bw != 5) printf("reset off error.\n");
  
 }
-/*
+
 void setup_port()
 {
   tcgetattr(ed_port, &tty);
@@ -232,13 +237,13 @@ void setup_port()
   tty.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL);
   tty.c_oflag &= ~OPOST; // Prevent special interpretation of output bytes (e.g. newline chars)
   tty.c_oflag &= ~ONLCR;
-  tty.c_cc[VTIME] = 3; // 300ms timeout (taken from source)
-  tty.c_cc[VMIN] = 0;
+  //tty.c_cc[VTIME] = 3; // 300ms timeout (taken from source)
+  //tty.c_cc[VMIN] = 0;
   //cfsetispeed(&tty, B19200);
   //cfsetospeed(&tty, B19200);
   tcsetattr(ed_port, TCSANOW, &tty);
 }
-*/
+
 
 int ed_load_rom()
 {
@@ -250,10 +255,13 @@ int ed_load_rom()
   for(int fs = 0; fs < filelen; fs += 32)
     {
       bw = ed_write_mem(fs, &filebuffer[fs], 32);
-      if(bw != 32) printf("WRITE ERROR\n");
+      if(bw != 32) {
+        printf("Write error! Is the device connected?\n");
+        return -1;
+      }
       bw = ed_read_mem(fs, 32);
       while(bw != 32) {
-        printf("READ ERROR\n");
+        printf("Write verify error! Possible desync, try again.\n");
         return -1;
         bw = ed_read_mem(fs, 32);
       }
@@ -276,7 +284,7 @@ int ed_load_rom()
 void usage()
 {
   printf("everpi\n\
-  A Debian/Pi tool for Mega EverDrive development\n\n\
+  A Linux tool for Mega EverDrive development\n\n\
   USAGE:\n\
   $ everpi rom [romfile]\n\
    or\n\
@@ -445,14 +453,14 @@ int main(int num_args, char** kw_args)
     return 1;
 
   /* Open Port */
-  //u8 port = kw_args[2];  
-  //ptstr[11] = port | 0x30;
-  ed_port = open(&ptstr, O_RDWR);
+  ed_port = open((const char*)&ptstr, O_RDWR);
+  setup_port(); // uses ed_port 
   printf("open() on port: %s\n", &ptstr);
   if(get_error(&ed_port)) {
     close(ed_port);
     return 1;
   }
+  
   /* Perform command */
   if(mode == MODE_WRITE_ROMFILE)
     load_and_run_file();
