@@ -19,6 +19,8 @@ u8* songStart = (u8*)0x00008000;
 static bool VBL_DONE = false;
 // sound
 #include "bmaster.h"
+//#include "title_vgm.h"
+#include "tseeker.h"
 // gfx
 #include "worldmap_tiles.h"
 #include "wm_pal.h"
@@ -151,7 +153,7 @@ int main()
 	tileindex = VDPLoadTiles(WORLDMAPTILES, (u32*)&worldmap_tiles_0, 600);
 	
 	// and song!
-	LoadSong(song);
+	LoadSong(&tseeker[0]);
 
 	// bg position - center A because we will scroll it
 	// We should load the next row or column of tiles based on how far into

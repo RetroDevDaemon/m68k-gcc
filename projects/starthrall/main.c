@@ -15,6 +15,7 @@
 #include "gfx.h"
 #include "starthrall.h"
 #include "characterdata.h"
+#include "music.h"
 
 #include "maptest2.h"
 
@@ -166,8 +167,9 @@ int main()
     player.y = 7;
 
     // RESET YM2612
-    // TODO
-
+    //EnableIRQLevel(7); // irqs off
+    LoadSong(&tseeker[0]);
+    //EnableIRQLevel(5); // vbl on 
     // RESET PSG
     // TODO
 
@@ -181,7 +183,7 @@ int main()
 
     InitTitleScreen();
 
-    // Enable VBlank on VDP 
+    // Enable VBlank IRQ on VDP 
     WriteVDPRegister(WRITE|REG(1)|0x64);
 
     bgb_vscroll_pos = 0;
@@ -277,6 +279,8 @@ int main()
 // Called during VBlank
 void GAME_DRAW()
 {   
+    PlaySong();
+    
     if(frameFlip == 0) frameFlip = 1;
     else frameFlip = 0;
     u16 c = 0;

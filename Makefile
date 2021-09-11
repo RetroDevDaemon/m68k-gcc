@@ -3,15 +3,19 @@
 #==============================
 UNAME_:=$(shell uname -s)
 ifeq ($(UNAME_),Darwin)
-  TCDIR:=~/Projects/Retro68-chain/bin
-  CC:=$(TCDIR)/m68k-apple-macos-gcc
-  AS:=$(TCDIR)/m68k-apple-macos-as
-  LD:=$(TCDIR)/m68k-apple-macos-ld
-else
-  CC:=m68k-apple-macos-gcc
-  AS:=m68k-apple-macos-as 
-  LD:=m68k-apple-macos-ld
-endif 
+  TCDIR:=~/Projects/Retro68-chain/bin/m68k-apple-macos-
+else 
+  TCDIR:=~/Downloads/m68k-toolchain/bin/m68k-elf-
+endif
+  CC:=$(TCDIR)gcc
+  AS:=$(TCDIR)as
+  LD:=$(TCDIR)ld
+#  CC:=m68k-apple-macos-gcc
+#  TCDIR:=~/Downloads/m68k-toolchain/bin/m68k-elf-
+#  CC:=$(TCDIR)m68k-elf-gcc
+#  AS:=m68k-apple-macos-as 
+#  LD:=m68k-apple-macos-ld
+#endif 
 
 CFLAGS=-Wall -nostdlib -O0 -m68000 -std=gnu11 -fno-pie -no-pie -fno-use-linker-plugin\
 	-fomit-frame-pointer -fno-inline -fno-builtin-inline 
@@ -57,6 +61,11 @@ main: DIRs
 
 run: main 
 	dgen $(ROMFILE)
+
+vgmplayer: 
+	cd lib 
+	./makez80.sh
+#	mv ./vgmplayer.h ./lib/vgmplayer.h
 
 # Create build directory	
 DIRs:
