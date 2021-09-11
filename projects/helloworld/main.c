@@ -17,7 +17,7 @@ static u16 tileindex;
 
 const char hw[] = "Hello World!";
 
-void main()
+int main()
 {       
         u16 c;
 	// Load palette
@@ -34,6 +34,7 @@ void main()
 
         while(1)
         {}
+        return 0;
 }
 
 void GAME_DRAW()

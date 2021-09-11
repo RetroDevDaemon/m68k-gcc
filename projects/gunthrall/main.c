@@ -28,7 +28,7 @@
 #define elseif else if 
 
 // game function defs 
-void main();
+int main();
 void GAME_INPUT();
 
 u8 FindFirstEmptyBullet();
@@ -119,7 +119,7 @@ void __attribute__((optimize("Os"))) stdcpy(u32* src, u32* dst, u32 siz)
 }
 
 
-void main()
+int main()
 {   
     WaitVBlank();
     //stdcpy(0x00ff0000, 0x00ff0001, 100);
@@ -368,6 +368,7 @@ void main()
         }
         bga_hscroll_pos -= 2;
     }
+    return 0;
 }
 
 // Called during VBlank

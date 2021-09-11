@@ -2,6 +2,9 @@
 #ifndef BENTGEN
 #define BENTGEN 
 
+// VGM PLAYER BYTES
+#include "vgmplayer.h"
+
 typedef unsigned long u32;
 typedef unsigned short u16;
 typedef unsigned char u8;
@@ -101,6 +104,13 @@ typedef signed char s8;
 #define BTN_A_PRESSED (u16)bit(4)
 #define BTN_START_PRESSED (u16)bit(5)
 
+#define REPT10(n) n;n;n;n;n;n;n;n;n;n;
+#define REPT4(n) n;n;n;n;
+#define REPT8(n) REPT4(n);REPT4(n);
+#define REPT3(n) n;n;n;
+#define REPT9(n) REPT3(REPT3(n))
+#define REPT20(n) REPT10(n);REPT10(n);
+
 // standard vram map:
 // 0000 - C000 : pattern defs (enough for 1536, max 2047=0xffeo)
 // C000 - D800 : BG_A
@@ -182,7 +192,19 @@ void SetVRAMWriteAddress(u16 address);
 void SetDMAWriteAddress(u16 address);
 void SetVRAMReadAddress(u16 address);
 void print(u8 plane, u8 x, u8 y, String str);
+void byToHex(u8 by, u8* ar);
+
 u16 VDPLoadTiles(u16 ti, u32* src, u16 numTiles);
+typedef struct meta_tile { 
+	u8 size;
+	u8 pal;
+	u16 ia; // top left tile index 
+	u16 ib; // optional - 2x2
+	u16 ic; // optional - 3x3
+	// 0, 1, [2]
+	// 20, 21, [22]
+	//[40, 41, 42]
+} metaTile;
 //
 Sprite* AddSprite(Sprite* as, u16 ypos, u8 size, u16 attr, u16 xpos);
 u16 strsize(String* s);
@@ -190,12 +212,21 @@ void LinkAllSpriteData();
 void DrawSpriteAsTile(u8 plane, u16 tileNo, u8 x, u8 y, u8 w, u8 h);
 void DrawTile(u8 plane, u16 TILEATTR, u8 x, u8 y, u8 w, u8 h);
 void UpdateBGScroll();
+//
+void PopulateMetatileList(u16 st_t, u16 en_t, u8 sz, metaTile* mt, u8 pal); 
+// Sound
+void LoadSong(const u8* son);
+void PlaySong();
+
 
 //void FlipTileRegionH(VDPPlane plane, u8 x1, u8 y1, u8 x2, u8 y2);
 //void FlipTileRegionV(VDPPlane plane, u8 x1, u8 y1, u8 x2, u8 y2);
 //void CopyMapRect(Map* source, VDPPlane tgtplane, u8 palNo, u16 tileIndex, u8 x1, u8 y1, u8 w, u8 h, u8 x2, u8 y2, BOOL p);
 //void ChangeTileRectPalette(VDPPlane plane, u8 x1, u8 y1, u8 x2, u8 y2, u8 palNo);
 void FlashAllPalettes();
+
+
+
 
 static u16 tempPalettes[4][16];     
 static s16 bga_hscroll_pos = 0;
@@ -541,14 +572,24 @@ void LinkAllSpriteData()
     s[79].next = 0;     // final sprite must link to 0
 }
 
-
 u16 strsize(String* s)
 {
     u16 sz;
-    while(*s != '\00') sz++;
+    char* c = s;
+    while(*c++ != '\00') sz++;
     return sz;
 }
 
+void byToHex(u8 by, u8* ar)
+{
+    u8 a = by & 0xf;
+    u8 b = (by & 0xf0) >> 4;
+    if (a > 9) a += 7;
+    if (b > 9) b += 7;
+    a += 0x30;
+    b += 0x30;
+    ar[0] = b; ar[1] = a; ar[2] = 0x20;
+}
 
 u16 VDPLoadTiles(u16 ti, u32* src, u16 numTiles)
 {
@@ -563,6 +604,101 @@ u16 VDPLoadTiles(u16 ti, u32* src, u16 numTiles)
     ti += numTiles;
     return ti;
 }
+
+
+static u8 zcyclesl;
+static u8 zcyclesh;
+
+void PlaySong()
+{
+	asm("move.w #0x100,(z80_bus_request).l");
+	asm("z80busreqwait:");
+	asm("btst #0,(z80_bus_request).l");
+	asm("bne.s z80busreqwait");
+	asm("move.b #1,(0xa00100).l");
+	asm("move.b (0xa0010a).l, %%d0\n\t"\
+		 "move.b %%d0,(%0)":"=g"(zcyclesl)::"d0");
+	asm("move.b (0xa0010b).l, %%d0\n\t"\
+		 "move.b %%d0,(%0)":"=g"(zcyclesh)::"d0");
+	asm("move.w #0,(z80_bus_request).l");
+}
+
+void LoadSong(const u8* son)
+{
+	u32 stadr = (u32)son;
+	u8 bank = (u8)((stadr >> 15));
+	//stadr += 0x80;
+#define z80_base_ram 0xa00000 
+#define z80_bus_request 0xa11100
+#define z80_reset 0xa11200     
+	asm("\n\t\
+	nop \n\t\
+	move.w	#0x100,(z80_bus_request).l\n\t\
+	move.w	#0x100,(z80_reset).l\n\t");
+// COPY z80prg[] INTO Z80 MEMORY (A00000+)
+	asm(\
+	"movea.l %0,%%a0\n\t"\
+	"movea.l %1,%%a1\n\t"\
+	::"g"(&vgmplayer), "g"(z80_base_ram):"a0","a1","d1");
+	asm(\
+	"move.l %0,%%d1"\
+	::"g"(sizeof(vgmplayer)):"d1");
+	asm(".Z80COPYLOOP:\n\t"\
+	"move.b (%%a0)+,%%d0\n\t"\
+	"move.b %%d0,(%%a1)+\n\t"\
+	"subq 	#1,%%d1\n\t"\
+	"bne 	.Z80COPYLOOP\n\t"\
+	:::"d0","d1","a0","a1");
+// set up vgm address on the z80
+	asm("move.b %0,(0xa00106).l"::"g"(bank)); // Rom bank # (A15-A23)
+	// 0x82-0x85 = start address 32 bit 
+	asm("move.b %0,(0xa00102).l"::"g"(stadr & 0xff));
+	asm("move.b %0,(0xa00103).l"::"g"((stadr >> 8)));
+	asm("move.b %0,(0xa00104).l"::"g"((stadr >>16)));
+	asm("move.b %0,(0xa00105).l"::"g"((stadr >>24)));
+	
+// reset, start z80
+	asm("\t\
+	move.w #0,(z80_reset).l \n\t\
+	nop \n\t\
+	nop \n\t\
+	nop \n\t\
+	nop \n\t\
+	move.w #0x100,(z80_reset).l \n\t\
+	move.w #0,(z80_bus_request).l");
+}
+
+
+// TODO: bigger than 3x3
+// TODO: sizes other than 10x15
+void PopulateMetatileList(u16 st_t, u16 en_t, u8 sz, metaTile* mt, u8 pal)
+{
+	// start tile, end tile, mt size in tiles (2 or 3)
+	u16 i;
+	metaTile* tile = mt;
+	u16 d = st_t;
+	u8 r = 0;
+	
+	for(i = 0; i < 150; i++)
+	{
+		tile[i].pal = pal;
+		tile[i].size = sz;
+		tile[i].ia = d; // 138;
+		tile[i].ib = d + 20; //158;
+		tile[i].ic = d + 40;
+		d += sz;
+		r += 1;
+		if(((r)%10) == 0){
+			if(sz == 2) 
+				d += 20;
+			else if(sz == 3)
+				d += 40;
+			r = 0;
+		}
+	}
+}
+
+
 
 //#include "gfx.h"
 
@@ -587,6 +723,7 @@ u16 VDPLoadTiles(u16 ti, u32* src, u16 numTiles)
 #define cram_pal2 0b00000000010000000000000000000000    // 0x40
 #define cram_pal3 0b00000000011000000000000000000000    // 0x60
 #define vsram_write 0b01111100000000000000000000010011 //fc00 -> 7c000013
+
 //
 /*
 ; ---------------------------------------------------------------------------
@@ -649,6 +786,7 @@ enable_ints:	macro
 
 #define SetDMALength(_L) WriteVDPRegister(WRITE|REG(0x13)|(u8)(_L & 0xff));\
 		WriteVDPRegister(WRITE|REG(0x14)|(u8)(_L >> 8));
-		
+
+
 
 #endif

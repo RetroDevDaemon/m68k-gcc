@@ -19,7 +19,7 @@
 #include "maptest2.h"
 
 // game function defs 
-void main();
+int main();
 int (*ProcessInput)(void);
 // test
 int GetInput();
@@ -138,7 +138,7 @@ s16 second_counter_a = 0;
 bool title_intro_done = false;
 
 
-void main()
+int main()
 {   
     /////////////////////////////
     ///////////
@@ -271,6 +271,7 @@ void main()
 
         
     }
+    return 0;
 }
 
 // Called during VBlank

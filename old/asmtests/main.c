@@ -16,7 +16,7 @@ int addr_a = 0;
 int addr_b = 0;
 
 
-void main()
+int main()
 {
 	while(1){}
     
@@ -55,7 +55,7 @@ void main()
 	"move.w #0x100,(%%a3)\n\t"\
 	:::"a3","a2");
 	
-	
+	return 0;
 	
 }
 

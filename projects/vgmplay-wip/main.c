@@ -12,7 +12,7 @@
 
 #include "font.h"
 #include "palette.h"
-#include "vgmplayer.h"
+
 #include "bmaster.h"
 
 static u16 tileindex;
@@ -63,66 +63,4 @@ void GAME_DRAW()
 
         VBL_DONE = true;
         UpdateBGScroll();	// update background position
-}
-
-u8 zcyclesl;
-u8 zcyclesh;
-
-void PlaySong()
-{
-	asm("move.w #0x100,(z80_bus_request).l");
-	asm("z80busreqwait:");
-	asm("btst #0,(z80_bus_request).l");
-	asm("bne.s z80busreqwait");
-	asm("move.b #1,(0xa00100).l");
-	asm("move.b (0xa0010a).l, %%d0\n\t\
-		 move.b %%d0,(%0)":"=g"(zcyclesl)::"d0");
-	asm("move.b (0xa0010b).l, %%d0\n\t\
-		 move.b %%d0,(%0)":"=g"(zcyclesh)::"d0");
-	asm("move.w #0,(z80_bus_request).l");
-}
-
-void LoadSong(u8* son)
-{
-	u32 stadr = &son[0];
-	u8 bank = (u8)((stadr >> 15));
-	//stadr += 0x80;
-#define z80_base_ram 0xa00000 
-#define z80_bus_request 0xa11100
-#define z80_reset 0xa11200     
-	asm("\n\t\
-	nop \n\t\
-	move.w	#0x100,(z80_bus_request).l\n\t\
-	move.w	#0x100,(z80_reset).l\n\t");
-// COPY z80prg[] INTO Z80 MEMORY (A00000+)
-	asm(\
-	"movea.l %0,%%a0\n\t"\
-	"movea.l %1,%%a1\n\t"\
-	::"g"(&vgmplayer), "g"(z80_base_ram):"a0","a1","d1");
-	asm(\
-	"move.l %0,%%d1"\
-	::"g"(sizeof(vgmplayer)):"d1");
-	asm(".Z80COPYLOOP:\n\t"\
-	"move.b (%%a0)+,%%d0\n\t"\
-	"move.b %%d0,(%%a1)+\n\t"\
-	"subq 	#1,%%d1\n\t"\
-	"bne 	.Z80COPYLOOP\n\t"\
-	:::"d0","d1","a0","a1");
-// set up vgm address on the z80
-	asm("move.b %0,(0xa00106).l"::"g"(bank)); // Rom bank # (A15-A23)
-	// 0x82-0x85 = start address 32 bit 
-	asm("move.b %0,(0xa00102).l"::"g"(stadr & 0xff));
-	asm("move.b %0,(0xa00103).l"::"g"((stadr >> 8)));
-	asm("move.b %0,(0xa00104).l"::"g"((stadr >>16)));
-	asm("move.b %0,(0xa00105).l"::"g"((stadr >>24)));
-	
-// reset, start z80
-	asm("\t\
-	move.w #0,(z80_reset).l \n\t\
-	nop \n\t\
-	nop \n\t\
-	nop \n\t\
-	nop \n\t\
-	move.w #0x100,(z80_reset).l \n\t\
-	move.w #0,(z80_bus_request).l");
 }

@@ -721,8 +721,8 @@ char* ProcessScriptCodes(const char* line)
     for(char c = 0; c < 25; c ++){
         if ((line[c] >= PHAESTA_NAME) && (line[c] <= '\x98')) { // Player name?
             char* n = &playerNames[(line[c] & 0b00000111) - 1];
-            memcpy(&procLine[d], n, strlen(n));
-            d += strlen(n)-1;
+            memcpy(&procLine[d], n, strsize(n));
+            d += strsize(n)-1;
         }
         else if((line[c] == WAIT_FOR_BTN)) {
             NPC_waitingForButton = true;
@@ -740,7 +740,7 @@ char* ProcessScriptCodes(const char* line)
 // UpdateTextLog processes script replacement codes (i.e. names, vars)
 void UpdateTextLog(const char* toAdd){
     // shift everything
-    u8 len = strlen(toAdd);
+    u8 len = strsize(toAdd);
     s8 blen = 25 - len;
     for(u16 p = 25; p <= 2475; p = p + 25){
         memcpy(&textLog[p-25], &textLog[p], 25);

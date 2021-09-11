@@ -8,9 +8,9 @@ ifeq ($(UNAME_),Darwin)
   AS:=$(TCDIR)/m68k-apple-macos-as
   LD:=$(TCDIR)/m68k-apple-macos-ld
 else
-  CC:=m68k-elf-gcc
-  AS:=m68k-elf-as
-  LD:=m68k-elf-ld
+  CC:=m68k-apple-macos-gcc
+  AS:=m68k-apple-macos-as 
+  LD:=m68k-apple-macos-ld
 endif 
 
 CFLAGS=-Wall -nostdlib -O0 -m68000 -std=gnu11 -fno-pie -no-pie -fno-use-linker-plugin\

@@ -29,10 +29,10 @@ u16 testBuffer[EXAMPLE_WIDTH*EXAMPLE_HEIGHT];
 bool DMA_TEST;
 u32 cycles;
 
-u8* byToHex(u8 by);
+u8* byToHexC(u8 by);
 
 // *** MAIN *** //
-void main()
+int main()
 {       
 	u32 c;
 	u16* zp;
@@ -65,9 +65,9 @@ void main()
 		//Print test string @ 16X 5Y
 		//if(DMA_TEST) {
 			SetVRAMWriteAddress(VRAM_BG_B + (BG_WIDTH*5*2) + (16*2)); 
-			u8* chp = (u8*)byToHex((u8)((cycles & 0xff00)>>8));  
+			u8* chp = (u8*)byToHexC((u8)((cycles & 0xff00)>>8));  
 			for(c = 0; c < 2; c++) WRITE_DATAREG16((u16)*chp++); 
-			chp = (u8*)byToHex((u8)((cycles & 0xff)));  
+			chp = (u8*)byToHexC((u8)((cycles & 0xff)));  
 			for(c = 0; c < 2; c++) WRITE_DATAREG16((u16)*chp++);
 			chp = (u8*)hw;
 			for(c = 0; c < sizeof(hw); c++) WRITE_DATAREG16((u16)*chp++);
@@ -76,7 +76,7 @@ void main()
 }
 
 static u8 BYTOHEXWORK[3] = "  ";
-u8* byToHex(u8 by)
+u8* byToHexC(u8 by)
 {
 	//u8 BYTOHEXWORK[3] = "  ";
     u8 a = by & 0xf;

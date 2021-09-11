@@ -22,7 +22,7 @@ const char hw[] = "Hello FM!";
 
 static bool VBL_DONE = false;
 
-void main()
+int main()
 {       
         u16 c;
 
@@ -48,11 +48,11 @@ void main()
 	asm(\
 	"move.l %0,%%d1"\
 	::"g"(sizeof(z80prg)):"d1");
-	asm(".Z80COPYLOOP:\n\t"\
+	asm(".Z80COPYLOOPF:\n\t"\
 	"move.b (%%a0)+,%%d0\n\t"\
 	"move.b %%d0,(%%a1)+\n\t"\
 	"subq 	#1,%%d1\n\t"\
-	"bne 	.Z80COPYLOOP\n\t"\
+	"bne 	.Z80COPYLOOPF\n\t"\
 	:::"d0","d1","a0","a1");
 // reset, start z80
 	asm("\t\
@@ -64,26 +64,27 @@ void main()
 	move.w #0x100,(z80_reset).l \n\t\
 	move.w #0,(z80_bus_request).l");
 
-        // Enable VBlank on VDP 
-        WriteVDPRegister(WRITE|REG(1)|0x64);
+	// Enable VBlank on VDP 
+	WriteVDPRegister(WRITE|REG(1)|0x64);
 
-        while(1)
-        {
-                VBL_DONE = false;
-                while(!VBL_DONE){}
-                //Print
-		SetVRAMWriteAddress(VRAM_BG_A + (64*5*2) + (5*2)); // Screen address + 5 Y, 5 X (BG_A)
-                u8* chp = (u8*)&hw[0];       // String address
-                for(c = 0; c < sizeof(hw); c++) WRITE_DATAREG16((u16)*chp++); // Loop
-        }
+	while(1)
+	{
+			VBL_DONE = false;
+			while(!VBL_DONE){}
+			//Print
+	SetVRAMWriteAddress(VRAM_BG_A + (64*5*2) + (5*2)); // Screen address + 5 Y, 5 X (BG_A)
+			u8* chp = (u8*)&hw[0];       // String address
+			for(c = 0; c < sizeof(hw); c++) WRITE_DATAREG16((u16)*chp++); // Loop
+	}
+	return 0;
 }
 
 void GAME_DRAW()
 {
-        GETJOYSTATE1(joyState1);
-        if(joyState1 & BTN_C_PRESSED) // Is (C) pressed?
-                bga_hscroll_pos++;
+	GETJOYSTATE1(joyState1);
+	if(joyState1 & BTN_C_PRESSED) // Is (C) pressed?
+			bga_hscroll_pos++;
 
-        VBL_DONE = true;
-        UpdateBGScroll();	// update background position
+	VBL_DONE = true;
+	UpdateBGScroll();	// update background position
 }
