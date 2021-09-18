@@ -34,7 +34,7 @@ u16 vdpstat;
 u32 hcount;
 //String hw = "Press START!\x00";
 //String okstr = "Okay\x00";
-const char hw[] = "Hello Buttons!";
+const char hw[] = "\"Caustic Love\"";
 
 static u16 joyState1;
 static u16 last_joyState1;
@@ -168,7 +168,7 @@ int main()
 
     // RESET YM2612
     //EnableIRQLevel(7); // irqs off
-    LoadSong(&tseeker[0]);
+    LoadSong(&caustic_love[0]);
     //EnableIRQLevel(5); // vbl on 
     // RESET PSG
     // TODO

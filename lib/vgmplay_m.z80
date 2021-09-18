@@ -317,13 +317,8 @@ ERRDEFB: DEFB $99
 ; This error handling is super rudimentary and only intended to get songs to
 ;  play without crashing!
 ERROR:  
-        ;cp $28    ; probably just got lost 
-        ;jr _fixsongptr
-        jp ERROR 
-
-_fixsongptr: 
-        %GETNEXTSONGBYTEM
-        jp PLAYLOOP 
+        ;jp ERROR 
+        jp LOADVGM
 
 _songoverb: defb $55
 SONGOVER:
