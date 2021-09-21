@@ -9,15 +9,21 @@
 
 // My own genesis stuff 
 #include "bentgen.h"
-// Assets
 
-// Game stuff
+static u16 joyState1;
+static u16 last_joyState1;
+static u16 joyState2;
+static u16 last_joyState2;
+static bool VBL_DONE = false;
+void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 pal);
+
+// Assets
 #include "gfx.h"
+#include "music.h"
+// Game stuff
 #include "starthrall.h"
 #include "characterdata.h"
-#include "music.h"
-
-#include "maptest2.h"
+#include "title.h"
 
 // game function defs 
 int main();
@@ -32,15 +38,6 @@ u32 frameCounter;
 bool frameFlip;
 u16 vdpstat;
 u32 hcount;
-//String hw = "Press START!\x00";
-//String okstr = "Okay\x00";
-const char hw[] = "\"Caustic Love\"";
-
-static u16 joyState1;
-static u16 last_joyState1;
-static u16 joyState2;
-static u16 last_joyState2;
-static bool VBL_DONE = false;
 
 bool REORDER_SPRITES = false;
 u8 sprites_destroyed = 0;
@@ -71,10 +68,9 @@ void __attribute__((optimize("Os"))) stdfill(u32 chr, u32* dst, u32 siz)
 }
 */
 
-int TitleInputHandler()
+void NullInputHandler(void)
 {
-    //FlashAllPalettes();
-    return 0;
+    return;
 }
 
 void InitGameStuff()
@@ -105,39 +101,12 @@ void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 
 }
 
 
-void InitTitleScreen()
-{
-    u16 c;
-    u32* cr;
-    // start title music
-    // TODO 
-    // scroll map
-    bgb_hscroll_pos = 180;
-    UpdateBGScroll();
-    LoadDungeonMap(&maptest2);
-    CUR_SCREEN_MODE = TITLE;
-    curPaletteSet[3] = (u16*)&titlePalette;
-    LoadPalette(3, curPaletteSet[3]);    
-    // Make map
-    tileindex = 128;
-    tileindex = VDPLoadTiles(tileindex, (u32*)&title_test_0, 605);
-    DrawBGMap(128, &title_test_map, 40, 28, (u16*)VRAM_BG_B, 3);
-
-    timer_3 = 0;
-    // sprite engine (already on)
-    // set joy handler
-    ProcessInput = TitleInputHandler;
-}
-
 void UndarkAllPalettes()
 {
 
 }
-
     
 s16 second_counter_a = 0;
-bool title_intro_done = false;
-
 
 int main()
 {   
@@ -186,6 +155,9 @@ int main()
     // Enable VBlank IRQ on VDP 
     WriteVDPRegister(WRITE|REG(1)|0x64);
 
+#define realFrameDelta 0.0167
+#define FrameDelta5 
+
     bgb_vscroll_pos = 0;
     bgb_hscroll_pos = 160;
     bga_vscroll_pos = 0;
@@ -196,17 +168,11 @@ int main()
     fix32 frameDelta;
     flashStepTimer = 0;
     flashStep = 0;
-
-#define realFrameDelta 0.0167
-#define FrameDelta5 
-    flashStepTimer = 0;
-    frameDelta = fp32(realFrameDelta);
-    title_intro_done = false;
     ticker = 0;
+    frameDelta = fp32(realFrameDelta);
     // Clear and reset queue
     //q_in = 0;
     for(i = 0; i < QUEUE_SIZE; i++) function_q[i] = (void*)NULL;
-
     
     while(TRUE)
     { 
@@ -257,7 +223,7 @@ int main()
         }
         else if (CUR_SCREEN_MODE == TITLE)
         {
-            //if(second_counter_a > 1) title_intro_done = true;
+       
         }
         
         // MAIN GAME LOOP 
@@ -284,10 +250,12 @@ void GAME_DRAW()
     if(frameFlip == 0) frameFlip = 1;
     else frameFlip = 0;
     u16 c = 0;
+    
     last_joyState1 = joyState1;
     GETJOYSTATE1(joyState1);
     //last_joyState2 = joyState2;
     //GETJOYSTATE2(joyState2);
+    
     // Sprite shit
     // TODO: Convert this to DMA
     volatile u32* spr = spriteRamBase;
@@ -328,56 +296,11 @@ void GAME_DRAW()
 
     if (CUR_SCREEN_MODE == TITLE)
     {
-        if(timer_3 <= 160) { 
-            // scroll the map in!
-            //if(titleScr != null)
-            //    MAP_scrollTo(titleScr, timer_3, 0);
-            timer_3 += 20;
-            bgb_hscroll_pos = 180 - timer_3;
-            bgb_vscroll_pos = 0;
-            //bgb_vscroll_pos = (u16)timer_3;
-        }
-        else { 
-            if(!flashAnimPlaying){
-                // if done, print :
-                SetVRAMWriteAddress(0xc000 + (64*21*2) + (9*2)); // Screen address + 21 Y, 9 X (BG_A)
-                // (16bit, 64 chars/map)
-                u8* chp = (u8*)&hw[0];       // String address
-                for(c = 0; c < sizeof(hw); c++) WRITE_DATAREG16((u16)*chp++); // Loop
-                //SetInputCallback(&GetInput);
-            }
-        }
-        if ((flashAnimPlaying) && (flashStep > 6)) { 
-            if ( NEXT_SCREEN_MODE == WORLDMAP)
-            {    
-                //InitWorldMapState();
-            }
-            else if ( NEXT_SCREEN_MODE == INTRO)
-            {    
-                //InitIntro();
-            }
-        }
+        TITLE_DRAW();
+        
     }
     VBL_DONE = true;
         // end draw
     UpdateBGScroll();
 }
 
-
-
-//int GetInput()
-//{
-    //FlashAllPalettes();
-//    return 0;
-//}
-
-//void SetInputCallback(void(* f)())
-//{
-//    void(*ProcessInput)() = &f;
-//}
-
-//void ProcessInput()
-//{
- //   void(*f)() = &function;
- //   f();
-//}
