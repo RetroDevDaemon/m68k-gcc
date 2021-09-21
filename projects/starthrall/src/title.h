@@ -1,6 +1,6 @@
 bool title_intro_done;
 bool go_intro;
-extern u16 last_joyState1, joyState1;
+extern u32 last_joyState1, joyState1;
 extern int (*ProcessInput)(void);
 const char str_pressStart[] = "PRESS START";
 extern void NullInputHandler(void);

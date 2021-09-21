@@ -103,6 +103,10 @@ typedef signed char s8;
 #define BTN_C_PRESSED (u16)bit(13)
 #define BTN_A_PRESSED (u16)bit(4)
 #define BTN_START_PRESSED (u16)bit(5)
+#define BTN_X_PRESSED (u32)(bit(19))
+#define BTN_Y_PRESSED (u32)(bit(18))
+#define BTN_Z_PRESSED (u32)(bit(17))
+#define BTN_MODE_PRESSED (u32)(bit(16))
 
 #define REPT10(n) n;n;n;n;n;n;n;n;n;n;
 #define REPT4(n) n;n;n;n;
@@ -226,8 +230,6 @@ void PlaySong();
 void FlashAllPalettes();
 
 
-
-
 static u16 tempPalettes[4][16];     
 static s16 bga_hscroll_pos = 0;
 static s16 bga_vscroll_pos = 0;
@@ -286,8 +288,9 @@ typedef s16 fix16;
         "move.b #0,(0xa10003).l     | TH to 0\n\t"\
         "nop\n\tnop                 | (sync!)\n\t"\
         "move.b (0xa10003).l,%%d0   | read byte 2\n\t"\
-        "move.w %%d0,%0             | copy to output"\
+        "move.l %%d0,%0             | copy to output"\
         :"=g"(n)::"d0"); n ^= 0xffff; // OR result
+        
 #define GETJOYSTATE2(n) asm(\
         "move.l #0,%%d0             | clear d0\n\t"\
         "moveq #0x40,%%d0           | set bit 6\n\t"\
@@ -474,7 +477,6 @@ void LoadPalette(u8 palNo, u16* p)
 
 void print(u8 plane, u8 x, u8 y, String str)
 {
-    //WriteVDPRegister(WRITE|REG(0xf)|2);
     // 2 bytes per character, 64 chars per plane row * 2 = 128 or $80 for newline
     switch(plane){
         case(BG_A):    // BG_A

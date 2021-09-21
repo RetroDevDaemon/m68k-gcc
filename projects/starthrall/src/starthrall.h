@@ -876,6 +876,7 @@ void UnflashAllPalettes()
                 s8 t = (tempPalettes[s][f] & 0x0f00) >> 8;
                 t -= 2;
                 if (t < 0) t = 0;
+                t = t & 0b1111110;
                 tempPalettes[s][f] = (tempPalettes[s][f] & 0x00ff) | (t << 8);
             }
             if((tempPalettes[s][f] & 0x00f0) > (*tr & 0x00f0))
@@ -883,6 +884,7 @@ void UnflashAllPalettes()
                 s8 t = (tempPalettes[s][f] & 0x00f0) >> 4;
                 t -= 2;
                 if (t < 0) t = 0;
+                t = t & 0b1111110;
                 tempPalettes[s][f] = (tempPalettes[s][f] & 0x0f0f) | (t << 4);
             }
             if((tempPalettes[s][f] & 0x000f) > (*tr & 0x000f))
@@ -890,6 +892,7 @@ void UnflashAllPalettes()
                 s8 t = tempPalettes[s][f] & 0x000f;
                 t -= 2;
                 if (t < 0) t = 0;
+                t = t & 0b1111110;
                 tempPalettes[s][f] = (tempPalettes[s][f] & 0x0ff0) | (t);
             }
             tr++;

@@ -292,6 +292,8 @@ int main()
 				print(BG_A, 5, 1, (u8*)"         ");
 				print(BG_A, 5, 2, (u8*)"                ");
 				print(BG_A, 5, 3, (u8*)"         ");
+				print(BG_A, 5, 4, (u8*)"                ");
+				print(BG_A, 5, 5, (u8*)"         ");
 				
 			}
 			else 

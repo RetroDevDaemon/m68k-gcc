@@ -10,8 +10,10 @@
 // My own genesis stuff 
 #include "bentgen.h"
 
-static u16 joyState1;
-static u16 last_joyState1;
+//static u16 joyState1;
+static u32 joyState1;
+//static u16 last_joyState1;
+static u32 last_joyState1;
 static u16 joyState2;
 static u16 last_joyState2;
 static bool VBL_DONE = false;
@@ -38,6 +40,7 @@ u32 frameCounter;
 bool frameFlip;
 u16 vdpstat;
 u32 hcount;
+static bool debug_text_enabled;
 
 bool REORDER_SPRITES = false;
 u8 sprites_destroyed = 0;
@@ -46,6 +49,7 @@ u8 sprites_destroyed = 0;
 static Sprite empty[80];
 
 u8 sixtyFrameCounter = 0;
+u8 thirtyFrameCounter = 0;
 u8 twentyFrameCounter = 0;
 u8 tenFrameCounter = 0;
 Sprite* test;
@@ -67,6 +71,32 @@ void __attribute__((optimize("Os"))) stdfill(u32 chr, u32* dst, u32 siz)
     for(u32 a = 0; a < siz; a++) *dst++ = chr;
 }
 */
+
+static s32 cycles;
+static s32 vcycles;
+static u8 vch[3];
+static u8 vcl[3];
+static u8 _zero = 0;
+static u8 ch[3];
+static u8 cl[3];
+static u8 _zeroa = 0;
+static u8 zh[3];
+static u8 zl[3];
+void UpdateDebugText()
+{
+
+	extern u8 zcyclesl;
+	extern u8 zcyclesh;
+
+	// Every word write to the VDP is ~2 cycles. This takes up 24c!
+	print(BG_A, 5, 1, (u8*)ch);
+	print(BG_A, 7, 1, (u8*)cl);
+    print(BG_A, 5, 3, (u8*)vch);
+	print(BG_A, 7, 3, (u8*)vcl);
+	print(BG_A, 5, 5, (u8*)zh);
+	print(BG_A, 7, 5, (u8*)zl);
+	
+}
 
 void NullInputHandler(void)
 {
@@ -101,11 +131,6 @@ void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 
 }
 
 
-void UndarkAllPalettes()
-{
-
-}
-    
 s16 second_counter_a = 0;
 
 int main()
@@ -164,6 +189,7 @@ int main()
     bga_hscroll_pos = 0;
     //WaitVBlank();
     flashAnimPlaying = true;
+    thirtyFrameCounter = 0;
     //unflashAnimPlaying = true;
     fix32 frameDelta;
     flashStepTimer = 0;
@@ -176,7 +202,12 @@ int main()
     
     while(TRUE)
     { 
-        
+        // Wait for VBL, count the cycles we wait until VBL
+		VBL_DONE = false;
+		cycles = 0;
+		while(!VBL_DONE)
+			cycles++;
+
         ticker = ticker + 1;
         if (ticker > 60) 
         {
@@ -189,8 +220,9 @@ int main()
         if(twentyFrameCounter > 19) twentyFrameCounter = 0;
         tenFrameCounter++;
         if(tenFrameCounter > 9) tenFrameCounter = 0;
+        thirtyFrameCounter++;
+        if(thirtyFrameCounter > 29) thirtyFrameCounter = 0;
 
-        //Fade in/out - Make me less ugly, please!
         
         UPDATE:
         if(GLOBALWAIT > 0)
@@ -229,6 +261,16 @@ int main()
         // MAIN GAME LOOP 
         ProcessInput();
         
+        if(debug_text_enabled)
+        {
+            byToHex(vcycles >> 8, (u8*)&vch);
+            byToHex(vcycles & 0xff, (u8*)&vcl);
+            byToHex(cycles >> 8, (u8*)&ch);
+            byToHex(cycles & 0xff, (u8*)&cl);
+            byToHex(zcyclesh, (u8*)&zh);
+            byToHex(zcyclesl, (u8*)&zl);           
+        }
+
         // ****
         //   VBLANK
         // ****
@@ -245,16 +287,17 @@ int main()
 // Called during VBlank
 void GAME_DRAW()
 {   
+    last_joyState1 = joyState1;
+    GETJOYSTATE1(joyState1);
+    //last_joyState2 = joyState2;
+    //GETJOYSTATE2(joyState2);
+
+    
     PlaySong();
     
     if(frameFlip == 0) frameFlip = 1;
     else frameFlip = 0;
     u16 c = 0;
-    
-    last_joyState1 = joyState1;
-    GETJOYSTATE1(joyState1);
-    //last_joyState2 = joyState2;
-    //GETJOYSTATE2(joyState2);
     
     // Sprite shit
     // TODO: Convert this to DMA
@@ -299,8 +342,43 @@ void GAME_DRAW()
         TITLE_DRAW();
         
     }
+    
+    /* Debug Menu */   
+    if(1)
+    {
+        if(Joy1Down(BTN_A_PRESSED) && Joy1Down(BTN_C_PRESSED))
+        {
+            if(debug_text_enabled) 
+            {
+                debug_text_enabled = false;
+                print(BG_A, 0, 0, (u8*)"                ");
+                print(BG_A, 0, 1, (u8*)"         ");
+                print(BG_A, 0, 2, (u8*)"                ");
+                print(BG_A, 0, 3, (u8*)"         ");
+                print(BG_A, 0, 4, (u8*)"                ");
+                print(BG_A, 0, 5, (u8*)"         ");   
+            }
+            else 
+            {
+                print(BG_A, 0, 0, (u8*)"CPU Cycles left:");
+                print(BG_A, 0, 2, (u8*)"VDP Cycles left:");
+                print(BG_A, 0, 4, (u8*)"Z80 Cycles left:");
+                debug_text_enabled = true;
+                //UpdateDebugText();
+            }
+        }
+    }
+    UpdateBGScroll();
+    if(debug_text_enabled)
+    {
+        if(thirtyFrameCounter == 0)
+            UpdateDebugText();
+    }
+    vcycles = 0;
+    while(*((u32*)0xc00004) & 0b1000)
+        vcycles++;
+        
     VBL_DONE = true;
         // end draw
-    UpdateBGScroll();
 }
 
