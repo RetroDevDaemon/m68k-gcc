@@ -161,6 +161,7 @@ NTSCWAIT equ 735
 LOADVGM:
 ;;;;;;;;;;;;;;;;
         ld a,(PALFlag)
+        cp 0
         jr z,_ntw
         ld hl,PALWAIT
         ld (LOCALEWAIT),hl 
@@ -581,15 +582,15 @@ SAMPLEWAIT:
 ;;;;;;;;;;;
 ; * A, B, C
 ; HL = song byte
-
         %GETNEXTSONGBYTEM
         ld a,(hl)
         ld c,a 
         %GETNEXTSONGBYTEM
         ld a,(hl)
         ld b,a 
+        inc b ; FIXME: This is to fix the "too fast" sample wait
         ld (SAMPTOWAIT),bc 
-        JP FRAMEOVER
+        JP PLAYLOOP 
 
 
 

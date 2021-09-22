@@ -10,26 +10,20 @@ endif
   CC:=$(TCDIR)gcc
   AS:=$(TCDIR)as
   LD:=$(TCDIR)ld
-#  CC:=m68k-apple-macos-gcc
-#  TCDIR:=~/Downloads/m68k-toolchain/bin/m68k-elf-
-#  CC:=$(TCDIR)m68k-elf-gcc
-#  AS:=m68k-apple-macos-as 
-#  LD:=m68k-apple-macos-ld
-#endif 
 
-CFLAGS=-Wall -Werror=implicit-function-declaration -nostdlib -O0 -m68000 -std=gnu11 -fno-pie -no-pie -fno-use-linker-plugin\
+CFLAGS=-Wall -Werror=implicit-function-declaration \
+	-nostdlib \
+	-O0 -m68000 \
+	-std=gnu11 -fno-pie -no-pie -fno-use-linker-plugin\
 	-fomit-frame-pointer -fno-inline -fno-builtin-inline 
-
 ASFLAGS=-march=68000 --register-prefix-optional 
-
 LDFLAGS=
-
-MKDIR=mkdir 
+MKDIR=mkdir
 BUILDDIR=build
 OUTDIR=out
-
 PYTHON=python3
-PROJECT=
+## Set PROJECT var here, or on command line:
+PROJECT=projects/starthrall
 ifeq ($(PROJECT),)
 .ONESHELL:
 default:
@@ -60,12 +54,12 @@ main: DIRs
 	rm -rf ${OUTDIR}/_main.rom 
 
 run: main 
-	dgen $(ROMFILE)
+	dgen $(ROMFILE) &>/dev/null
 
 vgmplayer: 
 	cd lib 
 	./makez80.sh
-#	mv ./vgmplayer.h ./lib/vgmplayer.h
+	
 
 # Create build directory	
 DIRs:
