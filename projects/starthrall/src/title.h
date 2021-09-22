@@ -4,6 +4,10 @@ extern u32 last_joyState1, joyState1;
 extern void (*ProcessInput)(void);
 const char str_pressStart[] = "PRESS START";
 extern void NullInputHandler(void);
+extern Sprite SPRITES[80];
+extern Sprite* spr_selector;
+
+#define SELECTORTILE 128
 
 #include "maptest2.h"
 
@@ -53,9 +57,9 @@ void InitTitleScreen(void)
     curPaletteSet[3] = (u16*)&titlePalette;
     LoadPalette(3, curPaletteSet[3]);    
     // Make map
-    tileindex = 128;
     tileindex = VDPLoadTiles(tileindex, (u32*)&title_test_0, 605);
-    DrawBGMap(128, (u16*)&title_test_map, 40, 28, (u16*)VRAM_BG_B, 3);
+    // title_bg_tile_index = 129
+    DrawBGMap(129, (u16*)&title_test_map, 40, 28, (u16*)VRAM_BG_B, 3);
 
     timer_3 = 0;
     // sprite engine (already on)
@@ -80,16 +84,8 @@ void TITLE_DRAW(void)
         }
         else { 
             if(!flashAnimPlaying){
-                //party[0].name = &pex.name;
-                party[0].name = &playerNames[0];
-                party[0].baseHP = 30;
-                print(BG_A, 9, 21, party[0].name);
-                // if done, print :
-                //SetVRAMWriteAddress(0xc000 + (64*21*2) + (9*2)); // Screen address + 21 Y, 9 X (BG_A)
-                // (16bit, 64 chars/map)
-                //u8* chp = (u8*)&str_pressStart[0];       // String address
-                //for(c = 0; c < sizeof(str_pressStart); c++) WRITE_DATAREG16((u16)*chp++); // Loop
-                //SetInputCallback(&GetInput);
+                print(BG_A, 9, 21, str_pressStart);
+                
                 title_intro_done = true;
             }
         }
@@ -100,6 +96,8 @@ void TITLE_DRAW(void)
         {
             if(unflashAnimPlaying){
                 FillVRAM((u16)' ', 0, (u16*)VRAM_BG_B, (64*32));
+                //InitIntro();
+                
                 go_intro = false;
             }
         }

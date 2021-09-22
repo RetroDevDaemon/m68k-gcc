@@ -17,7 +17,7 @@ endif
 #  LD:=m68k-apple-macos-ld
 #endif 
 
-CFLAGS=-Wall -nostdlib -O0 -m68000 -std=gnu11 -fno-pie -no-pie -fno-use-linker-plugin\
+CFLAGS=-Wall -Werror=implicit-function-declaration -nostdlib -O0 -m68000 -std=gnu11 -fno-pie -no-pie -fno-use-linker-plugin\
 	-fomit-frame-pointer -fno-inline -fno-builtin-inline 
 
 ASFLAGS=-march=68000 --register-prefix-optional 

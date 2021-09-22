@@ -7,5 +7,6 @@
 #include "titlepal.h"
 #include "title_test.h"
 #include "title_test_map.h"
+#include "led_green.h"
 
 #endif

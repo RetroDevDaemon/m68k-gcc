@@ -18,24 +18,15 @@ struct Player {
     u8 palette;
 };
 */
-const struct Player pex = {
-    (const char*)&playerNames[0],
-    30,
-    0,
-    0,
-    1,
-    fp16(0.5),
-    fp16(0.25),
-    fp16(0.3),
-    18,
-    NULL, //weapon
-    NULL, //body..
-    NULL,
-    NULL,
-    NULL,
-    NULL, //..body
-    NULL, //growth
-    NULL, NULL, NULL,//&hero01, &hero01_2, &hero01_3,
+const struct Player pex = { (const char*)&playerNames[0],    30,    0,    0,    1,    fp16(0.5),    fp16(0.25),    fp16(0.3),    18,\
+    NULL, /*weapon*/\
+    NULL, /*body*/\
+    NULL,\
+    NULL,\
+    NULL,\
+    NULL, /*..body*/\
+    NULL, /*grow*/\
+    NULL, NULL, NULL,/*&hero01, &hero01_2, &hero01_3,*/\
     1
 };
 

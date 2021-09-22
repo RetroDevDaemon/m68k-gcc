@@ -183,12 +183,12 @@ typedef struct spriteAttribute {
 #define TILEATTR(n, hf, vf, pal, pri) \
     (u16)((n)|((hf)<<11)|((vf)<<12)|((pal)<<13)|((pri)<<15))
 
-void _start();
-int main();
-void GAME_DRAW();
-void __attribute__((interrupt)) catch();
-void __attribute__((interrupt)) HBlank();
-void __attribute__((interrupt)) VBlank();
+void _start(void);
+int main(void);
+void GAME_DRAW(void);
+void __attribute__((interrupt)) fcatch(void);
+void __attribute__((interrupt)) HBlank(void);
+void __attribute__((interrupt)) VBlank(void);
 void __attribute__((optimize("Os"))) LoadPalette(u8 palNo, u16* p);
 void SetVDPPlaneAddress(u8 plane, u16 addr);
 //void __attribute__((section(".funcram"))) SetVRAMWriteAddress(u16 address);
@@ -197,6 +197,8 @@ void SetDMAWriteAddress(u16 address);
 void SetVRAMReadAddress(u16 address);
 void print(u8 plane, u8 x, u8 y, String str);
 void byToHex(u8 by, u8* ar);
+void __attribute__((optimize("Os"))) stdcpy(u32* dst, u32* src, u32 sz);
+void NullInputHandler(void);
 
 u16 VDPLoadTiles(u16 ti, u32* src, u16 numTiles);
 typedef struct meta_tile { 
@@ -212,22 +214,22 @@ typedef struct meta_tile {
 //
 Sprite* AddSprite(Sprite* as, u16 ypos, u8 size, u16 attr, u16 xpos);
 u16 strsize(String* s);
-void LinkAllSpriteData();
+void LinkAllSpriteData(void);
 void DrawSpriteAsTile(u8 plane, u16 tileNo, u8 x, u8 y, u8 w, u8 h);
 void DrawTile(u8 plane, u16 TILEATTR, u8 x, u8 y, u8 w, u8 h);
-void UpdateBGScroll();
+void UpdateBGScroll(void);
 //
 void PopulateMetatileList(u16 st_t, u16 en_t, u8 sz, metaTile* mt, u8 pal); 
 // Sound
 void LoadSong(const u8* son);
-void PlaySong();
+void PlaySong(void);
 
 
 //void FlipTileRegionH(VDPPlane plane, u8 x1, u8 y1, u8 x2, u8 y2);
 //void FlipTileRegionV(VDPPlane plane, u8 x1, u8 y1, u8 x2, u8 y2);
 //void CopyMapRect(Map* source, VDPPlane tgtplane, u8 palNo, u16 tileIndex, u8 x1, u8 y1, u8 w, u8 h, u8 x2, u8 y2, BOOL p);
 //void ChangeTileRectPalette(VDPPlane plane, u8 x1, u8 y1, u8 x2, u8 y2, u8 palNo);
-void FlashAllPalettes();
+void FlashAllPalettes(void);
 
 
 static u16 tempPalettes[4][16];     
@@ -320,21 +322,21 @@ typedef s16 fix16;
 #define elseif else if 
 
 
-void catch()
+void fcatch(void)
 {
     asm("jsr exceptionDump");
     return;
 }
 
 // Horizontal blank requires EnableIRQLevel(3) and VDP reg 0 set
-void HBlank()
+void HBlank(void)
 {
     return;
 }
 
 // Vertical blank requires EnableIRQLevel(5) and VDP reg 1 set
 //static bool VBL_DONE = false;
-void VBlank()
+void VBlank(void)
 {
     //if(VBL_DONE) return;
     GAME_DRAW();
@@ -396,13 +398,28 @@ void memset(char* start, u32 val, unsigned int length)
     */
 }
 
-void _start() {
+void _start(void) {
     //asm("movea.l 0x00FFF000,%%sp":::"sp"); // set stack pointer if its not
     // Important!! Clear BSS!!
     memset(_sbss, 0, _ebss - _sbss);
     // enable VBL IRQ
     EnableIRQLevel(5);
     main(); 
+}
+
+void __attribute__((optimize("Os"))) stdcpy(u32* dst, u32* src, u32 sz)
+{
+    for(; sz > 0; sz--) *dst++ = *src++;
+}
+/*
+void __attribute__((optimize("Os"))) stdfill(u32 chr, u32* dst, u32 siz)
+{
+    for(u32 a = 0; a < siz; a++) *dst++ = chr;
+}
+*/
+void NullInputHandler(void)
+{
+    return;
 }
 
 void SetVRAMWriteAddress(u16 address)
@@ -536,7 +553,7 @@ void DrawTile(u8 plane, u16 TILEATTR, u8 x, u8 y, u8 w, u8 h)
 
 // Ensure VRAM_SCROLL is defined first: default 0xf800
 ///// WARNING: THIS ONLY WORKS FOR FC00
-void UpdateBGScroll()
+void UpdateBGScroll(void)
 {
     //WriteVDPRegister(WRITE|REG(0xf)|4);
     SetVRAMWriteAddress(VRAM_SCROLL);
@@ -560,7 +577,7 @@ Sprite* AddSprite(Sprite* as, u16 ypos, u8 size, u16 attr, u16 xpos)
 
 const void* spriteRamBase;
 // Before calling this, point spriteRamBase to the correct location
-void LinkAllSpriteData()
+void LinkAllSpriteData(void)
 {
     Sprite* s = (Sprite*)spriteRamBase;
     // Set all 80 sprites to linear draw/link order
@@ -612,7 +629,7 @@ u16 VDPLoadTiles(u16 ti, u32* src, u16 numTiles)
 static u8 zcyclesl;
 static u8 zcyclesh;
 
-void PlaySong()
+void PlaySong(void)
 {
 	asm("move.w #0x100,(z80_bus_request).l");
 	asm("z80busreqwait:");

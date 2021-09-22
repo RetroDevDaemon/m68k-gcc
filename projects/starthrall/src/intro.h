@@ -1,5 +1,4 @@
-//title.h
-
+//intro.h
 
 u8 introLine = 0;
 u8 introScreen;
@@ -96,11 +95,16 @@ void DrawIntroTxt(void* txt)
     introLine++;
 }
 
-
+struct _sel { 
+    u16 x;
+    u8 y;
+} selectorpos;
 void IntroTxtPart2()
 {
-    selector = SPR_addSprite(&greenled, selectorpos.x, selectorpos.y, TILE_ATTR(PAL1, 1, 0, 0));
-    SPR_update();
+    // sprite 0 is selector
+    SPRITES[0] = AddSprite(&spr_selector, 100, SPRSIZE(1,1), SPR_ATTR(SELECTORTILE, 0, 0, 0, 0), 100);
+    //selector = SPR_addSprite(&greenled, selectorpos.x, selectorpos.y, TILE_ATTR(PAL1, 1, 0, 0));
+    //SPR_update();
 }
 
 void _introtxtfadein(bool tf){
