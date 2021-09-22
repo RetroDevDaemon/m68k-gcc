@@ -33,7 +33,8 @@ int GetInput(void);
 #include "starthrall.h"
 #include "characterdata.h"
 #include "title.h"
-//#include "intro.h"
+#include "intro.h"
+#include "worldmap.h"
 
 // Global Vars
 u8 fq;
@@ -123,7 +124,7 @@ void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 
     }
 }
 
-u8 _selx, _sely;
+
 s16 second_counter_a = 0;
 
 int main(void)
@@ -143,8 +144,7 @@ int main(void)
     curPaletteSet[0] = (u16*)&palette;
     curPaletteSet[1] = (u16*)&blankpalette;
     curPaletteSet[2] = (u16*)&blankpalette;
-    //LoadPalette(0, curPaletteSet[0]);
-    for(i = 0; i < 4; i++) LoadPalette(i, curPaletteSet[i]);
+    ResetPalettes(); //for(u8 p_i = 0; p_i < 4; p_i++) LoadPalette(p_i, curPaletteSet[p_i]);
 
     pSpeed = 3;
     NUM_SPRITES = 0;
@@ -152,8 +152,8 @@ int main(void)
     InitGameStuff();
     player.x = 7;
     player.y = 7;
-    _selx = 0;
-    _sely = 0;
+    selectorpos.x = 100;
+    selectorpos.y = 100;
     
     // INIT TITLE SCREEN
 /// INITIALIZE VRAM GRAPHICS ///
@@ -189,8 +189,6 @@ int main(void)
     // Clear and reset queue
     //q_in = 0;
     for(i = 0; i < QUEUE_SIZE; i++) function_q[i] = (void*)NULL;
-    
-    spr_selector = AddSprite(&SPRITES[0], ++_selx, SPRSIZE(1,1), SPR_ATTR(128, 0, 0, 0, 0), ++_sely);
     
     while(TRUE)
     { 
@@ -257,12 +255,6 @@ int main(void)
             //WorldMapUpdate();
             ////////////////////////////
         }
-        else if (CUR_SCREEN_MODE == TITLE)
-        {
-            spr_selector->y_pos+=4;
-            spr_selector->x_pos+=4;
-            
-        }
         
         // ****
         //   VBLANK
@@ -305,14 +297,17 @@ void GAME_DRAW(void)
     {
         TITLE_DRAW();
     }
-    
+    else if (CUR_SCREEN_MODE == INTRO)
+    {
+        INTRO_DRAW();
+    }
     DO_DEBUG();
         
     VBL_DONE = true;
         // end draw
 }
 
-void DO_DEBUG(void)
+void __attribute__((optimize("O3"))) DO_DEBUG(void)
 {
     /* Debug Menu */   
     if(1)

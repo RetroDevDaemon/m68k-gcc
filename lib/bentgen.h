@@ -493,6 +493,7 @@ void LoadPalette(u8 palNo, u16* p)
     for(i = 0; i < 16; i++) WRITE_DATAREG16(p[i]);   
 }
 
+u8 TEXT_PALETTE;
 void print(u8 plane, u8 x, u8 y, String str)
 {
     // 2 bytes per character, 64 chars per plane row * 2 = 128 or $80 for newline
@@ -508,7 +509,7 @@ void print(u8 plane, u8 x, u8 y, String str)
     u8 i = 0;
     while (str[i] != '\00')
     {
-        WRITE_DATAREG16(str[i]);
+        WRITE_DATAREG16(str[i] | pal_no(TEXT_PALETTE));
         i++;
     }
 }

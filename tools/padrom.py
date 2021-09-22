@@ -11,8 +11,9 @@ if(fsiz > ALIGN):
     banks = int(fsiz / ALIGN)
 else:
     banks = 0
-ofs = ALIGN - (fsiz % ALIGN) 
-ofs = ofs + (banks * ALIGN)
+#ofs = ALIGN - (fsiz % ALIGN) 
+#ofs = ofs + (banks * ALIGN)
+ofs = ((banks+1) * ALIGN)  - fsiz
 f = None
 if(len(sys.argv) > 2):
 	f = open(sys.argv[2], 'wb')

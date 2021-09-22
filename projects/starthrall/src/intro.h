@@ -1,10 +1,13 @@
 //intro.h
+extern u16 blankpalette[16];
+extern struct xypos selectorpos;
 
 u8 introLine = 0;
 u8 introScreen;
 
-const char* introtxt[] = { 
+const char introtxt[] = { 
 "          It's the year 3199.\x00"
+//"            Give or take.\x00"
 };
 const char* introtxt2[] = {
 "      For the last five centuries,\x00",
@@ -89,22 +92,16 @@ const char* introtxt13[] = {
 "             blacked out...\x00"
 };
 
-void DrawIntroTxt(void* txt)
+void DrawIntroTxt(const char* txt)
 {
-    VDP_drawText((const char*)txt, 0, introLine);
+    //VDP_drawText((const char*)txt, 0, introLine);
+    print(BG_A, 0, introLine, txt);
     introLine++;
 }
 
-struct _sel { 
-    u16 x;
-    u8 y;
-} selectorpos;
 void IntroTxtPart2()
 {
-    // sprite 0 is selector
-    SPRITES[0] = AddSprite(&spr_selector, 100, SPRSIZE(1,1), SPR_ATTR(SELECTORTILE, 0, 0, 0, 0), 100);
-    //selector = SPR_addSprite(&greenled, selectorpos.x, selectorpos.y, TILE_ATTR(PAL1, 1, 0, 0));
-    //SPR_update();
+    spr_selector = AddSprite(&SPRITES[0], selectorpos.x, SPRSIZE(1,1), SPR_ATTR(128, 0, 0, PAL0, 0), selectorpos.y);
 }
 
 void _introtxtfadein(bool tf){
@@ -117,54 +114,39 @@ void _introtxtfadein(bool tf){
 signed int negr, negg;
 signed long negb;
 
+#define RESET_BGA_SCROLL bga_hscroll_pos = 0; bga_vscroll_pos = 0;
+#define RESET_BGB_SCROLL bgb_hscroll_pos = 0; bgb_vscroll_pos = 0;
 
 
-void InitIntro()
+TileSet* introscrs[] = {
+    (TileSet*)&introimg0_0, (TileSet*)&introimg1_0, (TileSet*)&introimg2_0, 
+    (TileSet*)&introimg3_0, (TileSet*)&introimg4_0, (TileSet*)&introimg5_0, 
+    (TileSet*)&introimg6_0, (TileSet*)&introimg7_0, (TileSet*)&introimg8_0, (TileSet*)&introimg9_0
+};
+u8 introsizes[] = {
+    49, 89, 141, 161, 165, 165, 155, 166, 170, 170
+};
+void* intromaps[] = {
+    (void*)&introimg0_map, (void*)&introimg1_map, (void*)&introimg2_map, 
+    (void*)&introimg3_map, (void*)&introimg4_map, (void*)&introimg5_map, 
+    (void*)&introimg6_map, (void*)&introimg7_map, (void*)&introimg8_map, (void*)&introimg9_map
+};
+
+void InitIntro(void)
 {
-
-    if(titleScr != null){
-        MAP_scrollTo(titleScr, 0, 0);
-        MEM_free(titleScr);
-        MEM_free(&titleSplashTest);
-        
-        //titleScr = MAP_create(&introimage_map, BG_A, TILE_ATTR_FULL(0, 0, 0, 0, ))
-    }
-    tileindex = TILE_USERINDEX;   
-    bgBaseTileIndex[0] = tileindex;
-    //VDP_loadTileSet(&introimage_0, tileindex, DMA);
-    //tileindex += introimage_0.numTile;
-    //titleScr = MAP_create(&introimage_map0, BG_A, TILE_ATTR_FULL(3, 0, FALSE, FALSE, bgBaseTileIndex[0]));
-    //MAP_scrollTo(titleScr, 0, 0);
-     // fix tile index
-    sprBaseInd = tileindex;
+    WaitVBlank();
+    // TODO: FREE the title screen tiles
+    // 129 + 605
     
-    //// Test 1: Programmatically reduce color value (looks too red)
-    /*
-    negr = -10;
-    negb = -10;
-    negg = -10;
-
-    for(u8 i = 0; i < 16; i++){ // BGR
-        // split into rgb 
-        signed int nr, ng; signed long nb;
-        nr = intropal.data[i] & 0x000f;
-        ng = (intropal.data[i] & 0x00f0) >> 4;
-        nb = (intropal.data[i] & 0x0f00) >> 8;
-        nr += negr; nr = max(nr, 0);
-        nb += negb; nb = max(nb, 0);
-        ng += negg; ng = max(ng, 0);
-        ng = (ng << 4);
-        nb = (nb << 8);
-        palNegatives[i] = nr | ng | nb;
-
-    }
-    u16* p = &palNegatives;
-    */
-    curPaletteSet[3] = &intropal.data;
-    ResetPalettes();
+    tileindex = 129;
+    tileindex = VDPLoadTiles(tileindex, (u32*)&introimg0_0, 49);
+    RESET_BGA_SCROLL;
+    RESET_BGB_SCROLL;
     
-    
-    XGM_startPlay(&opening);
+    curPaletteSet[3] = (u16*)&intropal;
+    LoadPalette(3, curPaletteSet[3]); 
+
+    LoadSong(&freefall);
     
     flashAnimPlaying = false;    
     unflashAnimPlaying = true;
@@ -173,48 +155,43 @@ void InitIntro()
     
     CUR_SCREEN_MODE = INTRO;
     
-    VDP_clearTextArea(0, 0, 63, 31);
     introLine = INTROLINE_BASE+2;
     selectorpos.x = 250;
     selectorpos.y = INTROSEL_BASEY+10;    
     introTxtFadeIn = true;
-    
+    WaitVBlank();
+#define INTROIMGWIDTH 14
+    for(u16 y = 0; y < 14; y++){
+        SetVRAMWriteAddress(VRAM_BG_A + (64 * 2 * (5 + y) + (2 * 10)));
+        for(u16 x = 0; x < INTROIMGWIDTH; x++)
+            WRITE_DATAREG16((u16)((introimg0_map[(y * INTROIMGWIDTH) + x] + 129) | pal_no(3)));
+    }
     AddQueue(&Wait, secs(1));
     AddQueue(&_introtxtfadein, 1);
-    AddQueue(&DrawIntroTxt, introtxt[0]);
+    AddQueue(&DrawIntroTxt, &introtxt2[0]);
     AddQueue(&Wait, secs(2));
     AddQ(&IntroTxtPart2);
 
 }
 
-TileSet* introscrs[] = {
-    (TileSet*)&introimage_0, (TileSet*)&introimage_1, (TileSet*)&introimage_2, 
-    (TileSet*)&introimage_3, (TileSet*)&introimage_4, (TileSet*)&introimage_5, 
-    (TileSet*)&introimage_6, (TileSet*)&introimage_7, (TileSet*)&introimage_8, (TileSet*)&introimage_9
-};
-void* intromaps[] = {
-    (void*)&introimage_map0, (void*)&introimage_map1, (void*)&introimage_map2, 
-    (void*)&introimage_map3, (void*)&introimage_map4, (void*)&introimage_map5, 
-    (void*)&introimage_map6, (void*)&introimage_map7, (void*)&introimage_map8, (void*)&introimage_map9
-};
-
 void AdvanceIntroFrom(u8 i)
 {
-    MEM_free(titleScr);
-    MEM_free(intromaps[i-1]);
-    tileindex = TILE_USERINDEX;   
-    bgBaseTileIndex[0] = tileindex;
-    VDP_loadTileSet(introscrs[i], tileindex, DMA_QUEUE);
-    tileindex += introscrs[i]->numTile;
-    titleScr = MAP_create(intromaps[i], BG_A, TILE_ATTR_FULL(3, 0, FALSE, FALSE, bgBaseTileIndex[0]));
-    MAP_scrollTo(titleScr, 0, 0);
-    sprBaseInd = tileindex;
-
+    tileindex = 129; //TILE_USERINDEX;   
+    VDPLoadTiles(tileindex, intromaps[i], introsizes[i]);
+    for(u8 y = 0; y < 12; y++)
+    {
+        SetVRAMWriteAddress(VRAM_BG_B + (64 * 2 * introLine) + 0);
+        for(u8 c = 0; c < 12; c++)
+        {
+            WRITE_DATAREG16((u16)(129 + introimg0_map[(y*12)+c])|(pal_no(2)));
+        }
+    }
 }
 
 void DoIntro(u8 i)
 {
-    VDP_clearTextArea(0, 17, 63, 31);
+    FillVRAM((u16)' ', 0, (u16*)VRAM_BG_A, (64*32));
+    
     if(i <= 10) AdvanceIntroFrom(i-1);
     AddQueue(&_introtxtfadein, 1);
     if(i == 1){
@@ -295,6 +272,19 @@ void DoIntro(u8 i)
     
 }
 
+
+void JOY_ContinueIntroText()
+{
+    if(Joy1Down(BTN_C_PRESSED)){
+        introTxtTimer = 0;
+        introTxtFadeIn = false;
+        introTxtFadeOut = true;
+        
+        spr_selector->y_pos = 212;
+    }
+}
+
+
 void INTRO_DRAW()
 {
     if(introTxtFadeIn)
@@ -304,22 +294,22 @@ void INTRO_DRAW()
             // if its over x, swap palette
             if(introTxtTimer == 1){
                 curPaletteSet[1] = curPaletteSet[0];
-                curPaletteSet[0] = &palette_black;
+                curPaletteSet[0] = &blankpalette;
                 ResetPalettes();
             }
             if(introTxtTimer == 120){
                 unflashAnimPlaying = false;
                 unflashDarkAnimPlaying = false;
-                curPaletteSet[0] = (const u16**)&textfade_a.data;
+                curPaletteSet[0] = &introtxtpal_a;// (const u16**)&textfade_a.data;
                 ResetPalettes();
             }
             else if(introTxtTimer == 150){
-                curPaletteSet[0] = (const u16**)&textfade_b.data;
+                curPaletteSet[0] = &introtxtpal_b;//(const u16**)&textfade_b.data;
                 ResetPalettes();
             }
             else if(introTxtTimer == 180){
-                JOY_setEventHandler(&JOY_ContinueIntroText);
-                curPaletteSet[0] = (const u16**)&textfade_c.data;
+                ProcessInput = JOY_ContinueIntroText;
+                curPaletteSet[0] = &introtxtpal_c;//(const u16**)&textfade_c.data;
                 ResetPalettes();
             }
             else if (introTxtTimer == 190) introTxtTimer--;
@@ -328,13 +318,13 @@ void INTRO_DRAW()
             // joy handler sets timer to 0
             introTxtTimer++;
             if(introTxtTimer == 1){
-                curPaletteSet[0] = (const u16**)&textfade_b.data;
+                curPaletteSet[0] = &introtxtpal_b; //(const u16**)&textfade_b.data;
                 ResetPalettes();
             }else if (introTxtTimer == 30){
-                curPaletteSet[0] = (const u16**)&textfade_a.data;
+                curPaletteSet[0] = &introtxtpal_a; //(const u16**)&textfade_a.data;
                 ResetPalettes();
             }else if (introTxtTimer == 60){
-                curPaletteSet[0] = &palette_black;
+                curPaletteSet[0] = &blankpalette;
                 ResetPalettes();
                 introScreen++;
                 introTxtFadeOut = false;
@@ -345,7 +335,9 @@ void INTRO_DRAW()
                 introTxtTimer--;
             }
         }
+        /*
         if(selector != null){
+            
             SPR_setPosition(selector, selectorpos.x, selectorpos.y);
             if(ticker == 10){
                 SPR_releaseSprite(selector);
@@ -358,4 +350,5 @@ void INTRO_DRAW()
         }
         // swap dat ticky sprite
         SPR_update();
+        */
 }

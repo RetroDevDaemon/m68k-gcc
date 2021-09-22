@@ -492,6 +492,11 @@ struct CombatCommands {
 } command_arr[16];
 
 
+void ResetPalettes(void)
+{
+    for(u8 p_i = 0; p_i < 4; p_i++) LoadPalette(p_i, curPaletteSet[p_i]);
+
+}
 // Hard definitions:
 /*
 const SpriteDefinition* floor_tiles_1[20] = {
@@ -609,11 +614,6 @@ struct dungeonTile sideWallDisp[20] = { //add 5
 };
 
 
-void ResetPalettes()
-{
-    for(u8 i = 0; i < 4; i ++)
-        PAL_setPalette(i, *curPaletteSet[i]);
-}
 
 bool animatingDmgTxt;
 s8 dmgTextFrame = 0;

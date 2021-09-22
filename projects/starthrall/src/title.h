@@ -59,7 +59,7 @@ void InitTitleScreen(void)
     // Make map
     tileindex = VDPLoadTiles(tileindex, (u32*)&title_test_0, 605);
     // title_bg_tile_index = 129
-    DrawBGMap(129, (u16*)&title_test_map, 40, 28, (u16*)VRAM_BG_B, 3);
+    DrawBGMap(129, (u16*)&title_test_map, 40, 28, (u16*)VRAM_BG_B, PAL3);
 
     timer_3 = 0;
     // sprite engine (already on)
@@ -67,6 +67,7 @@ void InitTitleScreen(void)
     ProcessInput = TitleInputHandler;
 }
 
+extern void InitIntro(void);
 
 void TITLE_DRAW(void)
 {
@@ -96,7 +97,8 @@ void TITLE_DRAW(void)
         {
             if(unflashAnimPlaying){
                 FillVRAM((u16)' ', 0, (u16*)VRAM_BG_B, (64*32));
-                //InitIntro();
+                FillVRAM((u16)' ', 0, (u16*)VRAM_BG_A, (64*32));
+                InitIntro();
                 
                 go_intro = false;
             }
