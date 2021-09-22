@@ -1,7 +1,7 @@
 bool title_intro_done;
 bool go_intro;
 extern u32 last_joyState1, joyState1;
-extern int (*ProcessInput)(void);
+extern void (*ProcessInput)(void);
 const char str_pressStart[] = "PRESS START";
 extern void NullInputHandler(void);
 
@@ -14,8 +14,9 @@ void TITLE_DRAW(void);
 
 void FillVRAM(u16 ti, u8 pal, u16* startaddr, u16 len)
 {
-    SetVRAMWriteAddress(startaddr);
-    for(int i = 0; i < len; i++)
+    int i;
+    SetVRAMWriteAddress((u32)startaddr);
+    for(i = 0; i < len; i++)
     {
         WRITE_DATAREG16((u16)ti|(pal_no(pal)));
     }
@@ -40,23 +41,21 @@ int TitleInputHandler(void)
 
 void InitTitleScreen(void)
 {
-    u16 c;
-    u32* cr;
     // start title music
-    // TODO 
+    LoadSong(&caustic_love[0]);
     // scroll map
     go_intro = false;
     title_intro_done = false;
     bgb_hscroll_pos = 180;
     UpdateBGScroll();
-    LoadDungeonMap(&maptest2);
+    LoadDungeonMap((const u8*)&maptest2);
     CUR_SCREEN_MODE = TITLE;
     curPaletteSet[3] = (u16*)&titlePalette;
     LoadPalette(3, curPaletteSet[3]);    
     // Make map
     tileindex = 128;
     tileindex = VDPLoadTiles(tileindex, (u32*)&title_test_0, 605);
-    DrawBGMap(128, &title_test_map, 40, 28, (u16*)VRAM_BG_B, 3);
+    DrawBGMap(128, (u16*)&title_test_map, 40, 28, (u16*)VRAM_BG_B, 3);
 
     timer_3 = 0;
     // sprite engine (already on)
@@ -81,11 +80,15 @@ void TITLE_DRAW(void)
         }
         else { 
             if(!flashAnimPlaying){
+                //party[0].name = &pex.name;
+                party[0].name = &playerNames[0];
+                party[0].baseHP = 30;
+                print(BG_A, 9, 21, party[0].name);
                 // if done, print :
-                SetVRAMWriteAddress(0xc000 + (64*21*2) + (9*2)); // Screen address + 21 Y, 9 X (BG_A)
+                //SetVRAMWriteAddress(0xc000 + (64*21*2) + (9*2)); // Screen address + 21 Y, 9 X (BG_A)
                 // (16bit, 64 chars/map)
-                u8* chp = (u8*)&str_pressStart[0];       // String address
-                for(c = 0; c < sizeof(str_pressStart); c++) WRITE_DATAREG16((u16)*chp++); // Loop
+                //u8* chp = (u8*)&str_pressStart[0];       // String address
+                //for(c = 0; c < sizeof(str_pressStart); c++) WRITE_DATAREG16((u16)*chp++); // Loop
                 //SetInputCallback(&GetInput);
                 title_intro_done = true;
             }
@@ -96,7 +99,7 @@ void TITLE_DRAW(void)
         if(go_intro)
         {
             if(unflashAnimPlaying){
-                FillVRAM((u16)' ', 0, VRAM_BG_B, (64*32));
+                FillVRAM((u16)' ', 0, (u16*)VRAM_BG_B, (64*32));
                 go_intro = false;
             }
         }

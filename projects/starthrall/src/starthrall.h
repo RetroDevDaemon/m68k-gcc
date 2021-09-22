@@ -8,8 +8,8 @@
 #define false FALSE 
 #define true TRUE 
 
-#define NTSC 60
-#define PAL 50
+//#define NTSC 60
+//#define PAL 50
 
 #define XOFS 17
 #define YOFS 7
@@ -79,8 +79,8 @@ bool playerWalking;
 u8 currentSong = 0;
 u16 testno;
 
-const char** songnames[] = {
-    "Neon Rider\x00",
+const char* songnames[] = {
+    "Neon Rider",
     "Battle\x00",
     "Giger Train\x00",
     "Caustic Love\x00",
@@ -428,7 +428,7 @@ struct enemyCombatant {
     struct Enemy stats;
 };
 
-static struct Player party[4];
+struct Player party[4];
 struct Combatants { 
     struct playerCombatant players[(s8)4];
     struct enemyCombatant enemies[(s8)12];
@@ -849,7 +849,7 @@ void LoadPalettestoTemp()
 {
     u32 a;
     u8 f;
-    u32* p = &tempPalettes[0][0];
+    u32* p = (u32*)&tempPalettes[0][0];
     WRITE_CTRLREG(read_cram | cram_pal0);
     for(f = 0; f < 8*4; f++)
     //0bBBB0GGG0RRR0
@@ -864,8 +864,8 @@ void UnflashAllPalettes()
     LoadPalettestoTemp();
     
     u8 f, s;
-    u16 a = 0;
-    u16 c = 0;
+    //u16 a = 0;
+    //u16 c = 0;
     
     for(s = 0; s < 4; s++){
         u16* tr = (u16*)curPaletteSet[s];
@@ -899,7 +899,7 @@ void UnflashAllPalettes()
         }
     }
     for(f = 0; f < 4; f++){
-        LoadPalette(f, &tempPalettes[f]);
+        LoadPalette(f, (u16*)&tempPalettes[f]);
     }
 }
 
@@ -931,7 +931,7 @@ void FlashAllPalettes()
     }
     
     for(f = 0; f < 4; f++)
-        LoadPalette(f, &tempPalettes[f]);
+        LoadPalette(f, (u16*)&tempPalettes[f]);
 
 }
 

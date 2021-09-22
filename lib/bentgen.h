@@ -348,7 +348,8 @@ extern char _ebss[];
 void memset(char* start, u32 val, unsigned int length)
 {
     // length is between 0-65000.
-    for(unsigned int i = 0; i < length; i++) *start++ = val;
+    u16 i;
+    for(i = 0; i < length; i++) *start++ = val;
     /*
     u8 div;
     div = length % 4;

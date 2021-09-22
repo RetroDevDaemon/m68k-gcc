@@ -1,8 +1,25 @@
 #include <bentgen.h>
 
-
-struct Player pex = {
-    &playerNames[0],
+/*
+struct Player {
+    const char* name; 
+    u16 baseHP;
+    u16 baseMP;
+    u32 xp;
+    u8 lvl;
+    fp16 strength;
+    fp16 intellect;
+    fp16 dexterity; // multiplier - starts at 0, display is *100
+    u8 thaco;
+    struct Weapon* weap;
+    struct PlayerBody body;
+    struct LvlUp* growth;
+    const SpriteDefinition* spr[3];
+    u8 palette;
+};
+*/
+const struct Player pex = {
+    (const char*)&playerNames[0],
     30,
     0,
     0,
@@ -23,7 +40,7 @@ struct Player pex = {
 };
 
 struct Player pex2 = {
-    &playerNames[1],
+    (const char*)&playerNames[1],
     30,
     0,
     0,
@@ -44,7 +61,7 @@ struct Player pex2 = {
 };
 
 struct Player pex3 = {
-    &playerNames[2],
+    (const char*)&playerNames[2],
     30,
     0,
     0,
@@ -65,7 +82,7 @@ struct Player pex3 = {
 };
 
 struct Player pex4 = { // copy of 3
-    &playerNames[3],
+    (const char*)&playerNames[3],
     30,
     0,
     0,

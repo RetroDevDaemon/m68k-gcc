@@ -18,6 +18,12 @@ static u16 joyState2;
 static u16 last_joyState2;
 static bool VBL_DONE = false;
 void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 pal);
+void PROCESS_FLASH(void);
+// game function defs 
+int main(void);
+void (*ProcessInput)(void);
+// test
+int GetInput(void);
 
 // Assets
 #include "gfx.h"
@@ -27,11 +33,6 @@ void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 
 #include "characterdata.h"
 #include "title.h"
 
-// game function defs 
-int main();
-int (*ProcessInput)(void);
-// test
-int GetInput();
 
 // Global Vars
 u8 fq;
@@ -40,7 +41,6 @@ u32 frameCounter;
 bool frameFlip;
 u16 vdpstat;
 u32 hcount;
-static bool debug_text_enabled;
 
 bool REORDER_SPRITES = false;
 u8 sprites_destroyed = 0;
@@ -48,10 +48,13 @@ u8 sprites_destroyed = 0;
 // Sprite definitions
 static Sprite empty[80];
 
-u8 sixtyFrameCounter = 0;
-u8 thirtyFrameCounter = 0;
-u8 twentyFrameCounter = 0;
-u8 tenFrameCounter = 0;
+static struct _counters { 
+    u8 sixtyFrameCounter;
+    u8 thirtyFrameCounter;
+    u8 twentyFrameCounter;
+    u8 tenFrameCounter;
+} Counters;
+
 Sprite* test;
 u8 NUM_SPRITES;
 u32* spriteRamPtr;
@@ -71,30 +74,31 @@ void __attribute__((optimize("Os"))) stdfill(u32 chr, u32* dst, u32 siz)
     for(u32 a = 0; a < siz; a++) *dst++ = chr;
 }
 */
-
-static s32 cycles;
-static s32 vcycles;
-static u8 vch[3];
-static u8 vcl[3];
-static u8 _zero = 0;
-static u8 ch[3];
-static u8 cl[3];
-static u8 _zeroa = 0;
-static u8 zh[3];
-static u8 zl[3];
-void UpdateDebugText()
+static struct _debugvars { 
+     s32 cycles;
+     s32 vcycles;
+     u8 vch[3];
+     u8 vcl[3];
+     u8 _zero;
+     u8 ch[3];
+     u8 cl[3];
+     u8 _zeroa;
+     u8 zh[3];
+    u8 zl[3];
+    bool debug_text_enabled;
+} debugVars;
+void __attribute__((optimize("O3"))) UpdateDebugText()
 {
-
 	extern u8 zcyclesl;
 	extern u8 zcyclesh;
 
 	// Every word write to the VDP is ~2 cycles. This takes up 24c!
-	print(BG_A, 5, 1, (u8*)ch);
-	print(BG_A, 7, 1, (u8*)cl);
-    print(BG_A, 5, 3, (u8*)vch);
-	print(BG_A, 7, 3, (u8*)vcl);
-	print(BG_A, 5, 5, (u8*)zh);
-	print(BG_A, 7, 5, (u8*)zl);
+	print(BG_A, 5, 1, (u8*)debugVars.ch);
+	print(BG_A, 7, 1, (u8*)debugVars.cl);
+    print(BG_A, 5, 3, (u8*)debugVars.vch);
+	print(BG_A, 7, 3, (u8*)debugVars.vcl);
+	print(BG_A, 5, 5, (u8*)debugVars.zh);
+	print(BG_A, 7, 5, (u8*)debugVars.zl);
 	
 }
 
@@ -103,14 +107,14 @@ void NullInputHandler(void)
     return;
 }
 
-void InitGameStuff()
+void InitGameStuff(void)
 {
     u8 i;
-    stdcpy(&party[0], &pex, sizeof(struct Player));
-    stdcpy(&party[1], &pex2, sizeof(struct Player));
-    stdcpy(&party[2], &pex3, sizeof(struct Player));
-    stdcpy(&party[3], &pex4, sizeof(struct Player));
-    u32* d = &tempPalettes[0];
+    stdcpy((u32*)&party[0], (u32*)&pex, sizeof(struct Player));
+    stdcpy((u32*)&party[1], (u32*)&pex2, sizeof(struct Player));
+    stdcpy((u32*)&party[2], (u32*)&pex3, sizeof(struct Player));
+    stdcpy((u32*)&party[3], (u32*)&pex4, sizeof(struct Player));
+    u32* d = (u32*)&tempPalettes[0];
     for(i = 0; i < 32; i++)
     {
         *d++ = 0;
@@ -119,13 +123,14 @@ void InitGameStuff()
 
 void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 pal)
 {
+    u8 y, c;
     //WriteVDPRegister(WRITE|REG(0xf)|2);
-    for(u8 y = 0; y < height; y++)
+    for(y = 0; y < height; y++)
     {
-        SetVRAMWriteAddress(startaddr + (0x40 * y));
-        for(u8 c = 0; c < width; c++)
+        SetVRAMWriteAddress( (u16) (startaddr + (0x40 * y)) );
+        for(c = 0; c < width; c++)
         {
-            WRITE_DATAREG16((u16)ti + tiledefs[(y*40)+c]|(pal_no(pal)));
+            WRITE_DATAREG16( (u16) (ti + tiledefs[(y*40)+c]) | (pal_no(pal)) );
         }
     }
 }
@@ -133,7 +138,7 @@ void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 
 
 s16 second_counter_a = 0;
 
-int main()
+int main(void)
 {   
     /////////////////////////////
     ///////////
@@ -141,9 +146,9 @@ int main()
     ////////
     //////////////////////////////
     u8 i = 0;
-    u16 c = 0; 
-    u32* cr;
-    u8 r = 0;
+    //u16 c = 0; 
+    //u32* cr;
+    //u8 r = 0;
     timer_3 = 0;
     spriteRamBase = &empty[0];
     LinkAllSpriteData();
@@ -160,13 +165,7 @@ int main()
     player.x = 7;
     player.y = 7;
 
-    // RESET YM2612
-    //EnableIRQLevel(7); // irqs off
-    LoadSong(&caustic_love[0]);
-    //EnableIRQLevel(5); // vbl on 
-    // RESET PSG
-    // TODO
-
+    
     // INIT TITLE SCREEN
 /// INITIALIZE VRAM GRAPHICS ///
     // 0-400h is empty for now
@@ -189,7 +188,7 @@ int main()
     bga_hscroll_pos = 0;
     //WaitVBlank();
     flashAnimPlaying = true;
-    thirtyFrameCounter = 0;
+    Counters.thirtyFrameCounter = 0;
     //unflashAnimPlaying = true;
     fix32 frameDelta;
     flashStepTimer = 0;
@@ -204,9 +203,9 @@ int main()
     { 
         // Wait for VBL, count the cycles we wait until VBL
 		VBL_DONE = false;
-		cycles = 0;
+		debugVars.cycles = 0;
 		while(!VBL_DONE)
-			cycles++;
+			debugVars.cycles++;
 
         ticker = ticker + 1;
         if (ticker > 60) 
@@ -216,12 +215,12 @@ int main()
         }
 
         // Counter-y stuff
-        twentyFrameCounter++;
-        if(twentyFrameCounter > 19) twentyFrameCounter = 0;
-        tenFrameCounter++;
-        if(tenFrameCounter > 9) tenFrameCounter = 0;
-        thirtyFrameCounter++;
-        if(thirtyFrameCounter > 29) thirtyFrameCounter = 0;
+        Counters.twentyFrameCounter++;
+        if(Counters.twentyFrameCounter > 19) Counters.twentyFrameCounter = 0;
+        Counters.tenFrameCounter++;
+        if(Counters.tenFrameCounter > 9) Counters.tenFrameCounter = 0;
+        Counters.thirtyFrameCounter++;
+        if(Counters.thirtyFrameCounter > 29) Counters.thirtyFrameCounter = 0;
 
         
         UPDATE:
@@ -261,14 +260,14 @@ int main()
         // MAIN GAME LOOP 
         ProcessInput();
         
-        if(debug_text_enabled)
+        if(debugVars.debug_text_enabled)
         {
-            byToHex(vcycles >> 8, (u8*)&vch);
-            byToHex(vcycles & 0xff, (u8*)&vcl);
-            byToHex(cycles >> 8, (u8*)&ch);
-            byToHex(cycles & 0xff, (u8*)&cl);
-            byToHex(zcyclesh, (u8*)&zh);
-            byToHex(zcyclesl, (u8*)&zl);           
+            byToHex(debugVars.vcycles >> 8, (u8*)&debugVars.vch);
+            byToHex(debugVars.vcycles & 0xff, (u8*)&debugVars.vcl);
+            byToHex(debugVars.cycles >> 8, (u8*)&debugVars.ch);
+            byToHex(debugVars.cycles & 0xff, (u8*)&debugVars.cl);
+            byToHex(zcyclesh, (u8*)&debugVars.zh);
+            byToHex(zcyclesl, (u8*)&debugVars.zl);           
         }
 
         // ****
@@ -285,7 +284,7 @@ int main()
 }
 
 // Called during VBlank
-void GAME_DRAW()
+void GAME_DRAW(void)
 {   
     last_joyState1 = joyState1;
     GETJOYSTATE1(joyState1);
@@ -297,16 +296,64 @@ void GAME_DRAW()
     
     if(frameFlip == 0) frameFlip = 1;
     else frameFlip = 0;
-    u16 c = 0;
+    //u16 c = 0;
     
     // Sprite shit
     // TODO: Convert this to DMA
-    volatile u32* spr = spriteRamBase;
-    u8 i = 0;
+    const u32* spr = spriteRamBase;
     //SetVRAMWriteAddress(VRAM_SAT);
     // player1
     //for(i = 0; i < 4 * 2; i++) WRITE_DATAREG32(*spr++);
 
+    PROCESS_FLASH();
+    
+    if (CUR_SCREEN_MODE == TITLE)
+    {
+        TITLE_DRAW();
+        
+    }
+    
+    /* Debug Menu */   
+    if(1)
+    {
+        if(Joy1Down(BTN_A_PRESSED) && Joy1Down(BTN_C_PRESSED))
+        {
+            if(debugVars.debug_text_enabled) 
+            {
+                debugVars.debug_text_enabled = false;
+                print(BG_A, 0, 0, (u8*)"                ");
+                print(BG_A, 0, 1, (u8*)"         ");
+                print(BG_A, 0, 2, (u8*)"                ");
+                print(BG_A, 0, 3, (u8*)"         ");
+                print(BG_A, 0, 4, (u8*)"                ");
+                print(BG_A, 0, 5, (u8*)"         ");   
+            }
+            else 
+            {
+                print(BG_A, 0, 0, (u8*)"CPU Cycles left:");
+                print(BG_A, 0, 2, (u8*)"VDP Cycles left:");
+                print(BG_A, 0, 4, (u8*)"Z80 Cycles left:");
+                debugVars.debug_text_enabled = true;
+            }
+        }
+    }
+    UpdateBGScroll();
+    if(debugVars.debug_text_enabled)
+    {
+        if(Counters.thirtyFrameCounter == 0)
+            UpdateDebugText();
+    }
+    debugVars.vcycles = 0;
+    while(*((u32*)0xc00004) & 0b1000)
+        debugVars.vcycles++;
+        
+    VBL_DONE = true;
+        // end draw
+}
+
+void PROCESS_FLASH(void)
+{
+    u8 i;
     if(flashAnimPlaying)
     {
         flashStepTimer ++;
@@ -336,49 +383,4 @@ void GAME_DRAW()
             for(i = 0; i < 4; i++) LoadPalette(i, curPaletteSet[i]);
         }
     }
-
-    if (CUR_SCREEN_MODE == TITLE)
-    {
-        TITLE_DRAW();
-        
-    }
-    
-    /* Debug Menu */   
-    if(1)
-    {
-        if(Joy1Down(BTN_A_PRESSED) && Joy1Down(BTN_C_PRESSED))
-        {
-            if(debug_text_enabled) 
-            {
-                debug_text_enabled = false;
-                print(BG_A, 0, 0, (u8*)"                ");
-                print(BG_A, 0, 1, (u8*)"         ");
-                print(BG_A, 0, 2, (u8*)"                ");
-                print(BG_A, 0, 3, (u8*)"         ");
-                print(BG_A, 0, 4, (u8*)"                ");
-                print(BG_A, 0, 5, (u8*)"         ");   
-            }
-            else 
-            {
-                print(BG_A, 0, 0, (u8*)"CPU Cycles left:");
-                print(BG_A, 0, 2, (u8*)"VDP Cycles left:");
-                print(BG_A, 0, 4, (u8*)"Z80 Cycles left:");
-                debug_text_enabled = true;
-                //UpdateDebugText();
-            }
-        }
-    }
-    UpdateBGScroll();
-    if(debug_text_enabled)
-    {
-        if(thirtyFrameCounter == 0)
-            UpdateDebugText();
-    }
-    vcycles = 0;
-    while(*((u32*)0xc00004) & 0b1000)
-        vcycles++;
-        
-    VBL_DONE = true;
-        // end draw
 }
-
