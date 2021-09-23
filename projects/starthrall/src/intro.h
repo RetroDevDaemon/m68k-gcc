@@ -4,10 +4,10 @@ extern struct xypos selectorpos;
 
 u8 introLine = 0;
 u8 introScreen;
-
+//TODO: new print routine with opcodes 
 const char introtxt[] = { 
-"          It's the year 3199.\x00"
-//"            Give or take.\x00"
+"          It's the year 3199.\x00\
+            Give or take.\x00"
 };
 const char* introtxt2[] = {
 "      For the last five centuries,\x00",
@@ -92,10 +92,34 @@ const char* introtxt13[] = {
 "             blacked out...\x00"
 };
 
+extern struct _textsys ScriptSys;
+
+void printscript(const char* str)
+{
+    // add to print buffer that putc n times per frame
+    u8* c = (u8*)str;
+    while(*c != '\x00')
+    {
+        ScriptSys.text_buffer[ScriptSys.buffer_ptr++] = (u16)((*c++) | pal_no(TEXT_PALETTE));
+        if(ScriptSys.buffer_ptr > 1024) ScriptSys.buffer_ptr = 0;
+    }
+    
+}
+
+#define SetupScriptWin(sx, sy, ex, ey) \
+    ScriptSys.startx = sx;\
+    ScriptSys.starty = sy;\
+    ScriptSys.txt_x = sx;\
+    ScriptSys.txt_y = sy;\
+    ScriptSys.x_bound = ex;\
+    ScriptSys.y_bound = ey;
+
 void DrawIntroTxt(const char* txt)
 {
-    //VDP_drawText((const char*)txt, 0, introLine);
-    print(BG_A, 0, introLine, txt);
+    SetupScriptWin(0, introLine, 35, 23);
+    ScriptSys.textspeed = 1;
+    printscript(txt); // < actually adds to buffer
+    
     introLine++;
 }
 
@@ -152,6 +176,7 @@ void InitIntro(void)
     unflashAnimPlaying = true;
     flashStep = 0;
     flashStepTimer = 0;
+    TEXT_PALETTE = 0;
     
     CUR_SCREEN_MODE = INTRO;
     
@@ -168,7 +193,7 @@ void InitIntro(void)
     }
     AddQueue(&Wait, secs(1));
     AddQueue(&_introtxtfadein, 1);
-    AddQueue(&DrawIntroTxt, &introtxt2[0]);
+    AddQueue(&DrawIntroTxt, &introtxt);
     AddQueue(&Wait, secs(2));
     AddQ(&IntroTxtPart2);
 
@@ -294,22 +319,22 @@ void INTRO_DRAW()
             // if its over x, swap palette
             if(introTxtTimer == 1){
                 curPaletteSet[1] = curPaletteSet[0];
-                curPaletteSet[0] = &blankpalette;
+                curPaletteSet[0] = (u16*)&blankpalette;
                 ResetPalettes();
             }
             if(introTxtTimer == 120){
                 unflashAnimPlaying = false;
                 unflashDarkAnimPlaying = false;
-                curPaletteSet[0] = &introtxtpal_a;// (const u16**)&textfade_a.data;
+                curPaletteSet[0] = (u16*)&introtxtpal_a;// (const u16**)&textfade_a.data;
                 ResetPalettes();
             }
             else if(introTxtTimer == 150){
-                curPaletteSet[0] = &introtxtpal_b;//(const u16**)&textfade_b.data;
+                curPaletteSet[0] = (u16*)&introtxtpal_b;//(const u16**)&textfade_b.data;
                 ResetPalettes();
             }
             else if(introTxtTimer == 180){
                 ProcessInput = JOY_ContinueIntroText;
-                curPaletteSet[0] = &introtxtpal_c;//(const u16**)&textfade_c.data;
+                curPaletteSet[0] = (u16*)&introtxtpal_c;//(const u16**)&textfade_c.data;
                 ResetPalettes();
             }
             else if (introTxtTimer == 190) introTxtTimer--;
@@ -318,13 +343,13 @@ void INTRO_DRAW()
             // joy handler sets timer to 0
             introTxtTimer++;
             if(introTxtTimer == 1){
-                curPaletteSet[0] = &introtxtpal_b; //(const u16**)&textfade_b.data;
+                curPaletteSet[0] = (u16*)&introtxtpal_b; //(const u16**)&textfade_b.data;
                 ResetPalettes();
             }else if (introTxtTimer == 30){
-                curPaletteSet[0] = &introtxtpal_a; //(const u16**)&textfade_a.data;
+                curPaletteSet[0] = (u16*)&introtxtpal_a; //(const u16**)&textfade_a.data;
                 ResetPalettes();
             }else if (introTxtTimer == 60){
-                curPaletteSet[0] = &blankpalette;
+                curPaletteSet[0] = (u16*)&blankpalette;
                 ResetPalettes();
                 introScreen++;
                 introTxtFadeOut = false;

@@ -17,19 +17,36 @@ static u32 last_joyState1;
 static u16 joyState2;
 static u16 last_joyState2;
 static bool VBL_DONE = false;
+struct _textsys \
+{
+    u16 text_buffer[40*26]; // BUFFER IS SZ OF DISPLAY SCREEN. careful of buffered amount each frame
+    u8 startx, starty;      // keep track of where to reset
+    u8 txt_x, txt_y;           // Set to start position of text window and incremented each chr
+    u8 x_bound, y_bound;    // Right- and bottom-boundaries
+    u8 textspeed;           // characters per frame to display
+    u16 buffer_ptr;         // location within text_buffer of where to add next chr
+    u16 print_ptr;          // location within txt_buffer of next print chr
+} ScriptSys;
+
+static struct _counters \
+{ 
+    u8 sixtyFrameCounter;
+    u8 thirtyFrameCounter;
+    u8 twentyFrameCounter;
+    u8 tenFrameCounter;
+} Counters;
+
 void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 pal);
 void PROCESS_FLASH(void);
-void DO_DEBUG(void);
-// game function defs 
 int main(void);
 void (*ProcessInput)(void);
-// test
 int GetInput(void);
 
 // Assets
 #include "gfx.h"
 #include "music.h"
 // Game stuff
+#include "debug.h"
 #include "starthrall.h"
 #include "characterdata.h"
 #include "title.h"
@@ -50,13 +67,6 @@ u8 sprites_destroyed = 0;
 // Sprite definitions
 Sprite SPRITES[80];
 
-static struct _counters { 
-    u8 sixtyFrameCounter;
-    u8 thirtyFrameCounter;
-    u8 twentyFrameCounter;
-    u8 tenFrameCounter;
-} Counters;
-
 Sprite* test;
 u8 NUM_SPRITES;
 u32* spriteRamPtr;
@@ -64,37 +74,8 @@ u16 tileindex = 0;
 
 Sprite* spr_selector;
 
-// contains the tile_attr 
-u16 bg_a_map[64*32];
+u16 bg_map[64*32];
 u16 blankpalette[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-
-static struct _debugvars { 
-     s32 cycles;
-     s32 vcycles;
-     u8 vch[3];
-     u8 vcl[3];
-     u8 _zero;
-     u8 ch[3];
-     u8 cl[3];
-     u8 _zeroa;
-     u8 zh[3];
-    u8 zl[3];
-    bool debug_text_enabled;
-} debugVars;
-void __attribute__((optimize("O3"))) UpdateDebugText()
-{
-	extern u8 zcyclesl;
-	extern u8 zcyclesh;
-
-	// Every word write to the VDP is ~2 cycles. This takes up 24c!
-	print(BG_A, 5, 1, (u8*)debugVars.ch);
-	print(BG_A, 7, 1, (u8*)debugVars.cl);
-    print(BG_A, 5, 3, (u8*)debugVars.vch);
-	print(BG_A, 7, 3, (u8*)debugVars.vcl);
-	print(BG_A, 5, 5, (u8*)debugVars.zh);
-	print(BG_A, 7, 5, (u8*)debugVars.zl);
-	
-}
 
 void InitGameStuff(void)
 {
@@ -108,6 +89,15 @@ void InitGameStuff(void)
     {
         *d++ = 0;
     }
+    pSpeed = 3;
+    NUM_SPRITES = 0;
+    timer_3 = 0;
+    player.x = 7;
+    player.y = 7;
+    selectorpos.x = 100;
+    selectorpos.y = 100;
+    //ScriptSys.pointer = 0;
+
 }
 
 void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 pal)
@@ -124,6 +114,33 @@ void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 
     }
 }
 
+void UpdatePrintBuffer(void)
+{
+    // have a "window boundary" defined
+    // print within the boundary only
+    // automatically pause for btn if overflowing 
+    
+    // use ScriptSys var
+    
+    // needed opcodes:
+    // PRINT &STRINGS (like names)
+    // CHANGE TEXT COLOR 
+    // LINE BREAK
+    // PAUSE FOR N FRAMES
+    // SET ScriptSys.pointer (u32 vram addr)
+    /*
+        u16 text_buffer[40*26]; 
+        u8 txt_x, txt_y;
+        u8 x_bound, y_bound;
+        u8 textspeed;    
+        u16 buffer_ptr;  
+        ScriptSys;
+    */
+    // write speed x chars directly to vram (set vram addr each char/frame its ok)
+    // increase the print_ptr and print chrxtextspeed until print ptr == buffer_ptr 
+    // if txt_x > x_bound reset
+    // if txt_y > y_bound pause!
+}
 
 s16 second_counter_a = 0;
 
@@ -135,10 +152,7 @@ int main(void)
     ////////
     //////////////////////////////
     u8 i = 0;
-    //u16 c = 0; 
-    //u32* cr;
-    //u8 r = 0;
-    timer_3 = 0;
+    
     spriteRamBase = &SPRITES[0];
     LinkAllSpriteData();
     curPaletteSet[0] = (u16*)&palette;
@@ -146,14 +160,7 @@ int main(void)
     curPaletteSet[2] = (u16*)&blankpalette;
     ResetPalettes(); //for(u8 p_i = 0; p_i < 4; p_i++) LoadPalette(p_i, curPaletteSet[p_i]);
 
-    pSpeed = 3;
-    NUM_SPRITES = 0;
-
     InitGameStuff();
-    player.x = 7;
-    player.y = 7;
-    selectorpos.x = 100;
-    selectorpos.y = 100;
     
     // INIT TITLE SCREEN
 /// INITIALIZE VRAM GRAPHICS ///
@@ -301,47 +308,12 @@ void GAME_DRAW(void)
     {
         INTRO_DRAW();
     }
+    UpdatePrintBuffer();
+
     DO_DEBUG();
         
     VBL_DONE = true;
         // end draw
-}
-
-void __attribute__((optimize("O3"))) DO_DEBUG(void)
-{
-    /* Debug Menu */   
-    if(1)
-    {
-        if(Joy1Down(BTN_A_PRESSED) && Joy1Down(BTN_C_PRESSED))
-        {
-            if(debugVars.debug_text_enabled) 
-            {
-                debugVars.debug_text_enabled = false;
-                print(BG_A, 0, 0, (u8*)"                ");
-                print(BG_A, 0, 1, (u8*)"         ");
-                print(BG_A, 0, 2, (u8*)"                ");
-                print(BG_A, 0, 3, (u8*)"         ");
-                print(BG_A, 0, 4, (u8*)"                ");
-                print(BG_A, 0, 5, (u8*)"         ");   
-            }
-            else 
-            {
-                print(BG_A, 0, 0, (u8*)"CPU Cycles left:");
-                print(BG_A, 0, 2, (u8*)"VDP Cycles left:");
-                print(BG_A, 0, 4, (u8*)"Z80 Cycles left:");
-                debugVars.debug_text_enabled = true;
-            }
-        }
-    }
-    UpdateBGScroll();
-    if(debugVars.debug_text_enabled)
-    {
-        if(Counters.thirtyFrameCounter == 0)
-            UpdateDebugText();
-    }
-    debugVars.vcycles = 0;
-    while(*((u32*)0xc00004) & 0b1000)
-        debugVars.vcycles++;
 }
 
 void PROCESS_FLASH(void)
