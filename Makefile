@@ -30,7 +30,8 @@ default:
 	$(info PROJECT var not set!)
 	@$(exit)
 endif
-SRCDIR=${PROJECT}
+SRCDIR:=${PROJECT}
+EMUDIR:=~/Downloads/dgen-sdl-1.33/
 
 LINKSCR=rom.ld
 ROMFILE=out.md
@@ -53,15 +54,15 @@ main: DIRs
 	${PYTHON} tools/padrom.py ${OUTDIR}/_main.rom ./$(ROMFILE)
 	rm -rf ${OUTDIR}/_main.rom 
 
-run: main 
-	dgen $(ROMFILE) &>/dev/null
+run:
+	$(EMUDIR)/dgen $(ROMFILE) &>/dev/null
 
-vgmplayer: 
-	cd lib 
+vgmplayer:
+	cd lib
 	./makez80.sh
-	
 
-# Create build directory	
+
+# Create build directory
 DIRs:
 	@if [ -d "${BUILDDIR}" ]; then echo "dir exists"; \
 		else ${MKDIR} ${BUILDDIR}; fi

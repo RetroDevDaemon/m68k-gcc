@@ -195,7 +195,7 @@ void SetVDPPlaneAddress(u8 plane, u16 addr);
 void SetVRAMWriteAddress(u16 address);
 void SetDMAWriteAddress(u16 address);
 void SetVRAMReadAddress(u16 address);
-void print(u8 plane, u8 x, u8 y, String str);
+void __attribute__((optimize("Os"))) print(u8 plane, u8 x, u8 y, String str);
 void byToHex(u8 by, u8* ar);
 void __attribute__((optimize("Os"))) stdcpy(u32* dst, u32* src, u32 sz);
 void NullInputHandler(void);

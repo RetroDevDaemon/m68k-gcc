@@ -1,5 +1,3 @@
-bool title_intro_done;
-bool go_intro;
 extern u32 last_joyState1, joyState1;
 extern void (*ProcessInput)(void);
 const char str_pressStart[] = "PRESS START";
@@ -10,6 +8,10 @@ extern Sprite* spr_selector;
 #define SELECTORTILE 128
 
 #include "maptest2.h"
+
+// TITLE SCREEN RAM USAGE
+bool title_intro_done;
+bool go_intro;
 
 void FillVRAM(u16 ti, u8 pal, u16* startaddr, u16 len);
 int TitleInputHandler(void);

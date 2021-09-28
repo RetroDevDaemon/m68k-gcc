@@ -28,12 +28,53 @@ int main()
         tileindex = VDPLoadTiles(ASCIIBASETILE, (u32*)&font_0, 96);
 
         //Print
-	SetVRAMWriteAddress(VRAM_BG_A + (64*5*2) + (5*2)); // Screen address + 5 Y, 5 X (BG_A)
-        u8* chr = (u8*)&hw[0];       // String address
-        for(c = 0; c < sizeof(hw); c++) WRITE_DATAREG16((u16)*chr++); // Loop
+        print(BG_A, 5, 5, hw);
+	
+        u8 sz_char, sz_int;
+        u8 sz_long, sz_longlong;
+        u8 sz_ptr, sz_short;
+        
+        const u8* sz_c_t = "Size of char: ";
+        const u8* sz_s_t = "Size of short: ";
+        const u8* sz_i_t = "Size of int: ";
+        const u8* sz_l_t = "Size of long: ";
+        const u8* sz_ll_t = "Size of longlong: ";
+        const u8* sz_p_t = "Size of ptr: ";
+        
+        sz_char = sizeof(char);
+        sz_short = sizeof(short);
+        sz_int = sizeof(int);
+        sz_long = sizeof(long);
+        sz_longlong = sizeof(long long);
+        sz_ptr = sizeof(void*);
 
-        while(1)
-        {}
+        char o[3] = { 0,0,0 };
+        
+        byToHex(sz_char, &o);
+        print(BG_A, 5, 6, sz_c_t);
+        print(BG_A, 5, 7, &o);
+
+        byToHex(sz_short, &o);
+        print(BG_A, 5, 8, sz_s_t);
+        print(BG_A, 5, 9, &o);
+
+        byToHex(sz_int, &o);
+        print(BG_A, 5, 10, sz_i_t);
+        print(BG_A, 5, 11, &o);
+
+        byToHex(sz_long, &o);
+        print(BG_A, 5, 12, sz_l_t);
+        print(BG_A, 5, 13, &o);
+
+        byToHex(sz_longlong, &o);
+        print(BG_A, 5, 14, sz_ll_t);
+        print(BG_A, 5, 15, &o);
+
+        byToHex(sz_ptr, &o);
+        print(BG_A, 5, 16, sz_p_t);
+        print(BG_A, 5, 17, &o);
+
+        while(1){}
         return 0;
 }
 

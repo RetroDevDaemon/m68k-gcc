@@ -116,18 +116,14 @@ void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 
 
 void UpdatePrintBuffer(void)
 {
-    // have a "window boundary" defined
-    // print within the boundary only
-    // automatically pause for btn if overflowing 
-    
-    // use ScriptSys var
-    
+    // boundaries defined in global ScriptSys
+
     // needed opcodes:
     // PRINT &STRINGS (like names)
     // CHANGE TEXT COLOR 
     // LINE BREAK
     // PAUSE FOR N FRAMES
-    // SET ScriptSys.pointer (u32 vram addr)
+    // SET txt_x, txt_y (bg/vram loc)
     /*
         u16 text_buffer[40*26]; 
         u8 txt_x, txt_y;
@@ -137,9 +133,10 @@ void UpdatePrintBuffer(void)
         ScriptSys;
     */
     // write speed x chars directly to vram (set vram addr each char/frame its ok)
-    // increase the print_ptr and print chrxtextspeed until print ptr == buffer_ptr 
+    // increase the print_ptr and print chr*textspeed until print ptr == buffer_ptr 
     // if txt_x > x_bound reset
     // if txt_y > y_bound pause!
+
 }
 
 s16 second_counter_a = 0;
@@ -295,7 +292,7 @@ void GAME_DRAW(void)
     u32* spr = &SPRITES[0];
     SetVRAMWriteAddress(VRAM_SAT);
     // sprite count = 1
-    #define SPR_COUNT 1
+#define SPR_COUNT 1
     for(i = 0; i < SPR_COUNT * 2; i++) WRITE_DATAREG32(*spr++);
 
     PROCESS_FLASH();
@@ -308,7 +305,9 @@ void GAME_DRAW(void)
     {
         INTRO_DRAW();
     }
-    UpdatePrintBuffer();
+    UpdateBGScroll(); // Sets background position in VRAM
+
+    UpdatePrintBuffer(); // If script is printing, process it
 
     DO_DEBUG();
         

@@ -2,28 +2,31 @@
 extern u16 blankpalette[16];
 extern struct xypos selectorpos;
 
+// INTRO RAM USAGE
 u8 introLine = 0;
 u8 introScreen;
+
+
 //TODO: new print routine with opcodes 
 const char introtxt[] = { 
-"          It's the year 3199.\x00\
-            Give or take.\x00"
+"          It's the year 3199.\n\
+            Give or take."
 };
-const char* introtxt2[] = {
-"      For the last five centuries,\x00",
-"     humankind has spread steadily\x00",
-"      among the stars, thanks to\x00",
-"       replicative technology.\x00",
+const char introtxt2[] = {
+"      For the last five centuries,\n\
+     humankind has spread steadily\n\
+      among the stars, thanks to\n\
+       replicative technology."
 };
 const char* introtxt3[] = {
-"       This means the bodies we\x00",
-"      own are nothing more than\x00",
-"            fabrications.\x00",
-" \x00",
-"       Ordered arrangements made\x00",
-"       of unordered atoms, drawn\x00",
-"        to the specification of\x00",
-"             our DNA.\x00"
+"       This means the bodies we\n\
+      own are nothing more than\n\
+            fabrications.\n\
+ \n\
+       Ordered arrangements made\n\
+       of unordered atoms, drawn\n\
+        to the specification of\n\
+             our DNA."
 };
 const char* introtxt4[] = {
 "       The alternative, of course,\x00",
@@ -304,7 +307,7 @@ void JOY_ContinueIntroText()
         introTxtTimer = 0;
         introTxtFadeIn = false;
         introTxtFadeOut = true;
-        
+        // fixme?
         spr_selector->y_pos = 212;
     }
 }

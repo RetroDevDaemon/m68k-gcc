@@ -59,7 +59,7 @@ void __attribute__((optimize("O3"))) DO_DEBUG(void)
             }
         }
     }
-    UpdateBGScroll();
+    
     if(debugVars.debug_text_enabled)
     {
         if(Counters.thirtyFrameCounter == 0)
