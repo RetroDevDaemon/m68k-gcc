@@ -4,8 +4,13 @@ a compiled local .rom file directly to your Genesis/Megaddrive.<br>
 `tools/everpi rom path/to/rom.bin`<br>
 `tools/everpi memread|memset|memset16|memset32` can be run from the MEDP<br>
 interrupt menu while the game is running.<br><br>
-Be sure you are on a brand new install of Raspbian if you can, fully updated<br>
-## If you want to build yourself:<br>
+Be sure you are on a brand new install of Raspbian if you can, fully updated.<br>
+The tool has been tested on Ubuntu 21 64-bit as well.<br>
+Due to changes in the way macOS handles serial connections, it will NOT work on newer macs.<br>
+If you are having issues accessing the port, ensure that your user has `dialout` group priveleges:<br>
+`sudo usermod -a -G dialout $USER`
+
+## If you want to build the GCC compiler yourself:<br>
 <br>
 On linux, you can try to build using this repo by kentosama:<br>
 https://github.com/kentosama/m68k-elf-gcc<br>
