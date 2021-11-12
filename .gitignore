@@ -1,3 +1,6 @@
 .vscode
 build
 out
+out.md
+pcmdata.bin
+vgmdata.bin 

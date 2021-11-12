@@ -5,7 +5,7 @@ from os.path import isfile, join
 from struct import *
 
 allpcm = []
-
+allvgm=[]
 lastid = 0
 
 class pcmObject:
@@ -83,6 +83,13 @@ class vgmfile:
         self.pcms = []
         return 
 
+    def split_vgm(self):
+        global allvgm 
+        i = 0
+        while i < len(self.songbytes):
+            allvgm.append(bytes([self.songbytes[i]]))
+            i += 1
+
     def split_pcm(self):
         global lastid
         global allpcm
@@ -102,7 +109,7 @@ class vgmfile:
                     print('warning - not ym2612 pcm!\n', end='')
                 i += 1
                 dbsize = self.bytes[i] + (self.bytes[i+1]<<8) + (self.bytes[i+2]<<16) + (self.bytes[i+3]<<24)
-                print('\tsize',dbsize)
+                print('\tsize',dbsize, end=' ')
                 pcmsize += dbsize
                 thispcm = []
                 i_t = i + dbsize + 4 - 1 # until end of pcm
@@ -126,6 +133,15 @@ class vgmfile:
                 #   change 0x95 [ss] [bb bb] to: 0x95 [streamid] [global][id]
                 allpcm.append(thispcm)
                 datstart = i + 1
+            # if a Gd3 block is found, skip it 
+            #if(self.bytes[i] == 0x47):
+            #    if(self.bytes[i+1] == 0x64):
+            #        if(self.bytes[i+2] == 0x33):
+            #            #+3 is " "
+                        #+4,5,6,7 is 0.1.0.0
+                        #+8, +9 (LE) is size of gd3 tag
+            #            gdsize = self.bytes[i+8] + (self.bytes[i+9]<<8)
+            #            i += 9 + gdsize 
             i += 1
         # register song data start position
         if datstart == 0:
@@ -135,11 +151,15 @@ class vgmfile:
         # copy only VGM data into songbytes up until Gd3 tag
         i = self.musicstart 
         while i < len(self.bytes):
-            if(self.bytes[i] == 'G'):
-                if(self.bytes[i+1] == 'd'):
-                    if(self.bytes[i+2] == '3'):
-                        i = len(self.bytes)
-                        continue
+            if(self.bytes[i] == 0x47):
+                if(self.bytes[i+1] == 0x64):
+                    if(self.bytes[i+2] == 0x33):
+                        print("Gd3 found, skipping ... ")
+                        #+3 is " "
+                        #+4,5,6,7 is 0.1.0.0
+                        #+8, +9 (LE) is size of gd3 tag
+                        gdsize = self.bytes[i+8] + (self.bytes[i+9]<<8)
+                        i += 9 + gdsize 
             self.songbytes.append(self.bytes[i])
             i += 1
         print('total pcm size: ', pcmsize, '(' + str(int(pcmsize/1024)) + 'kB)', '[' + str(int(pcmsize/len(self.bytes)*100)) + '% total filesize]')
@@ -170,6 +190,9 @@ for k in l:
         vgms.append(k)
 print(str(len(vgms)) + ' VGMs found.\n')#, vgms)
 
+
+vgfiles = []
+
 for vg in vgms:
     f = open(fn+vg, 'rb')
     vgby = f.read()
@@ -178,6 +201,8 @@ for vg in vgms:
     this = vgmfile(vg, vgby)
     print('\n',vg)
     this.split_pcm()
+    this.split_vgm()
+    vgfiles.append(this)
 
 dupes = 0
 
@@ -211,3 +236,84 @@ while i < len(allpcm):
 
 print('total sample size: ', tsize, '(' + str(int(tsize/1024))+'kB)')
 print('(size saved: ', str(int((_otsize-tsize)/1024)) + 'kB)')
+
+print("writing PCM block to pcmdata.bin... ", end =" ")
+
+pcmbytes = []
+# bytes 0-1 total number of samples
+# bytes n...n+3 offset from pcmbytes+2 to sample bytes
+# Disabled:
+#pcmbytes.append(bytes([len(unique_pcm) >> 8]))
+#pcmbytes.append(bytes([len(unique_pcm) & 0xff]))
+# first entry is always 256 (4 bytes per vec * 64 samples)
+pcmbytes.append(bytes([0]))
+pcmbytes.append(bytes([0]))
+pcmbytes.append(bytes([1]))
+pcmbytes.append(bytes([0]))
+# append pcm data offsets
+_pbofs = 256
+i = 0
+while i < len(unique_pcm)-1:
+    pcmbytes.append(bytes([(_pbofs + len(unique_pcm[i].bytes) & 0xff000000) >> 24]))
+    pcmbytes.append(bytes([(_pbofs + len(unique_pcm[i].bytes) & 0xff0000) >> 16]))
+    pcmbytes.append(bytes([(_pbofs + len(unique_pcm[i].bytes) & 0xff00) >> 8]))
+    pcmbytes.append(bytes([(_pbofs + len(unique_pcm[i].bytes) & 0xff)]))
+    _pbofs += len(unique_pcm[i].bytes) 
+    i += 1
+while(len(pcmbytes) < 256):
+    pcmbytes.append(bytes([0]))
+# append pcm data itself
+i = 0
+while i < len(unique_pcm):
+    j = 0
+    while j < len(unique_pcm[i].bytes):
+        pcmbytes.append(bytes([unique_pcm[i].bytes[j]]))
+        j += 1
+    i += 1
+# write data to file
+f = open('pcmdata.bin', "wb")
+i = 0
+while i < len(pcmbytes):
+    f.write(pcmbytes[i])
+    i += 1
+f.close()
+
+print("Done.")
+print("writing song bytes to vgmdata.bin ... ")
+
+# first entry is always 0x100
+vgmbytes = []
+vgmbytes.append(bytes([0]))
+vgmbytes.append(bytes([0]))
+vgmbytes.append(bytes([1]))
+vgmbytes.append(bytes([0]))
+_vofs = 256
+# append offsets
+i = 0
+while i < len(vgfiles)-1:
+    vgmbytes.append(bytes([(_vofs + len(vgfiles[i].songbytes) & 0xff000000) >> 24]))
+    vgmbytes.append(bytes([(_vofs + len(vgfiles[i].songbytes) & 0xff000) >> 16]))
+    vgmbytes.append(bytes([(_vofs + len(vgfiles[i].songbytes) & 0xff00) >> 8]))
+    vgmbytes.append(bytes([(_vofs + len(vgfiles[i].songbytes) & 0xff)]))
+    _vofs += len(vgfiles[i].songbytes)
+    i += 1
+# pad to 256 bytes
+while (len(vgmbytes) < 256):
+    vgmbytes.append(bytes([0]))
+# write trimmed song bytes 
+i = 0
+while i < len(vgfiles):
+    j = 0
+    while j < len(vgfiles[i].songbytes):
+        vgmbytes.append(bytes([vgfiles[i].songbytes[j]]))
+        j += 1
+    i += 1
+# write file 
+f = open('vgmdata.bin', "wb")
+i = 0
+while i < len(vgmbytes):
+    f.write(vgmbytes[i])
+    i += 1
+f.close()
+
+print("Done.")
