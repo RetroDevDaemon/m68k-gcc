@@ -1,11 +1,12 @@
+; vgmplay2.z80
+
 ;;;;;;;;;;;;;;;;;
 ;;
-;; Z80 VGM Player
+;; Z80 VGM Player2
 ;; 
 ;; v 0.25
 ; WARNING: 68k side addresses changed from a00080+ to a00100+
 ; Set to NTSC 
-; Samples currently OFF while debugging
 ; Watch for macros
 
 ; by RetroDevDiscord
@@ -157,6 +158,12 @@ LOCALEWAIT:
 PALWAIT equ 882 
 NTSCWAIT equ 735
 
+; 32-bit addresses of incoming DAC samples.
+; if these are 0, no sample is playing.
+SAMPLE1SRC: DEFB 0,0,0,0
+SAMPLE2SRC: DEFB 0,0,0,0
+SAMPLE3SRC: DEFB 0,0,0,0
+
 
 LOADVGM:
 ;;;;;;;;;;;;;;;;
@@ -175,94 +182,30 @@ _ld:
         LD A,(RomBank) 
         LD (StartBank),A        ; Store the initial ROM bank for looping.
         
-; Set the memory window to the song header (+1c)      
+; Set the memory window to song data start 
         ld hl,(SongBaseAddress)
-        ld bc,$001c 
-        xor a 
-        adc hl,bc 
         ld (ZadrWork),hl 
         ld hl,(SongBaseAddress+2)
-        ld bc,$0000
-        adc hl,bc               ; catch the carry
         ld (ZadrWork+2),hl
-        call SETZADDRESS        ; set bank to song base address + 1c!
+        call SETZADDRESS        ; set bank 
+        
+        ; For now pretend there is no loop function
 
-; Is the loop variable = 00 00 ?
-        ld a,(hl)               ; pointer is at loop portion of header. 
-        ld c,a 
-        %GETNEXTSONGBYTEM
-        ld a,(hl)               ; Is there loop location?
-        or c  
-        jr z, noloop            ; checks first two bytes only~~~
-        ld a,(hl)
-        ld b,a                  ; 1c and 1d are in bc
-; store the 32bit 68000 address at LoopLoc
-        push hl 
-         push bc 
-         pop hl 
-         ld (LoopLoc),hl ; store 1c-1d here
-        pop hl          ; at LoopLoc
-        %GETNEXTSONGBYTEM 
-        ld a,(hl) 
-        ld c,a 
-        %GETNEXTSONGBYTEM
-        ld a,(hl) 
-        ld b,a 
-        push bc         ; excg
-        pop hl          ; bc and hl
-        ld (LoopLoc+2),hl  ; and at LoopLoc+2
-        ; WE AREN'T DONE!!!
-; we need to convert this to the 68000 range.;
-        ld hl,(SongBaseAddress) 
-        push hl 
-        pop bc                  ; HL = LoopLoc+0, BC=SongBaseAddress+0 
-        ld hl,(LoopLoc) 
-        xor a 
-        adc hl,bc               ; if it overflows, its in the carry...
-        ld (LoopLoc),hl         ; lower byte stored
-        ld hl,(LoopLoc+2)       ; load upper byte and store carry
-        ld bc,$0000
-        adc hl,bc               ; <- carry taken care of. 
-        ld (LoopLoc+2),hl 
-        ; HL = LoopLoc+2 and carry
-        push hl 
-         ld hl,(SongBaseAddress+2) 
-         push hl 
-         pop bc 
-        pop hl    ; HL = LoopLoc+2+c, BC = SongBaseAddress+2
-        xor a     ; clear carry for the upper bytes 
-        adc hl,bc               ; phew! NOW we're good 
-        ld (LoopLoc+2),hl 
-; Set start playing flag 
-        ld a,1 
-        ld (LoopPlay),a           ; set LoopPlay to 1
 noloop:
-; Now set HL to song data pointer - longword at 0x0034 into the VGM header 
-        ld hl,(SongBaseAddress)    ; 00001ef7, need to add 83 to skip header and
-                                   ; byte size
-        ld bc, $0080            ; skip the header
-        xor a 
-        adc hl,bc  ; 0x100              ; 1f2b 1f2e is wrong! should be 1f7a
-        ld (ZadrWork),hl           ; 16bit addition ; START BAD CODE
-        ld bc,$0000
-        ld hl,(SongBaseAddress+2)
-        adc hl,bc ; catch the carry 
-        ld (ZadrWork+2),hl              ; < ok
-        call SETZADDRESS   
-; TODO FIXME i am not reading addr from header right now     
-; This means only 128-byte header VGMs (1.60 will work!)
-        ; hl now contains base+34 or data offset start
+; Now set HL to song data pointer 
+        ld hl,(SongBaseAddress)    
+; TODO: Currently data byte 0 is expected as SongBaseAddress! No vgm data please!
 ; Get the 68000 address and store it in SongDataStart (our sram var) 
-        ld a,(hl) ; data start offset bits 0-7. add this to ;
+        ld a,(hl) ; data start 
 
         dec hl  ;) < go down one because we call GetNextSongByte below
 PLAYLOOP:
-;;;;;;;;;;;;;;;;               ; +27..400
-        ld a,(SAMPTOWAIT)
+;;;;;;;;;;;;;;;;              
+        ld a,(SAMPTOWAIT)       ; Do we have a WAIT queued?
         or a 
         jr z, _nosampwt
         push hl 
-         ld hl,(SAMPTOWAIT)
+         ld hl,(SAMPTOWAIT)     ; if so, load the PAL/NTSC wait and sub it
          ld bc,(LOCALEWAIT) 
          sbc hl,bc
          jp m,_zero 
@@ -288,7 +231,7 @@ _nosampwt:
         inc bc 
         ld a,(bc) 
         ld d,a
-        push de 
+        push de         ; de contains address of command
         ret 
 
 
@@ -299,7 +242,7 @@ FRAMEOVER:
         ; Before checking 68k vbl, we need to see if DAC are queued.
         ;LD A,(DacTransferActive) 
         ;cp 0 
-        ;call DACBLOCKTRANSFER ; MAD TESTING BRUH
+        call DACBLOCKTRANSFER ; TESTING!!
         ld bc,0
 _framewait:
         inc bc 
@@ -627,6 +570,16 @@ DACWORK
 ;BlockActive: 1 if we need to dac stream it, 0 skips
 ;_buffer 3 : to align to 16 bytes
 
+; New theory
+;  - There are 3 dac slots total. lets start with 1!
+; Data required: 
+;   - playing yes/no
+;   - location of sample data
+;   - how many sample bytes to push per frame
+;   - when is the sound "over"?
+
+
+
 DACBLOCKTRANSFER:
         ;ret 
 ;; Step through me again
@@ -635,32 +588,9 @@ DACBLOCKTRANSFER:
         ld (DACWORK),a 
         xor a
         ld (DACWORK+1),a     ; saving me for later!
-        ld (DACWORK+2),hl       
-        ; LOOP THROUGH DATA STRUCT[], SEARCH FOR ACTIVE BYTE == 1
-;        ld hl,BlockActive-16
-;        ld b,16   ; 16 data arrays
-;        ld de,1  ; 16 bytes each FIXME
-;_nextdb
-;        OR A 
-;        adc hl,de 
-;        ld a,(hl) 
-;        cp $0
-;        jr nz,_found
-;        djnz _nextdb
-;        cp $0 
-;        jp z,_daclpend     ; if all are 0, return
-_found
-        ; TESTING 
-        ld a,(BlockActive) 
-        cp 0 
-        ret z 
-        ; b = 15 to 0 (to flip: 15 - b)
-        ;ld hl,15 
-        ;ld c,0
-        ;or a 
-        ;sbc hl,bc 
-        ;ld a,l
-        ; now [A] has active data bank 0-15
+        ld (DACWORK+2),hl
+
+
         ; TODO 
         ; GET THE STRUCT'S CTR, STORE IT IN ACTIVEDACCTR
         ; switch to ActiveDacBank|ActiveDacLoc 
