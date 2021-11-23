@@ -173,7 +173,7 @@ void InitIntro(void)
     curPaletteSet[3] = (u16*)&intropal;
     LoadPalette(3, curPaletteSet[3]); 
 
-    LoadSong(&freefall);
+    //LoadSong(&freefall);
     
     flashAnimPlaying = false;    
     unflashAnimPlaying = true;

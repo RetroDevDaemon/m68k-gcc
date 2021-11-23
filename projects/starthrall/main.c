@@ -44,14 +44,60 @@ int GetInput(void);
 
 // Assets
 #include "gfx.h"
-#include "music.h"
+//#include "music.h"
+#include "pcmdata.h"
+#include "vgmdata.h"
 // Game stuff
-#include "debug.h"
+//#include "debug.h"
 #include "starthrall.h"
 #include "characterdata.h"
 #include "title.h"
 #include "intro.h"
 #include "worldmap.h"
+
+//debug.h
+extern struct _counters Counters;
+
+void DO_DEBUG(void);
+
+static struct _debugvars \
+{ 
+    s32 cycles;
+    s32 vcycles;
+    u8 vch[3];
+    u8 vcl[3];
+    u8 _zero;
+    u8 ch[3];
+    u8 cl[3];
+    u8 _zeroa;
+    u8 zh[3];
+    u8 zl[3];
+    bool debug_text_enabled;
+} debugVars;
+
+void __attribute__((optimize("O3"))) UpdateDebugText()
+{
+	extern u8 zcyclesl;
+	extern u8 zcyclesh;
+
+	// Every word write to the VDP is ~2 cycles. This takes up 24c!
+	print(BG_A, 5, 1, (u8*)debugVars.ch);
+	print(BG_A, 7, 1, (u8*)debugVars.cl);
+    print(BG_A, 5, 3, (u8*)debugVars.vch);
+	print(BG_A, 7, 3, (u8*)debugVars.vcl);
+	print(BG_A, 5, 5, (u8*)debugVars.zh);
+	print(BG_A, 7, 5, (u8*)debugVars.zl);
+	
+}
+
+void __attribute__((optimize("O3"))) DO_DEBUG(void)
+{
+    // Debug Menu 
+    UpdateDebugText();
+    debugVars.vcycles = 0;
+    while(*((u32*)0xc00004) & 0b1000)
+        debugVars.vcycles++;
+}
 
 // Global Vars
 u8 fq;
@@ -141,6 +187,11 @@ void UpdatePrintBuffer(void)
 
 s16 second_counter_a = 0;
 
+void placeholder(void)
+{
+
+}
+
 int main(void)
 {   
     /////////////////////////////
@@ -190,6 +241,8 @@ int main(void)
     flashStep = 0;
     ticker = 0;
     frameDelta = fp32(realFrameDelta);
+
+    debugVars.debug_text_enabled = true;
     // Clear and reset queue
     //q_in = 0;
     for(i = 0; i < QUEUE_SIZE; i++) function_q[i] = (void*)NULL;
@@ -217,105 +270,130 @@ int main(void)
         Counters.thirtyFrameCounter++;
         if(Counters.thirtyFrameCounter > 29) Counters.thirtyFrameCounter = 0;
 
-        UPDATE:
+        //UPDATE:
         if(GLOBALWAIT > 0)
         {
             GLOBALWAIT--;
-            goto DRAW;
+        //    goto DRAW;
+            placeholder();
         }
-
-        DoQ();
-        
-        // MAIN GAME LOOP 
-        ProcessInput();
-        
-        if(debugVars.debug_text_enabled)
-        {
-            byToHex(debugVars.vcycles >> 8, (u8*)&debugVars.vch);
-            byToHex(debugVars.vcycles & 0xff, (u8*)&debugVars.vcl);
-            byToHex(debugVars.cycles >> 8, (u8*)&debugVars.ch);
-            byToHex(debugVars.cycles & 0xff, (u8*)&debugVars.cl);
-            byToHex(zcyclesh, (u8*)&debugVars.zh);
-            byToHex(zcyclesl, (u8*)&debugVars.zl);           
-        }
-
-        if (CUR_SCREEN_MODE == BATTLE){
-            ///////////////////////////
-            ////      BATTLE CODE 
-            ////////////////////////////
-            //DoMainBattleLoop();
-        } 
-        else if (CUR_SCREEN_MODE == DUNGEON) 
-        {
-            ///////////////////////////////////////////
-            //         DUNGEON NORMAL STATE
-            ///////////////////////////////////////////
-            // update dungeon
-            //DUNGEON_UPDATE();
-        }
-        else if(CUR_SCREEN_MODE == WORLDMAP)
-        {
+        else {
+            DoQ();
             
-            //WorldMapUpdate();
-            ////////////////////////////
+            // MAIN GAME LOOP 
+            PlaySong();
+            
+            ProcessInput();
+            
+            if(debugVars.debug_text_enabled)
+            {
+                byToHex(debugVars.vcycles >> 8, (u8*)&debugVars.vch);
+                byToHex(debugVars.vcycles & 0xff, (u8*)&debugVars.vcl);
+                byToHex(debugVars.cycles >> 8, (u8*)&debugVars.ch);
+                byToHex(debugVars.cycles & 0xff, (u8*)&debugVars.cl);
+                byToHex(zcyclesh, (u8*)&debugVars.zh);
+                byToHex(zcyclesl, (u8*)&debugVars.zl);           
+            }
+
+            if (CUR_SCREEN_MODE == BATTLE){
+                ///////////////////////////
+                ////      BATTLE CODE 
+                ////////////////////////////
+                //DoMainBattleLoop();
+            } 
+            else if (CUR_SCREEN_MODE == TITLE)
+            {
+                TITLE_UPDATE();
+            }
+            else if (CUR_SCREEN_MODE == DUNGEON) 
+            {
+                ///////////////////////////////////////////
+                //         DUNGEON NORMAL STATE
+                ///////////////////////////////////////////
+                // update dungeon
+                //DUNGEON_UPDATE();
+            }
+            else if(CUR_SCREEN_MODE == WORLDMAP)
+            {
+                
+                //WorldMapUpdate();
+                ////////////////////////////
+            }
         }
-        
         // ****
         //   VBLANK
         // ****
-        DRAW:
+        //DRAW:
+        
         //WaitVBlank();       // Wait until draw is done DONT DO THIS IF VBL IRQ IS ON!
-        VBL_DONE = false;
-        while(!VBL_DONE){ };
-
+        
     }
     return 0;
 }
-
+bool asdf = false;
+const char hw[] = "Press Start\x00";
 // Called during VBlank
 void GAME_DRAW(void)
 {   
     int i;
+    u16 ch;
 
     last_joyState1 = joyState1;
     GETJOYSTATE1(joyState1);
     //last_joyState2 = joyState2;
     //GETJOYSTATE2(joyState2);
 
-    PlaySong();
-    
-    if(frameFlip == 0) frameFlip = 1;
-    else frameFlip = 0;
-    
-    // Sprite shit
-    // TODO: Convert this to DMA
-    u32* spr = &SPRITES[0];
-    SetVRAMWriteAddress(VRAM_SAT);
-    // sprite count = 1
-#define SPR_COUNT 1
-    for(i = 0; i < SPR_COUNT * 2; i++) WRITE_DATAREG32(*spr++);
-
-    PROCESS_FLASH();
-    
-    if (CUR_SCREEN_MODE == TITLE)
-    {
-        TITLE_DRAW();
+    if(Counters.thirtyFrameCounter == 0){
+        if(debugVars.debug_text_enabled)
+            DO_DEBUG();
     }
-    else if (CUR_SCREEN_MODE == INTRO)
-    {
-        INTRO_DRAW();
-    }
-    UpdateBGScroll(); // Sets background position in VRAM
+    else {
 
-    UpdatePrintBuffer(); // If script is printing, process it
+        if(frameFlip == 0) frameFlip = 1;
+        else frameFlip = 0;
+        
+        // Sprite shit
+        // TODO: Convert this to DMA
+        u32* spr = &SPRITES[0];
+        SetVRAMWriteAddress(VRAM_SAT);
+        // sprite count = 1
+    #define SPR_COUNT 1
+        for(i = 0; i < SPR_COUNT * 2; i++) WRITE_DATAREG32(*spr++);
 
-    DO_DEBUG();
+        if(flashAnimPlaying || unflashAnimPlaying){
+            PROCESS_FLASH();
+            UpdateBGScroll();
+        }
+        else {
+            if (CUR_SCREEN_MODE == TITLE)
+            {
+                if(!asdf){
+                    //print(BG_A, 10, 15, hw);
+                    SetVRAMWriteAddress(VRAM_BG_A + (128*20) + 20);
+                    u8* ec = &hw[0];
+                    for(u8 t = 0; t < sizeof(hw); t++)
+                        WRITE_DATAREG16((u16)*ec++); 
+                    asdf = true;
+                }
+                
+            }
+            else if (CUR_SCREEN_MODE == INTRO)
+            {
+                INTRO_DRAW();
+            }
+            UpdateBGScroll(); // Sets background position in VRAM
+
+            UpdatePrintBuffer(); // If script is printing, process it
+        }
+        
+        i = 0u;
+    }        
         
     VBL_DONE = true;
-        // end draw
+    // end draw
 }
 
-void PROCESS_FLASH(void)
+void __attribute__((optimize("O3"))) PROCESS_FLASH(void)
 {
     u8 i;
     if(flashAnimPlaying)

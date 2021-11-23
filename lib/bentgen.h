@@ -185,7 +185,7 @@ typedef struct spriteAttribute {
 
 void _start(void);
 int main(void);
-void GAME_DRAW(void);
+void __attribute__((optimize("O0"))) GAME_DRAW(void);
 void __attribute__((interrupt)) fcatch(void);
 void __attribute__((interrupt)) HBlank(void);
 void __attribute__((interrupt)) VBlank(void);
@@ -195,7 +195,7 @@ void SetVDPPlaneAddress(u8 plane, u16 addr);
 void SetVRAMWriteAddress(u16 address);
 void SetDMAWriteAddress(u16 address);
 void SetVRAMReadAddress(u16 address);
-void __attribute__((optimize("Os"))) print(u8 plane, u8 x, u8 y, String str);
+void print(u8 plane, u8 x, u8 y, const char str[]);
 void byToHex(u8 by, u8* ar);
 void __attribute__((optimize("Os"))) stdcpy(u32* dst, u32* src, u32 sz);
 void NullInputHandler(void);
@@ -229,7 +229,7 @@ void PlaySong(void);
 //void FlipTileRegionV(VDPPlane plane, u8 x1, u8 y1, u8 x2, u8 y2);
 //void CopyMapRect(Map* source, VDPPlane tgtplane, u8 palNo, u16 tileIndex, u8 x1, u8 y1, u8 w, u8 h, u8 x2, u8 y2, BOOL p);
 //void ChangeTileRectPalette(VDPPlane plane, u8 x1, u8 y1, u8 x2, u8 y2, u8 palNo);
-void FlashAllPalettes(void);
+void __attribute__((optimize("O3"))) FlashAllPalettes(void);
 
 
 static u16 tempPalettes[4][16];     
@@ -329,19 +329,19 @@ void fcatch(void)
 }
 
 // Horizontal blank requires EnableIRQLevel(3) and VDP reg 0 set
-void HBlank(void)
+void __attribute__((interrupt)) HBlank(void)
 {
     return;
 }
 
 // Vertical blank requires EnableIRQLevel(5) and VDP reg 1 set
 //static bool VBL_DONE = false;
-void VBlank(void)
+void __attribute__((interrupt)) VBlank(void)
 {
     //if(VBL_DONE) return;
     GAME_DRAW();
     //VBL_DONE = true;
-    return;
+    //return;
 }
 
 extern char _sbss[];
@@ -494,7 +494,7 @@ void LoadPalette(u8 palNo, u16* p)
 }
 
 u8 TEXT_PALETTE;
-void print(u8 plane, u8 x, u8 y, String str)
+void print(u8 plane, u8 x, u8 y, const char str[])
 {
     // 2 bytes per character, 64 chars per plane row * 2 = 128 or $80 for newline
     switch(plane){
