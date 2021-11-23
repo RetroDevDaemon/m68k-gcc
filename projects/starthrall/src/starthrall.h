@@ -131,7 +131,7 @@ bool screenUpdated = false;
 void GetMapProjection();
 void dungeonJoyHandler(u16 JOYNO, u16 RELEASED, u16 PRESSED);
 void noJoyHandler(u16 JOYNO, u16 RELEASED, u16 PRESSED);
-void UnflashAllPalettes();
+void __attribute__((optimize("O3"))) UnflashAllPalettes();
 void UpdateTextLog(const char* toAdd);
 void LoadDungeonMap(const u8* dungeon);
 void ResetPalettes();
@@ -859,7 +859,7 @@ void LoadPalettestoTemp()
     }
 }
 
-void UnflashAllPalettes() 
+void __attribute__((optimize("O3"))) UnflashAllPalettes() 
 {
     LoadPalettestoTemp();
     
@@ -903,7 +903,7 @@ void UnflashAllPalettes()
     }
 }
 
-void FlashAllPalettes()
+void __attribute__((optimize("O3"))) FlashAllPalettes()
 {
     // increase the current palette values by 2
     // store in temp palettes

@@ -9,9 +9,8 @@ extern Sprite* spr_selector;
 
 #include "maptest2.h"
 
-// TITLE SCREEN RAM USAGE
 bool title_intro_done;
-bool go_intro;
+//bool go_intro;
 
 void FillVRAM(u16 ti, u8 pal, u16* startaddr, u16 len);
 int TitleInputHandler(void);
@@ -38,19 +37,23 @@ int TitleInputHandler(void)
             flashStepTimer = 0;
             flashStep = 0;
             ticker = 0;
-            go_intro = true;
+            //go_intro = true;
             ProcessInput = NullInputHandler;
         }
     }
     return 0;
 }
 
+const char nullsong = 0x97;
+
 void InitTitleScreen(void)
 {
     // start title music
-    LoadSong(&caustic_love[0]);
+    LoadSong(&vgmdata[0] + 0x1142a);
+    //LoadSong(&nullsong);
     // scroll map
-    go_intro = false;
+    
+    //go_intro = false;
     title_intro_done = false;
     bgb_hscroll_pos = 180;
     UpdateBGScroll();
@@ -67,24 +70,32 @@ void InitTitleScreen(void)
     // sprite engine (already on)
     // set joy handler
     ProcessInput = TitleInputHandler;
+    
 }
 
 extern void InitIntro(void);
 
-void TITLE_DRAW(void)
+bool go_intro = false;
+
+void TITLE_UPDATE(void)
 {
     int c;
     if(!title_intro_done)
     {
         if(timer_3 <= 160) { 
-            // scroll the map in!
-            //if(titleScr != null)
-            //    MAP_scrollTo(titleScr, timer_3, 0);
             timer_3 += 20;
             bgb_hscroll_pos = 180 - timer_3;
             bgb_vscroll_pos = 0;
-            //bgb_vscroll_pos = (u16)timer_3;
         }
+        else {
+            title_intro_done = true;
+            go_intro=true;
+        }
+    }
+}
+
+
+/*
         else { 
             if(!flashAnimPlaying){
                 print(BG_A, 9, 21, str_pressStart);
@@ -117,3 +128,4 @@ void TITLE_DRAW(void)
         }
     }
 }
+*/

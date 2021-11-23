@@ -1,6 +1,9 @@
 .vscode
 build
 out
-out.md
-pcmdata.bin
-vgmdata.bin 
+**/out.md
+**/pcmdata.bin
+**/vgmdata.bin 
+**/everpi
+**/pcmdata.h 
+**/vgmdata.h
