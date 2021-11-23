@@ -44,12 +44,12 @@ int TitleInputHandler(void)
     return 0;
 }
 
-const char nullsong = 0x97;
+extern u32 OST[64];
 
 void InitTitleScreen(void)
 {
     // start title music
-    LoadSong(&vgmdata[0] + 0x1142a);
+    LoadSong(OST[6]);
     //LoadSong(&nullsong);
     // scroll map
     

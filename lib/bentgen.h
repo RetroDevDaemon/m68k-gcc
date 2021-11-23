@@ -644,8 +644,14 @@ void PlaySong(void)
 	asm("move.w #0,(z80_bus_request).l");
 }
 
+const char nullsong = 0x97;
+
 void LoadSong(const u8* son)
 {
+    if ((u32)son == (u32)0)
+    {
+        son = &nullsong;
+    }
 	u32 stadr = (u32)son;
 	u8 bank = (u8)((stadr >> 15));
 	//stadr += 0x80;

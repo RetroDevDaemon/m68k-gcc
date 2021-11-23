@@ -106,7 +106,7 @@ int copy_file()
   fread(filebuffer, filelen, 1, romfile);
   fclose(romfile);
 
-  if(ed_create_file(rom_filename, sizeof(rom_filename)) == 1)
+  if(ed_create_file("TEST.MD", 7) == 1)
     {
       printf("Failed - try again?\n");
       return -1;
@@ -116,7 +116,7 @@ int copy_file()
   int offset = 0;
   int len = filelen;
   int ctr = 10;
-  printf("Copying %s", rom_filename);
+  printf("Copying as TEST.MD");
   while (len > 0)
   {
     // Progress dot
