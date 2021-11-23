@@ -36,6 +36,9 @@ static struct _counters \
     u8 tenFrameCounter;
 } Counters;
 
+u32 OST[64];
+u32 SFX[64];
+
 void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 pal);
 void PROCESS_FLASH(void);
 int main(void);
@@ -48,18 +51,14 @@ int GetInput(void);
 #include "pcmdata.h"
 #include "vgmdata.h"
 // Game stuff
-//#include "debug.h"
 #include "starthrall.h"
 #include "characterdata.h"
 #include "title.h"
 #include "intro.h"
 #include "worldmap.h"
 
-//debug.h
 extern struct _counters Counters;
-
 void DO_DEBUG(void);
-
 static struct _debugvars \
 { 
     s32 cycles;
@@ -74,7 +73,6 @@ static struct _debugvars \
     u8 zl[3];
     bool debug_text_enabled;
 } debugVars;
-
 void __attribute__((optimize("O3"))) UpdateDebugText()
 {
 	extern u8 zcyclesl;
@@ -89,7 +87,6 @@ void __attribute__((optimize("O3"))) UpdateDebugText()
 	print(BG_A, 7, 5, (u8*)debugVars.zl);
 	
 }
-
 void __attribute__((optimize("O3"))) DO_DEBUG(void)
 {
     // Debug Menu 
@@ -123,6 +120,7 @@ Sprite* spr_selector;
 u16 bg_map[64*32];
 u16 blankpalette[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
+
 void InitGameStuff(void)
 {
     u8 i;
@@ -143,7 +141,14 @@ void InitGameStuff(void)
     selectorpos.x = 100;
     selectorpos.y = 100;
     //ScriptSys.pointer = 0;
-
+    u32* sp = &vgmdata[0];
+    u32* vp = &pcmdata[0];
+    for(i = 0; i < 64; i++)
+    {
+        OST[i] = (u32)&vgmdata[0] + (u32)*sp++;
+        SFX[i] = (u32)&pcmdata[0] + (u32)*vp++;
+    }
+    
 }
 
 void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 pal)
