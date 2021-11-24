@@ -10,12 +10,10 @@
 // My own genesis stuff 
 #include "bentgen.h"
 
-//static u16 joyState1;
 static u32 joyState1;
-//static u16 last_joyState1;
 static u32 last_joyState1;
-static u16 joyState2;
-static u16 last_joyState2;
+//static u16 joyState2;
+//static u16 last_joyState2;
 static bool VBL_DONE = false;
 struct _textsys \
 {
@@ -45,6 +43,8 @@ int main(void);
 void (*ProcessInput)(void);
 int GetInput(void);
 
+void vdp_print(u32 vram_plane_base, u8 x, u8 y, char* str);
+
 // Assets
 #include "gfx.h"
 //#include "music.h"
@@ -57,7 +57,14 @@ int GetInput(void);
 #include "intro.h"
 #include "worldmap.h"
 
-extern struct _counters Counters;
+//extern struct _counters Counters;
+static struct _counters \
+{ 
+    u8 sixtyFrameCounter;
+    u8 thirtyFrameCounter;
+    u8 twentyFrameCounter;
+    u8 tenFrameCounter;
+} Counters;
 void DO_DEBUG(void);
 static struct _debugvars \
 { 
@@ -79,12 +86,13 @@ void __attribute__((optimize("O3"))) UpdateDebugText()
 	extern u8 zcyclesh;
 
 	// Every word write to the VDP is ~2 cycles. This takes up 24c!
-	print(BG_A, 5, 1, (u8*)debugVars.ch);
-	print(BG_A, 7, 1, (u8*)debugVars.cl);
-    print(BG_A, 5, 3, (u8*)debugVars.vch);
-	print(BG_A, 7, 3, (u8*)debugVars.vcl);
-	print(BG_A, 5, 5, (u8*)debugVars.zh);
-	print(BG_A, 7, 5, (u8*)debugVars.zl);
+	//vdp_print(VRAM_BG_A, 5, 1, (u8*)debugVars.ch);
+    vdp_print(VRAM_BG_A, 5, 1, (char*)debugVars.ch);
+	vdp_print(VRAM_BG_A, 7, 1, (char*)debugVars.cl);
+    vdp_print(VRAM_BG_A, 5, 3, (char*)debugVars.vch);
+	vdp_print(VRAM_BG_A, 7, 3, (char*)debugVars.vcl);
+	vdp_print(VRAM_BG_A, 5, 5, (char*)debugVars.zh);
+	vdp_print(VRAM_BG_A, 7, 5, (char*)debugVars.zl);
 	
 }
 void __attribute__((optimize("O3"))) DO_DEBUG(void)
@@ -141,8 +149,8 @@ void InitGameStuff(void)
     selectorpos.x = 100;
     selectorpos.y = 100;
     //ScriptSys.pointer = 0;
-    u32* sp = &vgmdata[0];
-    u32* vp = &pcmdata[0];
+    u32* sp = (u32*)&vgmdata[0];
+    u32* vp = (u32*)&pcmdata[0];
     for(i = 0; i < 64; i++)
     {
         OST[i] = (u32)&vgmdata[0] + (u32)*sp++;
@@ -241,11 +249,11 @@ int main(void)
     flashAnimPlaying = true;
     Counters.thirtyFrameCounter = 0;
     //unflashAnimPlaying = true;
-    fix32 frameDelta;
+    //fix32 frameDelta;
     flashStepTimer = 0;
     flashStep = 0;
     ticker = 0;
-    frameDelta = fp32(realFrameDelta);
+    //frameDelta = fp32(realFrameDelta);
 
     debugVars.debug_text_enabled = true;
     // Clear and reset queue
@@ -335,13 +343,17 @@ int main(void)
     }
     return 0;
 }
+
+extern u8 TEXT_PALETTE;
+
+
 bool asdf = false;
 const char hw[] = "Press Start\x00";
 // Called during VBlank
 void GAME_DRAW(void)
 {   
     int i;
-    u16 ch;
+    //u16 ch;
 
     last_joyState1 = joyState1;
     GETJOYSTATE1(joyState1);
@@ -359,7 +371,7 @@ void GAME_DRAW(void)
         
         // Sprite shit
         // TODO: Convert this to DMA
-        u32* spr = &SPRITES[0];
+        u32* spr = (u32*)&SPRITES[0];
         SetVRAMWriteAddress(VRAM_SAT);
         // sprite count = 1
     #define SPR_COUNT 1
@@ -373,11 +385,7 @@ void GAME_DRAW(void)
             if (CUR_SCREEN_MODE == TITLE)
             {
                 if(!asdf){
-                    //print(BG_A, 10, 15, hw);
-                    SetVRAMWriteAddress(VRAM_BG_A + (128*20) + 20);
-                    u8* ec = &hw[0];
-                    for(u8 t = 0; t < sizeof(hw); t++)
-                        WRITE_DATAREG16((u16)*ec++); 
+                    vdp_print(VRAM_BG_A, 10, 20, (char*)&hw);
                     asdf = true;
                 }
                 

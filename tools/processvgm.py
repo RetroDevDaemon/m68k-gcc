@@ -253,7 +253,7 @@ pcmbytes.append(bytes([0]))
 # append pcm data offsets
 _pbofs = 256
 i = 0
-while i < len(unique_pcm)-1:
+while i < len(unique_pcm):
     pcmbytes.append(bytes([(_pbofs + len(unique_pcm[i].bytes) & 0xff000000) >> 24]))
     pcmbytes.append(bytes([(_pbofs + len(unique_pcm[i].bytes) & 0xff0000) >> 16]))
     pcmbytes.append(bytes([(_pbofs + len(unique_pcm[i].bytes) & 0xff00) >> 8]))
@@ -290,7 +290,7 @@ vgmbytes.append(bytes([0]))
 _vofs = 256
 # append offsets
 i = 0
-while i < len(vgfiles)-1:
+while i < len(vgfiles):
     vgmbytes.append(bytes([(_vofs + len(vgfiles[i].songbytes) & 0xff000000) >> 24]))
     vgmbytes.append(bytes([(_vofs + len(vgfiles[i].songbytes) & 0xff000) >> 16]))
     vgmbytes.append(bytes([(_vofs + len(vgfiles[i].songbytes) & 0xff00) >> 8]))
