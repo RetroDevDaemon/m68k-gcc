@@ -49,7 +49,7 @@ extern u32 OST[64];
 void InitTitleScreen(void)
 {
     // start title music
-    LoadSong(OST[6]);
+    LoadSong((const u8*)OST[6]);
     //LoadSong(&nullsong);
     // scroll map
     
@@ -98,7 +98,7 @@ void TITLE_UPDATE(void)
 /*
         else { 
             if(!flashAnimPlaying){
-                print(BG_A, 9, 21, str_pressStart);
+                vdp_print(VRAM_BG_A, 9, 21, str_pressStart);
                 
                 title_intro_done = true;
             }

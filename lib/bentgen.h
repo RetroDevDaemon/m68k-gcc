@@ -263,6 +263,7 @@ typedef s16 fix16;
 #define WriteVDPRegister(v) asm("move.w %0,(0xC00004).l"::"g"(v))
 #define VDPStatus_u16(var) asm("move.w (0xc00004).l,%0":"=g"(var)::)
 #define EnableIRQLevel(n) asm("move.w %0,sr"::"g"((n<<8)|0x20))
+#define EnableVBlankIRQ() WriteVDPRegister(WRITE|REG(1)|0x64);
 
 
 #define WaitVBlank() asm("VB%=: move.w (0xc00004).l,%%d0\n\t" \
@@ -493,7 +494,8 @@ void LoadPalette(u8 palNo, u16* p)
     for(i = 0; i < 16; i++) WRITE_DATAREG16(p[i]);   
 }
 
-u8 TEXT_PALETTE;
+u8 TEXT_PALETTE = 0;
+
 void print(u8 plane, u8 x, u8 y, const char str[])
 {
     // 2 bytes per character, 64 chars per plane row * 2 = 128 or $80 for newline
@@ -514,6 +516,13 @@ void print(u8 plane, u8 x, u8 y, const char str[])
     }
 }
 
+void __attribute__((optimize("Os"))) vdp_print(u32 vram_plane_base, u8 x, u8 y, char* str)
+{
+    SetVRAMWriteAddress(vram_plane_base + (BG_WIDTH*2*y) + (x*2));
+    char* e = &str[0]; 
+    while(*e !='\x00')
+        WRITE_DATAREG16((u16)*e++ | pal_no(TEXT_PALETTE));
+}
 
 // Use DrawTile when possible
 void DrawSpriteAsTile(u8 plane, u16 tileNo, u8 x, u8 y, u8 w, u8 h)
@@ -644,13 +653,42 @@ void PlaySong(void)
 	asm("move.w #0,(z80_bus_request).l");
 }
 
+u32 SFX[64];
+
+void PlaySFX(u32 adr, u32 sz)
+{
+    // wait for z80 bus
+	asm("move.w #0x100,(z80_bus_request).l");
+	asm("z80brqwait:");
+	asm("btst #0,(z80_bus_request).l");
+	asm("bne.s z80brqwait");
+	// set up sfx 
+    // 110h and 114h have address of sfx and size of sfx.
+    //u8* z8r = 0xa00110;
+    //for(int i = 0; i < 4; i++)
+    //    *z8r++ = (u8)((adr >> (8*i)) & 0xff);
+    //for(int i = 0; i < 4; i++)
+    //    *z8r++ = (u8)((sz >> (8*i)) & 0xff);
+    asm("move.b %0,(0xa00110).l"::"g"(adr & 0xff));
+	asm("move.b %0,(0xa00111).l"::"g"((adr >> 8)));
+	asm("move.b %0,(0xa00112).l"::"g"((adr >>16)));
+	asm("move.b %0,(0xa00113).l"::"g"((adr >>24)));
+    asm("move.b %0,(0xa00114).l"::"g"(sz & 0xff));
+	asm("move.b %0,(0xa00115).l"::"g"((sz >> 8)));
+	asm("move.b %0,(0xa00116).l"::"g"((sz >>16)));
+	asm("move.b %0,(0xa00117).l"::"g"((sz >>24)));
+    
+    // close bus 
+    asm("move.w #0,(z80_bus_request).l");
+}
+
 const char nullsong = 0x97;
 
 void LoadSong(const u8* son)
 {
     if ((u32)son == (u32)0)
     {
-        son = &nullsong;
+        son = (const u8*)&nullsong;
     }
 	u32 stadr = (u32)son;
 	u8 bank = (u8)((stadr >> 15));

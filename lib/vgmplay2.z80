@@ -226,6 +226,7 @@ _zero:
          ld hl, 0
          ld (SAMPTOWAIT), hl 
         pop hl 
+        jp FRAMEOVER 
 _nosampwt:
         %GETNEXTSONGBYTEM
         LD A,(HL)
@@ -252,7 +253,7 @@ FRAMEOVER:
         ; Before checking 68k vbl, we need to see if DAC are queued.
         ;LD A,(DacTransferActive) 
         ;cp 0 
-        ;call DACBLOCKTRANSFER ; MAD TESTING BRUH
+        call DACBLOCKTRANSFER ; MAD TESTING BRUH
         ld bc,0
 _framewait:
         inc bc 
@@ -295,9 +296,13 @@ WRITEPCM:
 bbb: defb $22
 ; Waits 1-16 samples
 QWAIT:
-        jp QWAIT
+        ;jp QWAIT
         ; TOO SHORT TO NOTICE?
         and $0f 
+        sla a 
+        sla a
+        sla a
+        sla a
         ld b,a 
         ld c,0 
 _qwl:   ; idk what to do other than skip 256*n cycles
@@ -305,17 +310,29 @@ _qwl:   ; idk what to do other than skip 256*n cycles
         ld a,c 
         or b 
         jr nz, _qwl
-        JP PLAYLOOP 
+        JP FRAMEOVER 
 ccc: defb $33
 QFMWAIT:
-        ;jp PLAYLOOP 
-        JP QFMWAIT 
+        and $0f 
+        sla a
+        sla a 
+        sla a
+        sla a
+        ld b,a 
+        ld c,0 
+_qfl:   dec bc 
+        ld a,c 
+        or b 
+        jr nz, _qfl
+; TODO: send N samples from this data block
+        jp FRAMEOVER 
+        ;JP QFMWAIT 
 
 ZadrWork: defb 0,0,0,0
 
 SETZADDRESS:
 ;;;;;;;;;;;;;;;;;;
-; * A H L 
+; * A H L, RomBank, ZadrWork, 
 ; Input: ZadrWork 32-bit address (68000 memory)
 ; Output: changes active rom bank, and sets HL to mem addr
         ld hl,(ZadrWork+1) ; ignore bits 0-7, so we have 8-23
@@ -336,6 +353,7 @@ SETZADDRESS:
         rr l   ; hl >> 7 
         ld a,l 
         ld (RomBank),a ; BITS 15-22
+        ;%ZWAITM
         call BANKSWAP
         LD HL,(ZadrWork)  ; 0-15 
         ld a,$7f 
@@ -350,6 +368,59 @@ SETZADDRESS:
         ; [HL] now contains memory pointer!
         ret
 ;;;;
+
+bankwork: defb 0,0,0,0,0,0,0,0,0
+
+BANKSWAP:
+;;;;;;;;;;;;;
+; * A (preserve bc/hl)
+; RomBank has the # of the 32kb block to write to 6000.
+; (Currently does not support > 8mb)
+; Must write bank bits from 0-8 in ascending order in BYTE size
+;  e.g. 00000000 or 00000001 x 9
+        push bc                         
+        push hl 
+;; - convert RomBank to binary 
+        ld hl,bankwork    ; &bankwork
+        ld c,1
+_bankworkloop
+        ld a,(RomBank)  
+        and c           ; bank & 001 ... bank & 010 ... 
+        ld (hl),a 
+        inc hl          ; bankwork++
+        sla c           ; c << 1
+        jr nc,_bankworkloop
+;; - write one byte at a time to bank register
+        ld hl,bankwork  ; &bankwork
+        ld bc,9         ; for i < 9...
+_b0r
+        ld a,(hl)
+        ld ($6000),a    ; bank register
+        inc hl 
+        dec bc 
+        ld a,c 
+        or b 
+        jr nz,_b0r
+        ; reset/return
+        pop hl 
+        pop bc 
+        ret
+
+
+;;;;                                    ; ~300?
+
+BANKUP:
+;;;;;;;;;;;;;;
+; * A H L
+; Pops up the rom bank by 1 and 
+; sets HL back to $8000
+        ld a,(RomBank)          ; +13
+        inc a                   ; +4   
+        ld (RomBank),a          ; +13
+        call BANKSWAP           ; +17 +(BANKSWAP)
+        ld hl,$8000             ; +10
+        ret                     ; +10
+;;;;                            ; Total : 67+~300
 
 GETROMADDRESS: 
 ;;;;;;;;;;;;;;
@@ -388,52 +459,6 @@ GETROMADDRESS:
         pop hl 
         RET 
 
-
-BANKSWAP:
-;;;;;;;;;;;;;
-; * A (preserve bc)
-; RomBank has the # of the 32kb block to write to 6001.
-;  Keep it 8 bits for now FIXME for > 8MB song locations 
-        push bc                         ; +11
-        ld c, 1         ; = 0b00000001  ; +7
-        or a                            ; +4
-_bswp2: 
-        ld a,(RomBank)                  ; +13
-        and c                           ; +4
-        cp 0                            ; +7
-        jr z,_bzero                     ; +12/+7
-        jr _bone                        ; +12
-_bzero: 
-        ;call ZWAIT 
-        xor a                           ; +4
-        jr _bwrt                        ; +12
-_bone:
-        ;call ZWAIT 
-        ld a,1                          ; +7
-_bwrt:
-        ld ($6001),a                    ; +13
-        sla c           ; = 0b00000010  ; +8
-        jr nc,_bswp2    ; loop until bit goes into carry; +12/+7
-
-        ;call ZWAIT 
-        xor a                   ; +4
-        ld ($6001),a       ; 9 bit = 0 ( works for < 8MB); +13
-        pop bc                          ; +10
-        ret                             ; +10
-;;;;                                    ; ~300?
-
-BANKUP:
-;;;;;;;;;;;;;;
-; * A H L
-; Pops up the rom bank by 1 and 
-; sets HL back to $8000
-        ld a,(RomBank)          ; +13
-        inc a                   ; +4   
-        ld (RomBank),a          ; +13
-        call BANKSWAP           ; +17 +(BANKSWAP)
-        ld hl,$8000             ; +10
-        ret                     ; +10
-;;;;                            ; Total : 67+~300
 
 
 WRITEFM1:
@@ -534,6 +559,8 @@ _clearlp:
         RET
 ;;;;
 
+KHZRATE8: equ 134
+
 ;; DAC STUFF:
 
 DacWRAM: defb 0, 0
@@ -541,6 +568,8 @@ DACWORK
         defb 0,0,0,0
 
 DACBLOCKTRANSFER:
+        ; DEBUG ret 
+;        ret
         xor a 
         push hl 
          ld hl,(Sample1Address)
@@ -557,26 +586,82 @@ _nosample:
 
 _playsample:
         ; PRESERVE CURRENT ROM BANK AND SONG PTR IN WORKRAM~+3
-         ld a,(RomBank)          
+         ld a,(RomBank) 
          ld (DACWORK),a 
          xor a
          ld (DACWORK+1),a     ; saving me for later!
         pop hl 
         ld (DACWORK+2),hl    ; save hl ofc 
+        
         ; change zadr to sample location
         ld hl,(Sample1Address)
         ld (ZadrWork),hl 
         ld hl,(Sample1Address+2)
         ld (ZadrWork+2),hl 
         call SETZADDRESS
+        
         ; hl has address of sample, FIXME 184 samples/frame = ntsc/11khz
-        ld bc,184
+        ld bc,KHZRATE8 ; 8kb sample in 1 second
         ; loop ....
+        ; dac on 
+        ld a,$2b 
+        ld ($4000),a
+        ld a,$80
+        ld ($4001),a
+_dacwriteloop:
+        
+        ld a,$2a 
+        ld ($4000),a 
+        ld a,(hl)
+        ld ($4001),a 
+        %GETNEXTSONGBYTEM
+        dec bc 
+        ld a,b 
+        or c 
+        jr nz,_dacwriteloop
+        ; dac off 
+        ld a,$2b 
+        ld ($4000),a
+        xor a
+        ld ($4001),a 
+        
+        ; add32 
+        xor a   ; clc
+        ld hl,(Sample1Address)
+        ld bc,KHZRATE8
+        adc hl,bc 
+        ld (Sample1Address),hl 
+        jr nc,_noincad
+        ld hl, (Sample1Address+2)
+        inc hl 
+        ld (Sample1Address+2),hl 
+        ; cmp32: Sample1Address vs Sample1Length 
+_noincad
+        ld hl,(Sample1Length+2)
+        ld bc,(Sample1Address+2)
+        sbc hl,bc ; is adr > len?
+        jr nc, _con ; if not, continue
+        jr c,_dacover
+_con:   ; compare lower 16 bits with address + playrate
+        ld hl,(Sample1Address)
+        ld bc,KHZRATE8
+        add hl,bc
+        ; we wont catch carry here because weve already checked the top 16 bits.
+        ld bc,(Sample1Length) ; TODO technically if it overflows it will stop.
+        sbc hl,bc  ; is adr > len?
+        jr nc, _dacover ; if address is still < length, continue
 
+TEST:
+_condac
         ld a,(DACWORK)
         call BANKSWAP
         ld hl,(DACWORK+2)
-        ret 
+        ret
+_dacover:
+        ld hl,0
+        ld (Sample1Address),hl 
+        ld (Sample1Address+2),hl
+        jr _condac
 ;;;;
 
 QUICKSTOP:

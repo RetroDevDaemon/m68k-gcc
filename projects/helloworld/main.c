@@ -28,7 +28,7 @@ int main()
         tileindex = VDPLoadTiles(ASCIIBASETILE, (u32*)&font_0, 96);
 
         //Print
-        print(BG_A, 5, 5, hw);
+        vdp_print(VRAM_BG_A, 5, 5, hw);
 	
         u8 sz_char, sz_int;
         u8 sz_long, sz_longlong;
@@ -51,28 +51,28 @@ int main()
         char o[3] = { 0,0,0 };
         
         byToHex(sz_char, &o);
-        print(BG_A, 5, 6, sz_c_t);
-        print(BG_A, 5, 7, &o);
+        vdp_print(VRAM_BG_A, 5, 6, sz_c_t);
+        vdp_print(VRAM_BG_A, 5, 7, &o);
 
         byToHex(sz_short, &o);
-        print(BG_A, 5, 8, sz_s_t);
-        print(BG_A, 5, 9, &o);
+        vdp_print(VRAM_BG_A, 5, 8, sz_s_t);
+        vdp_print(VRAM_BG_A, 5, 9, &o);
 
         byToHex(sz_int, &o);
-        print(BG_A, 5, 10, sz_i_t);
-        print(BG_A, 5, 11, &o);
+        vdp_print(VRAM_BG_A, 5, 10, sz_i_t);
+        vdp_print(VRAM_BG_A, 5, 11, &o);
 
         byToHex(sz_long, &o);
-        print(BG_A, 5, 12, sz_l_t);
-        print(BG_A, 5, 13, &o);
+        vdp_print(VRAM_BG_A, 5, 12, sz_l_t);
+        vdp_print(VRAM_BG_A, 5, 13, &o);
 
         byToHex(sz_longlong, &o);
-        print(BG_A, 5, 14, sz_ll_t);
-        print(BG_A, 5, 15, &o);
+        vdp_print(VRAM_BG_A, 5, 14, sz_ll_t);
+        vdp_print(VRAM_BG_A, 5, 15, &o);
 
         byToHex(sz_ptr, &o);
-        print(BG_A, 5, 16, sz_p_t);
-        print(BG_A, 5, 17, &o);
+        vdp_print(VRAM_BG_A, 5, 16, sz_p_t);
+        vdp_print(VRAM_BG_A, 5, 17, &o);
 
         while(1){}
         return 0;

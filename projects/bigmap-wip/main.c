@@ -113,15 +113,15 @@ void UpdateDebugText()
 	byToHex(zcyclesh, (u8*)&zh);
 	byToHex(zcyclesl, (u8*)&zl);
 	// Every word write to the VDP is ~2 cycles.
-	print(BG_A, 5, 0, (u8*)"CPU Cycles left:");
-	print(BG_A, 5, 1, (u8*)ch);
-	print(BG_A, 7, 1, (u8*)cl);
-	print(BG_A, 5, 2, (u8*)"VDP Cycles left:");
-	print(BG_A, 5, 3, (u8*)vch);
-	print(BG_A, 7, 3, (u8*)vcl);
-	print(BG_A, 5, 4, (u8*)"Z80 Cycles left:");
-	print(BG_A, 5, 5, (u8*)zh);
-	print(BG_A, 7, 5, (u8*)zl);
+	vdp_print(VRAM_BG_A, 5, 0, (u8*)"CPU Cycles left:");
+	vdp_print(VRAM_BG_A, 5, 1, (u8*)ch);
+	vdp_print(VRAM_BG_A, 7, 1, (u8*)cl);
+	vdp_print(VRAM_BG_A, 5, 2, (u8*)"VDP Cycles left:");
+	vdp_print(VRAM_BG_A, 5, 3, (u8*)vch);
+	vdp_print(VRAM_BG_A, 7, 3, (u8*)vcl);
+	vdp_print(VRAM_BG_A, 5, 4, (u8*)"Z80 Cycles left:");
+	vdp_print(VRAM_BG_A, 5, 5, (u8*)zh);
+	vdp_print(VRAM_BG_A, 7, 5, (u8*)zl);
 	
 }
 
@@ -288,12 +288,12 @@ int main()
 			if(debug_text_enabled) 
 			{
 				debug_text_enabled = false;
-				print(BG_A, 5, 0, (u8*)"                ");
-				print(BG_A, 5, 1, (u8*)"         ");
-				print(BG_A, 5, 2, (u8*)"                ");
-				print(BG_A, 5, 3, (u8*)"         ");
-				print(BG_A, 5, 4, (u8*)"                ");
-				print(BG_A, 5, 5, (u8*)"         ");
+				vdp_print(VRAM_BG_A, 5, 0, (u8*)"                ");
+				vdp_print(VRAM_BG_A, 5, 1, (u8*)"         ");
+				vdp_print(VRAM_BG_A, 5, 2, (u8*)"                ");
+				vdp_print(VRAM_BG_A, 5, 3, (u8*)"         ");
+				vdp_print(VRAM_BG_A, 5, 4, (u8*)"                ");
+				vdp_print(VRAM_BG_A, 5, 5, (u8*)"         ");
 				
 			}
 			else 

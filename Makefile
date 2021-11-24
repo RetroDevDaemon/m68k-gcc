@@ -58,8 +58,7 @@ run:
 	$(EMUDIR)/dgen $(ROMFILE) &>/dev/null
 
 vgmplayer:
-	cd lib
-	./makez80.sh
+	lib/makez80.sh
 
 
 # Create build directory
