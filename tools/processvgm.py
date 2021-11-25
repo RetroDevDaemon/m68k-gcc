@@ -7,12 +7,17 @@ from struct import *
 allpcm = []
 allvgm=[]
 lastid = 0
+streamcalls = 0
+freqcalls = 0
 
 class pcmObject:
     def __init__(self, by):
         self.bytes = by
         self.samprate = 0
         self.globalid = 0
+        self.src_id = 0
+        self.src_song = None 
+    
 ####
 
 class vgmfile:
@@ -93,6 +98,8 @@ class vgmfile:
     def split_pcm(self):
         global lastid
         global allpcm
+        global streamcalls 
+        global freqcalls
         i = 0
         pcms = []
         pcmsize = 0
@@ -123,6 +130,7 @@ class vgmfile:
                 print('db no: ', num_db)
                 lastid += 1
                 num_db += 1
+                #thispcm.fixdac() # change manually to .globalid
                 self.pcms.append(thispcm) 
                 #   0x90 ss < ignore
                 #   0x94 ss < ignore
@@ -160,6 +168,37 @@ class vgmfile:
                         #+8, +9 (LE) is size of gd3 tag
                         gdsize = self.bytes[i+8] + (self.bytes[i+9]<<8)
                         i += 9 + gdsize 
+            # if (self.bytes[i] == 0x95):
+            #     if(self.bytes[i+1] == 0) and (self.bytes[i-1] != 0x53) and (self.bytes[i-1] != 0x52):
+            #         #print("stream call found")
+            #         streamcalls += 1
+            #         self.songbytes.append(0x95)
+            #         #self.songbytes.append(0x0)
+            #         #self.songbytes.append(thispcm.globalid)
+            #         tgsrc = self.bytes[i+2] # id low byte 
+            # #        print(hex(self.bytes[i]))
+            # #        print(hex(self.bytes[i+1]))
+            # #        print(hex(self.bytes[i+2]))
+            # #        print(hex(self.bytes[i+3]))
+            # #        print(hex(self.bytes[i+4]))
+            #         ii = 0 
+            #         while ii < len(self.pcms):
+            #             #print(self.pcms[ii].src_id, tgsrc)
+            #             if (int(self.pcms[ii].src_id) == int(tgsrc)):
+            #                 #print("ok")
+            #                 self.songbytes.append(self.pcms[ii].globalid)
+            #                 ii = 99
+            #             ii += 1
+            #         if(ii != 100):
+            #             print("global id not found, fixing stream")
+            #             self.songbytes.append(0x0)
+            #             i += 2
+            #         else:
+            #             i += 5
+            #if (self.bytes[i] == 0x92):
+            #    freqcalls += 1
+            #    if(self.bytes[i+1] == 0) and (self.bytes[i+5] == 0):
+            #        i += 5
             self.songbytes.append(self.bytes[i])
             i += 1
         print('total pcm size: ', pcmsize, '(' + str(int(pcmsize/1024)) + 'kB)', '[' + str(int(pcmsize/len(self.bytes)*100)) + '% total filesize]')
@@ -236,6 +275,8 @@ while i < len(allpcm):
 
 print('total sample size: ', tsize, '(' + str(int(tsize/1024))+'kB)')
 print('(size saved: ', str(int((_otsize-tsize)/1024)) + 'kB)')
+print('and', str(int(3*streamcalls/1024))+'kB in stream call compression')
+print('and', str(int(6*freqcalls/1024))+'kB in stream call compression')
 
 print("writing PCM block to pcmdata.bin... ", end =" ")
 

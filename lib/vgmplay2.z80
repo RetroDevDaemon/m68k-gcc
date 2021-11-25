@@ -249,11 +249,9 @@ _nosampwt:
 FRAMEOVER:
 ;;;;;;;;;;;
 ; * A
+        
+        call ProcessSampleQueue   ; rearrange queued samples
 ; Waits until next vblank signal (done via 68k)
-        ; Before checking 68k vbl, we need to see if DAC are queued.
-        ;LD A,(DacTransferActive) 
-        ;cp 0 
-        call DACBLOCKTRANSFER ; MAD TESTING BRUH
         ld bc,0
 _framewait:
         inc bc 
@@ -263,6 +261,7 @@ _framewait:
         xor a            ; if it is, clear it.
         ld (PlayNext),a 
         ld (FREECYCLES),bc
+        call DACBLOCKTRANSFER  
         JP PLAYLOOP 
 ;;;; 
 
@@ -296,36 +295,11 @@ WRITEPCM:
 bbb: defb $22
 ; Waits 1-16 samples
 QWAIT:
-        ;jp QWAIT
-        ; TOO SHORT TO NOTICE?
-        and $0f 
-        sla a 
-        sla a
-        sla a
-        sla a
-        ld b,a 
-        ld c,0 
-_qwl:   ; idk what to do other than skip 256*n cycles
-        dec bc 
-        ld a,c 
-        or b 
-        jr nz, _qwl
-        JP FRAMEOVER 
+
+        JP PLAYLOOP 
 ccc: defb $33
 QFMWAIT:
-        and $0f 
-        sla a
-        sla a 
-        sla a
-        sla a
-        ld b,a 
-        ld c,0 
-_qfl:   dec bc 
-        ld a,c 
-        or b 
-        jr nz, _qfl
-; TODO: send N samples from this data block
-        jp FRAMEOVER 
+        jp FRAMEOVER
         ;JP QFMWAIT 
 
 ZadrWork: defb 0,0,0,0
@@ -567,6 +541,24 @@ DacWRAM: defb 0, 0
 DACWORK
         defb 0,0,0,0
 
+Idles: defb $a
+
+
+
+DACTRANSFER:
+; CHECKS BOTH SAMPLE1ADDRESS AND SONGSAMPADDRESS EACH LOOP
+; SAMPLE1ADDRESS IS ACTIVE SFX 
+; SONGSAMPADDRESS IS ACTIVE MUSIC-BASED SAMPLE
+; WRITE ONE BYTE FROM EACH, INCREMENT RESPECTIVE POINTER
+; LOOP N KHZ TIMES
+; AT THE END OF EACH FRAME, ROTATE THE SFX AND MUSIC SAMPLE QUEUE TO ACTIVE ADDRESSES,
+;  UP TO 8, IF THEY EXIST. 
+; + WHEN STARTING A MUSIC SAMPLE OR SFX, ADD IT TO QUEUE INSTEAD.
+; + FRAME END: GRAB QUEUED U32 FROM BUS AND ADD TO END OF Q
+; + ONLY 1 SFX STARTABLE PER FRAME
+
+
+
 DACBLOCKTRANSFER:
         ; DEBUG ret 
 ;        ret
@@ -574,9 +566,11 @@ DACBLOCKTRANSFER:
         push hl 
          ld hl,(Sample1Address)
          ld de,(Sample1Address+2)
-         add hl,de 
+         ;add hl,de 
          or h 
          or l 
+         or d  ; 3 cycles faster
+         or e
          jr z,_nosample 
          ; ok, sample found
          jr _playsample
@@ -594,6 +588,7 @@ _playsample:
         ld (DACWORK+2),hl    ; save hl ofc 
         
         ; change zadr to sample location
+_noin2
         ld hl,(Sample1Address)
         ld (ZadrWork),hl 
         ld hl,(Sample1Address+2)
@@ -601,17 +596,32 @@ _playsample:
         call SETZADDRESS
         
         ; hl has address of sample, FIXME 184 samples/frame = ntsc/11khz
-        ld bc,KHZRATE8 ; 8kb sample in 1 second
+        ld bc,(DacFrequency) ;KHZRATE8 ; 8kb sample in 1 second
         ; loop ....
         ; dac on 
         ld a,$2b 
         ld ($4000),a
         ld a,$80
         ld ($4001),a
-_dacwriteloop:
-        
-        ld a,$2a 
+        ld a,$2a
         ld ($4000),a 
+_dacwriteloop:
+;;; ONE SAMPLE AT 8KHZ, NTSC:
+        NOP 
+        nop 
+        nop 
+        nop 
+        nop 
+        push hl 
+        ld hl,$a ; < dont go higher than c!
+_atst
+        NOP 
+        ld a,l 
+        or h 
+        dec hl 
+        jr nz,_atst
+        pop hl 
+;;;
         ld a,(hl)
         ld ($4001),a 
         %GETNEXTSONGBYTEM
@@ -625,33 +635,28 @@ _dacwriteloop:
         xor a
         ld ($4001),a 
         
-        ; add32 
+        ; add32 addr + freq 
         xor a   ; clc
         ld hl,(Sample1Address)
-        ld bc,KHZRATE8
-        adc hl,bc 
+        ld bc,(DacFrequency)
+        add hl,bc 
         ld (Sample1Address),hl 
-        jr nc,_noincad
-        ld hl, (Sample1Address+2)
-        inc hl 
-        ld (Sample1Address+2),hl 
-        ; cmp32: Sample1Address vs Sample1Length 
+        ;jr nc,_noincad
+        ;ld hl, (Sample1Address+2)
+        ;inc hl 
+        ;ld (Sample1Address+2),hl 
 _noincad
-        ld hl,(Sample1Length+2)
-        ld bc,(Sample1Address+2)
-        sbc hl,bc ; is adr > len?
-        jr nc, _con ; if not, continue
-        jr c,_dacover
-_con:   ; compare lower 16 bits with address + playrate
-        ld hl,(Sample1Address)
-        ld bc,KHZRATE8
-        add hl,bc
-        ; we wont catch carry here because weve already checked the top 16 bits.
-        ld bc,(Sample1Length) ; TODO technically if it overflows it will stop.
-        sbc hl,bc  ; is adr > len?
-        jr nc, _dacover ; if address is still < length, continue
-
-TEST:
+; cmp32: Sample1Address vs Sample1Length 
+; if = or < check low
+        ld hl,(Sample1Length)
+        ld bc,(Sample1Address)
+        sbc hl,bc 
+        jr c,_dacover  ; if cur adr > len end
+        ;jr z,_dacover
+;        ld hl,(Sample1Length+2)
+;        ld bc,(Sample1Address+2)
+;        sbc hl,bc 
+;        jr c,_dacover ; if cur adr is > end
 _condac
         ld a,(DACWORK)
         call BANKSWAP
@@ -661,6 +666,9 @@ _dacover:
         ld hl,0
         ld (Sample1Address),hl 
         ld (Sample1Address+2),hl
+        ld (Sample1Length),hl 
+        ld (Sample1Length+2),hl
+        
         jr _condac
 ;;;;
 
@@ -678,31 +686,34 @@ STOPDAC:
 ;;;
 
 StreamID: defb 0
+
+;; Ignore DACSETUP because we dont care for meagdrive.
 ; 90 0 2 0 2a 
 ; TODO SUPPORT MORE THAN ONE DAC STREAM :)
-DACSETUP:
-        ;INC HL  ; STREAM ID 
+DACSETUP: 
+        ;INC HL  ; set STREAM ID 
         %GETNEXTSONGBYTEM 
-     
+        ; CHIP
         %GETNEXTSONGBYTEM 
+        ; PORT 
         %GETNEXTSONGBYTEM 
-        ; write this byte 
+        ; DATA BYTE 
         %GETNEXTSONGBYTEM 
-        ; to this reg
         
         jp PLAYLOOP 
 
+;; Ignore SETDACSTREAM because we control our own streams.
 SETDACSTREAM:        
 ; 0X91 <STREAM> <DATABANK ID> <STEP SIZE> <STEP BASE>
 ;         0           0            1           0 
-; Preserves BC 
-       push bc 
-        %GETNEXTSONGBYTEM 
-        %GETNEXTSONGBYTEM 
-        %GETNEXTSONGBYTEM
-        %GETNEXTSONGBYTEM 
-       pop bc 
 
+       ; STREAM ID AND DATABANK
+        %GETNEXTSONGBYTEM
+        %GETNEXTSONGBYTEM
+        ;STEP AND STEP BASE
+        %GETNEXTSONGBYTEM
+        %GETNEXTSONGBYTEM
+       ;pop bc 
         jp PLAYLOOP  
 
 _invfreq
@@ -712,28 +723,81 @@ INVALIDFREQ: JP INVALIDFREQ
 DacTransferActive: 
         defb 0
 DacFrequency:
-        defb 0, 0
+        defw 138
 RealFrequency: 
         defb 0,0,0,0
 
 ; 
 FreqTable:
-        DEFW 134,184,267,368,533
+        ;DEFW 134,184,267,368,533
+        DEFW 533,368,267,184,134
 PALFreqTable:
-        DEFW 160,221,320,441,640
+        ;DEFW 160,221,320,441,640
+        DEFW 640,441,320,221,160
 
 ; $92
+;SETSTREAMFREQUENCY
 SETDACFREQ: ; 7D00 == 32000
 ; 7D00 = 32000 = 533 N 640P ; 
 ; 5622 = 22050 = 368 N 441P ; 
 ; 3E80 = 16000 = 267 N 320P ; 
 ; 2b11 = 11025 = 184 N 221P
 ; 1f40 = 8000 =  134 N 160P
+        
+        ; stream :
         %GETNEXTSONGBYTEM
+        ; byte 0
         %GETNEXTSONGBYTEM
-        %GETNEXTSONGBYTEM 
-        %GETNEXTSONGBYTEM 
-        %GETNEXTSONGBYTEM 
+        ; byte 1
+        %GETNEXTSONGBYTEM
+        ld a,(hl)
+         push hl 
+         ld hl,FreqTable
+         push bc 
+         ld bc,10 
+         push af 
+         ld a,(PALFlag)
+         cp 1
+         jr nz,_notpal
+         add hl,bc 
+_notpal:
+        pop af 
+        ld bc,0
+        cp $7d 
+        jr z,_ffr
+        cp $56 
+        jr z,_bb 
+        cp $3e 
+        jr z,_cc 
+        cp $2b 
+        jr z,_dd 
+        cp $1f 
+        jr z,_ee 
+        ; else:
+        jp INVALIDFREQ
+_bb
+        ld bc,2
+        jr _ffr
+_cc 
+        ld bc,4
+        jr _ffr
+_dd 
+        ld bc,6
+        jr _ffr
+_ee 
+        ld bc,8
+        jr _ffr
+_ffr:
+        add hl,bc ; hl = freqtable + palflag*10 + freq# offset
+        ld c,(hl)
+        inc hl 
+        ld b,(hl)
+        ld bc,(DacFrequency)
+    pop bc 
+    pop hl 
+    ; both 0
+    %GETNEXTSONGBYTEM    
+    %GETNEXTSONGBYTEM
     jp PLAYLOOP 
 
 
@@ -761,7 +825,7 @@ LoopDac: defb 0
 DACFASTCALL:
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ; This should start the DAC playback
-; 95 00 ID 00
+; 95 00 IDID 00
 ; for data block info:
 ; data type 1
 ; datasize 4
@@ -770,26 +834,24 @@ DACFASTCALL:
 ; datacounter 4 (bytes left this loop)
 ; blockactive 1 (gogogo)
 ; 0X95
-        %GETNEXTSONGBYTEM 
-        %GETNEXTSONGBYTEM
-        %GETNEXTSONGBYTEM 
+; NOTE: Optimized using processvgm.py, only has 1 byte argument
+        ;%GETNEXTSONGBYTEM 
+        ;%GETNEXTSONGBYTEM
+        ;%GETNEXTSONGBYTEM 
         %GETNEXTSONGBYTEM
         jp PLAYLOOP 
 
 
 ;; 
 
-; Everything below is legacy to handle VGM files with embedded DATs.
-
-
 ;;
 
 ; Data Block struct:
 DataType: defb $ff
 DataSize: defb 0,0,0,0
-DataLoc: defb 0,0
-DataBank: defb 0
-DataCounter: defb 0,0,0,0 
+DataLoc: defb 0,0               ; hl 
+DataBank: defb 0                ; current rombank
+DataCounter: defb 0,0,0,0       ; equals DataSize when intialized
 BlockActive: defb 0
 _buffer: defb 0,0,0          ; 16 bytes 
 ;Type (ff means empty) 1
@@ -834,6 +896,9 @@ Block15: defb $ff,0,0,0,0,0,0,0
         defb $0,0,0,0,0,0,0,0
 
 DBWORK: defb 0,0
+
+ProcessSampleQueue:
+        ret 
 
 DATABLOCK:
 ;;;;;;;;;;;;

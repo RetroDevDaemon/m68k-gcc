@@ -476,7 +476,7 @@ BANKSWAP:
 _bswp2: 
         ld a,(RomBank)                  ; +13
         and c                           ; +4
-        cp 0                            ; +7
+        ;cp 0                            ; +7
         jr z,_bzero                     ; +12/+7
         jr _bone                        ; +12
 _bzero: 
@@ -490,7 +490,6 @@ _bwrt:
         ld ($6001),a                    ; +13
         sla c           ; = 0b00000010  ; +8
         jr nc,_bswp2    ; loop until bit goes into carry; +12/+7
-
         ;call ZWAIT 
         xor a                   ; +4
         ld ($6001),a       ; 9 bit = 0 ( works for < 8MB); +13

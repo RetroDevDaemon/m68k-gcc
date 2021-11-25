@@ -75,6 +75,9 @@ void __attribute__((optimize("O3"))) DO_DEBUG(void)
 
 u16 frameCounter = 0;
 
+u8 sf = 9;
+extern u32 SFX[64];
+
 int main()
 {       
 	u32 c;
@@ -84,8 +87,8 @@ int main()
 #define ASCIIBASETILE 32
 	tileindex = VDPLoadTiles(ASCIIBASETILE, (u32*)&font_0, 96);
 
-	LoadSong((u32)&vgmdata[256]);
-	//LoadSong(&nullsong);
+	//LoadSong((u32)&vgmdata[256]);
+	LoadSong(&nullsong);
 	EnableVBlankIRQ();
 	
     u32* vp = (u32*)&pcmdata[0];
@@ -93,6 +96,7 @@ int main()
         SFX[i] = (u32)&pcmdata[0] + (u32)*vp++;
     
 	u8 sfxno = 0;
+	sf = 0;
 	//
 	debugVars.debug_text_enabled = true;
 
@@ -119,7 +123,12 @@ int main()
         if(Counters.tenFrameCounter > 9) Counters.tenFrameCounter = 0;
         Counters.thirtyFrameCounter++;
         if(Counters.thirtyFrameCounter > 29) Counters.thirtyFrameCounter = 0;
-		
+		frameCounter++;
+		if (frameCounter == 120) {
+			PlaySFX(SFX[0] + 256, SFX[1] - 256);
+			//frameCounter = 0;
+		}
+	
 	}
 	return 0;
 }
@@ -132,11 +141,7 @@ void GAME_DRAW()
 
 	PlaySong();
 	// Play cymbal crash every second
-	frameCounter++;
-	if (frameCounter == 60) {
-		PlaySFX(SFX[0], SFX[0+1]);
-		frameCounter = 0;
-	}
+
 	UpdateBGScroll();
 	
 	vdp_print(VRAM_BG_A, 8, 8, "Hello DAC!\x00");
