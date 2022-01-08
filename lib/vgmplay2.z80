@@ -250,7 +250,7 @@ FRAMEOVER:
 ;;;;;;;;;;;
 ; * A
         
-        call ProcessSampleQueue   ; rearrange queued samples
+        ;call ProcessSampleQueue   ; rearrange queued samples
 ; Waits until next vblank signal (done via 68k)
         ld bc,0
 _framewait:
@@ -261,7 +261,7 @@ _framewait:
         xor a            ; if it is, clear it.
         ld (PlayNext),a 
         ld (FREECYCLES),bc
-        call DACBLOCKTRANSFER  
+        ;call DACBLOCKTRANSFER  
         JP PLAYLOOP 
 ;;;; 
 

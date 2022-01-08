@@ -12,9 +12,9 @@
 
 #include "font.h"
 #include "palette.h"
-
-#include "pcmdata.h"
-#include "vgmdata.h"
+#include "bmaster.h"
+//#include "pcmdata.h"
+//#include "vgmdata.h"
 
 static u16 tileindex;
 static u16 joyState1;
@@ -87,16 +87,16 @@ int main()
 #define ASCIIBASETILE 32
 	tileindex = VDPLoadTiles(ASCIIBASETILE, (u32*)&font_0, 96);
 
-	//LoadSong((u32)&vgmdata[256]);
-	LoadSong(&nullsong);
+	LoadSong((u32)&song[128]);
+	//LoadSong(&nullsong);
 	EnableVBlankIRQ();
 	
-    u32* vp = (u32*)&pcmdata[0];
-    for(int i = 0; i < 64; i++)
-        SFX[i] = (u32)&pcmdata[0] + (u32)*vp++;
+    //u32* vp = (u32*)&pcmdata[0];
+    //for(int i = 0; i < 64; i++)
+    //    SFX[i] = (u32)&pcmdata[0] + (u32)*vp++;
     
-	u8 sfxno = 0;
-	sf = 0;
+	//u8 sfxno = 0;
+	//sf = 0;
 	//
 	debugVars.debug_text_enabled = true;
 
