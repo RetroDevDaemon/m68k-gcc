@@ -34,7 +34,7 @@ typedef unsigned char u8;
 char buf[64];
 int packet_length;
 int ed_port;
-char ptstr[] = "/dev/ttyACM0";
+char ptstr[] = "/dev/tty.usbserial-1330";
 FILE* romfile;
 char* filebuffer;
 int filelen;

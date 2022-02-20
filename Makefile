@@ -3,7 +3,7 @@
 #==============================
 UNAME_:=$(shell uname -s)
 ifeq ($(UNAME_),Darwin)
-  TCDIR:=~/Projects/Retro68-chain/bin/m68k-apple-macos-
+  TCDIR:=/usr/local/m68k/bin/m68k-elf-
 else 
   TCDIR:=~/Downloads/m68k-toolchain/bin/m68k-elf-
 endif
@@ -31,7 +31,7 @@ default:
 	@$(exit)
 endif
 SRCDIR:=${PROJECT}
-EMUDIR:=~/Downloads/dgen-sdl-1.33/
+EMUDIR:=
 
 LINKSCR=rom.ld
 ROMFILE=out.md
