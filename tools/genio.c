@@ -5,6 +5,7 @@
 #include <stdlib.h> // malloc
 #include <termios.h>
 #include <errno.h>
+#include <sys/ioctl.h>
 
 int get_error(int* fd);
 int main(int num_args, char** kw_args);
@@ -14,7 +15,9 @@ void setup_port(int port);
 struct termios tty;
 int out_port;
 int in_port;
-char outportstr[] = "/dev/cu.usbserial-1330\000";
+//char outportstr[] = "/dev/tty.usbserial-1330";
+char outportstr[] = "/dev/cu.usbserial-1340";
+
 //char inportstr[] =  "/dev/tty.usbserial-1330\000";
 
 int get_error_outport(int* fd)
@@ -22,7 +25,7 @@ int get_error_outport(int* fd)
   while(*fd == -1)
     {
       close(*fd);
-      *fd = open((const char*)&outportstr, O_WRONLY);
+      *fd = open((const char*)&outportstr, O_RDONLY);
       if(*fd == -1)
       {
         close(*fd);
@@ -50,14 +53,14 @@ void setup_port(int port)
   // echo set if needed here
   tty.c_lflag &= ~(ECHO | ECHOE | ECHONL);
   tty.c_lflag &= ~ISIG; // disable signal interrupt characters
-  //tty.c_iflag &= ~(IXON | IXOFF | IXANY); // software flow ctl off
+  tty.c_iflag &= ~(IXON | IXOFF | IXANY); // software flow ctl off
   tty.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL);
   tty.c_oflag &= ~OPOST; // Prevent special interpretation of output bytes (e.g. newline chars)
   tty.c_oflag &= ~ONLCR;
-  //tty.c_cc[VTIME] = 3; // 300ms timeout (taken from source)
-  //tty.c_cc[VMIN] = 0;
-    cfsetispeed(&tty, B4800);
-    cfsetospeed(&tty, B4800);
+  tty.c_cc[VTIME] = 10; // 300ms timeout (taken from source)
+  tty.c_cc[VMIN] = 0;
+    cfsetispeed(&tty, B300);
+    cfsetospeed(&tty, B300);
 
   tcsetattr(port, TCSANOW, &tty);
 }
@@ -67,8 +70,6 @@ int main(int num_args, char** kw_args)
   /* Open Write Port */
   printf("trying to open() RDWR on port: %s\n", &outportstr);
   out_port = open((const char*)&outportstr, O_RDWR);
-  close(out_port);
-  out_port = open((const char*)&outportstr, O_RDWR);
   if(get_error_outport(&out_port)) {
     close(out_port);
     printf("error opening\n");
@@ -76,14 +77,16 @@ int main(int num_args, char** kw_args)
   }
   setup_port(out_port); 
   
-
-    while(1)
-    {
-        char c = ' ';
-        read(out_port, &c, 1);
-        if(c != ' ')
-            printf("%c\n");
-    }
+  for(int i = 0; i < 10; i++)
+  {
+      char buf[256];
+      int available = 0;
+      while(available == 0)
+        ioctl(out_port, FIONREAD, &available);
+      printf("bytes in buffer: %d\n", available);
+      read(out_port, &buf, available);
+      printf("read: %s\n", buf);
+  }
 
   close(out_port);
   printf("OK. closing.\n");

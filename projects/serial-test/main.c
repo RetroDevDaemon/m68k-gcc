@@ -28,9 +28,13 @@ const char egclr[]="    \000";
 int main()
 {       
         u16 c;
-        
         //*((u8*)IoSCtrl2) = 0b00110000;
-        asm("move.b #0b00110000, (0xa10019)");
+        //asm("move.b #0b01111111, (0xa1000b)"); // all output
+        vu8* cl = (vu8*)IoCtrl2;
+        *cl = 0b01111111;
+        //asm("move.b #0b11110000, (0xa10019)"); //300bps
+        cl = (vu8*)IoSCtrl2;
+        *cl = 0b11110000;
 	// Load palette
         LoadPalette(0, (u16*)&palette);
         
@@ -41,17 +45,29 @@ int main()
         //Print
         vdp_print(VRAM_BG_A, 5, 5, hw);
 
+        
+        int totalSent = 0;
+        
+
         while(1)
         {
+                char frameCtr = 0;
+                while(frameCtr < 60){
+                        WaitVBlank();
+                        frameCtr++;
+                }
+                totalSent++;
                 // forever wait for sctl to be ready and send data byte "!" through Tx
-                vdp_print(VRAM_BG_A,5,8, egclr);
                 asm("move.l #0xa10019,%%a0\n\t"\
                 "move.l #0x00000021,%%d0\n\t"\
                 "Wait%=:\n\t"\
                 "btst #0, (%%a0)\n\t"\
                 "bne.s Wait%=\n\t"\
-                "move.b %%d0, -4(%%a0)":::"d0","a0"); 
+                "move.b %%d0, (0xa10015)":::"d0","a0"); 
                 vdp_print(VRAM_BG_A, 5, 8, eg);
+                char bf[3] = { 0, 0, 0};
+                byToHex(totalSent & 0xff, &bf);
+                vdp_print(VRAM_BG_A, 5, 9, bf);
         }
         return 0;
 }
