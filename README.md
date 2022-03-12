@@ -28,23 +28,23 @@ I had to change line 24 of Rez/CMakeLists.txt to this and clean/redo the build:<
 
 <br>
 Using a standard GCC build from source, you should be able to compile targeting m68k using the following:<br>
-```
-./configure  --disable-mcs51-port   \
-  --disable-r2k-port     \
-  --disable-r2ka-port    \
-  --disable-r3ka-port    \
-  --disable-tlcs90-port  \
-  --disable-ds390-port   \
-  --disable-ds400-port   \
-  --disable-pic14-port   \
-  --disable-pic16-port   \
-  --disable-hc08-port    \
-  --disable-s08-port     \
-  --disable-pdk13-port   \
-  --disable-pdk14-port   \
-  --disable-pdk15-port   \
-  --enable-pdk16-port
-```
+
+`./configure  --disable-mcs51-port   \`<br>
+`  --disable-r2k-port     \`<br>
+`  --disable-r2ka-port    \`<br>
+`  --disable-r3ka-port    \`<br>
+`  --disable-tlcs90-port  \`<br>
+`  --disable-ds390-port   \`<br>
+`  --disable-ds400-port   \`<br>
+`  --disable-pic14-port   \`<br>
+`  --disable-pic16-port   \`<br>
+`  --disable-hc08-port    \`<br>
+`  --disable-s08-port     \`<br>
+`  --disable-pdk13-port   \`<br>
+`  --disable-pdk14-port   \`<br>
+`  --disable-pdk15-port   \`<br>
+`  --enable-pdk16-port`
+  
 Good luck and feel free to open issues with questions.<br>
 
 ## If you a lazybones:<br>
