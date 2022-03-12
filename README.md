@@ -27,11 +27,30 @@ I had to change line 24 of Rez/CMakeLists.txt to this and clean/redo the build:<
 `set(CMAKE_PROGRAM_PATH ${CMAKE_PROGRAM_PATH} "/usr/local/bison/bin")`
 
 <br>
+Using a standard GCC build from source, you should be able to compile targeting m68k using the following:<br>
+```
+./configure  --disable-mcs51-port   \
+  --disable-r2k-port     \
+  --disable-r2ka-port    \
+  --disable-r3ka-port    \
+  --disable-tlcs90-port  \
+  --disable-ds390-port   \
+  --disable-ds400-port   \
+  --disable-pic14-port   \
+  --disable-pic16-port   \
+  --disable-hc08-port    \
+  --disable-s08-port     \
+  --disable-pdk13-port   \
+  --disable-pdk14-port   \
+  --disable-pdk15-port   \
+  --enable-pdk16-port
+```
+Good luck and feel free to open issues with questions.<br>
 
 ## If you a lazybones:<br>
-
+These are slightly out-of-date. I currently use GCC 9.3 built on both Raspberry Pi and Apple Silicon.<br>
 <br>
-`-nostdlib` is a required CFLAG or building will fail <br>
+`-nostdlib` for these builds is a required CFLAG or building will fail <br>
 
 ### 6.3.0 (GCC) binary for RPi-arm71:<br>
 
