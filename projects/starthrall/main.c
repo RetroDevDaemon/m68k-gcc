@@ -47,9 +47,9 @@ void vdp_print(u32 vram_plane_base, u8 x, u8 y, char* str);
 
 // Assets
 #include "gfx.h"
-//#include "music.h"
-#include "pcmdata.h"
-#include "vgmdata.h"
+#include "music.h"
+//#include "pcmdata.h"
+//#include "vgmdata.h"
 // Game stuff
 #include "starthrall.h"
 #include "characterdata.h"
@@ -57,14 +57,6 @@ void vdp_print(u32 vram_plane_base, u8 x, u8 y, char* str);
 #include "intro.h"
 #include "worldmap.h"
 
-//extern struct _counters Counters;
-static struct _counters \
-{ 
-    u8 sixtyFrameCounter;
-    u8 thirtyFrameCounter;
-    u8 twentyFrameCounter;
-    u8 tenFrameCounter;
-} Counters;
 void DO_DEBUG(void);
 static struct _debugvars \
 { 
@@ -132,23 +124,32 @@ u16 blankpalette[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 void InitGameStuff(void)
 {
     u8 i;
+
     stdcpy((u32*)&party[0], (u32*)&pex, sizeof(struct Player));
     stdcpy((u32*)&party[1], (u32*)&pex2, sizeof(struct Player));
     stdcpy((u32*)&party[2], (u32*)&pex3, sizeof(struct Player));
     stdcpy((u32*)&party[3], (u32*)&pex4, sizeof(struct Player));
+    
     u32* d = (u32*)&tempPalettes[0];
     for(i = 0; i < 32; i++)
     {
         *d++ = 0;
     }
+    
     pSpeed = 3;
+    
     NUM_SPRITES = 0;
+    
     timer_3 = 0;
+    
     player.x = 7;
     player.y = 7;
+    
     selectorpos.x = 100;
     selectorpos.y = 100;
     //ScriptSys.pointer = 0;
+
+    /*
     u32* sp = (u32*)&vgmdata[0];
     u32* vp = (u32*)&pcmdata[0];
     for(i = 0; i < 64; i++)
@@ -156,7 +157,7 @@ void InitGameStuff(void)
         OST[i] = (u32)&vgmdata[0] + (u32)*sp++;
         SFX[i] = (u32)&pcmdata[0] + (u32)*vp++;
     }
-    
+    */
 }
 
 void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 pal)
@@ -216,6 +217,7 @@ int main(void)
     
     spriteRamBase = &SPRITES[0];
     LinkAllSpriteData();
+
     curPaletteSet[0] = (u16*)&palette;
     curPaletteSet[1] = (u16*)&blankpalette;
     curPaletteSet[2] = (u16*)&blankpalette;
@@ -292,9 +294,6 @@ int main(void)
         }
         else {
             DoQ();
-            
-            // MAIN GAME LOOP 
-            PlaySong();
             
             ProcessInput();
             
@@ -402,6 +401,8 @@ void GAME_DRAW(void)
         i = 0u;
     }        
         
+    PlaySong();
+
     VBL_DONE = true;
     // end draw
 }

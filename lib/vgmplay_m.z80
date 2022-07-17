@@ -73,11 +73,11 @@ _clrstack:
         LD (DE),A
         inc de 
         djnz _clrstack
-_clr2
+_clr2:
         ld (de),a 
         inc de 
         djnz _clr2
-_clr3 
+_clr3: 
         ld (de),a 
         inc de 
         djnz _clr3
@@ -129,7 +129,7 @@ CMDJUMPTABLE: ; starts at 50h
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-        org $100
+        DS $100-$ ; org $100
 
 ; Vars
 PlayNext:
@@ -347,7 +347,7 @@ _endsong:
         LD (SongPlaying),A
         call CLEARPSG
         ; TODO in case the VGM doesn't clear the FM stuff, do that here
-_overloop
+_overloop:
         JP _overloop
 
 
@@ -531,14 +531,14 @@ ZWAIT:
 ; * A C
         LD A,($4000) 
         ADD A, A 
-        JR C,-4
+        JR C,$-4
         RET 
 ;;;;
 
 .macro ZWAITM
         LD A,($4000) 
         ADD A, A 
-        JR C,-4
+        JR C,$-4
 .endmacro 
 
 .macro GETNEXTSONGBYTEM
@@ -612,7 +612,7 @@ _clearlp:
 ;; DAC STUFF:
 
 DacWRAM: defb 0, 0
-DACWORK
+DACWORK:
         defb 0,0,0,0
 ; Block struct:
 ;Type (ff means empty) 1
@@ -648,7 +648,7 @@ DACBLOCKTRANSFER:
 ;        djnz _nextdb
 ;        cp $0 
 ;        jp z,_daclpend     ; if all are 0, return
-_found
+_found:
         ; TESTING 
         ld a,(BlockActive) 
         cp 0 
@@ -870,7 +870,7 @@ SETDACSTREAM:
 
         jp PLAYLOOP  
 
-_invfreq
+_invfreq:
         defb $88
 INVALIDFREQ: JP INVALIDFREQ 
 
@@ -912,9 +912,9 @@ SETDACFREQ: ; 7D00 == 32000
         jr nz,__2 
         ld hl,PALFreqTable
         jr __1
-__2
+__2:
         ld hl,FreqTable
-__1
+__1:
         ld a,(RealFrequency+1)               ; high byte of real freq is all we care about        
         cp $1f
         jr z,_set8
@@ -949,7 +949,7 @@ _set32:
         ld de,8 
         adc hl,de 
 
-_endfset
+_endfset:
         ld a,(hl) 
         ld (DacFrequency),a  
         inc hl 
@@ -1066,14 +1066,14 @@ DACFASTCALL:
         or d 
         cp 0 
         jr nz,_active
-_inactive 
+_inactive: 
         inc bc 
         xor a 
         jr _setblockon
-_active
+_active:
         inc bc 
         ld a,1
-_setblockon
+_setblockon:
         ld (bc),a 
         pop de 
         ;INC HL          ; FLAGS 
@@ -1248,7 +1248,7 @@ _compressed: ; TODO do extra stuff for compressed data
 _uncompressed:
         jp PLAYLOOP     
 
-_emptyblock
+_emptyblock:
         LD A,$FF 
         PUSH HL 
         LD HL,(DBWORK) 

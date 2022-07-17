@@ -65,11 +65,11 @@ _clrstack:
         LD (DE),A
         inc de 
         djnz _clrstack
-_clr2
+_clr2:
         ld (de),a 
         inc de 
         djnz _clr2
-_clr3 
+_clr3: 
         ld (de),a 
         inc de 
         djnz _clr3
@@ -121,7 +121,7 @@ CMDJUMPTABLE: ; starts at 50h
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-        org $100
+        DS $100-$ ; org $100
 
 ; Vars
 PlayNext:
@@ -310,7 +310,7 @@ _endsong:
         LD (SongPlaying),A
         call CLEARPSG
         ; TODO in case the VGM doesn't clear the FM stuff, do that here
-_overloop
+_overloop:
         JP _overloop
 
 
@@ -429,7 +429,7 @@ GETROMADDRESS:
         RET 
 
 DacWRAM: defb 0, 0
-DACWORK
+DACWORK:
         defb 0,0,0,0
 ; Block struct:
 ;Type (ff means empty) 1
@@ -560,7 +560,7 @@ SETDACSTREAM:
 
         jp PLAYLOOP  
 
-_invfreq
+_invfreq:
         defb $88
 INVALIDFREQ: JP INVALIDFREQ 
 
@@ -746,7 +746,7 @@ _uncompressed:
 
         jp PLAYLOOP     
 
-_emptyblock
+_emptyblock:
         LD A,$FF 
         PUSH HL 
         LD HL,(DBWORK) 
@@ -823,14 +823,14 @@ ZWAIT:
 ; * A C
         LD A,($4000) 
         ADD A, A 
-        JR C,-4
+        JR C,$-4
         RET 
 ;;;;
 
 .macro ZWAITM
         LD A,($4000) 
         ADD A, A 
-        JR C,-4
+        JR C,$-4
 .endmacro 
 
 .macro GETNEXTSONGBYTEM
@@ -882,7 +882,7 @@ SAMPLEWAIT:
         %GETNEXTSONGBYTEM
         LD A,(HL)
         LD B,A          ; BC = SAMPLE WAIT 16BIT
-_sw2 
+_sw2: 
         ;call DACBLOCKTRANSFER
 _sampwt:        
         LD A,(PlayNext)  ; check the 'play next frame' var
@@ -907,9 +907,9 @@ _sampwt:
          ;pop hl ;  bc = 735-dacfreq
          ld bc,735     ;  267
          jr __3
-_palsize 
+_palsize: 
          ld bc,882      ; PAL
-__3 
+__3: 
          sbc hl,bc      ; samplewait - 735 -> HL
          push hl 
          pop bc         ; store it back in bc 

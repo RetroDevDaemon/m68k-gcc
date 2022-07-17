@@ -49,7 +49,8 @@ extern u32 OST[64];
 void InitTitleScreen(void)
 {
     // start title music
-    LoadSong((const u8*)OST[6]);
+    // CURRENTLY SAMPLE LESS VGM PLAYER IS ENABLED. NEEDS VGM FILE WITH HEADER.
+    LoadSong(freefall);
     //LoadSong(&nullsong);
     // scroll map
     
@@ -57,12 +58,16 @@ void InitTitleScreen(void)
     title_intro_done = false;
     bgb_hscroll_pos = 180;
     UpdateBGScroll();
+    // test!
     LoadDungeonMap((const u8*)&maptest2);
+    
     CUR_SCREEN_MODE = TITLE;
     curPaletteSet[3] = (u16*)&titlePalette;
     LoadPalette(3, curPaletteSet[3]);    
+    
     // Make map
     tileindex = VDPLoadTiles(tileindex, (u32*)&title_test_0, 605);
+    
     // title_bg_tile_index = 129
     DrawBGMap(129, (u16*)&title_test_map, 40, 28, (u16*)VRAM_BG_B, PAL3);
 
@@ -92,6 +97,7 @@ void TITLE_UPDATE(void)
             go_intro=true;
         }
     }
+            
 }
 
 
