@@ -260,11 +260,31 @@ typedef s16 fix16;
     :"m"(pal),"g"(CRAM_ADDR)\
     :"a0","d0");
 
+// VDP Register 01h descriptors 
+#define VRAM_16K bit(7)
+#define VRAM_8K 0
+#define DISPLAY_ON bit(6)
+#define DISPLAY_OFF 0
+#define VBL_IRQ_ON bit(5)
+#define VBL_IRQ_OFF 0 
+#define DMA_ON bit(4)
+#define DMA_OFF 0 
+#define PAL_30H bit(3)
+#define NTSC_28H 0 
+#define MODE5 bit(2)
+#define MODE4 0 
+
 #define WriteVDPRegister(v) asm("move.w %0,(0xC00004).l"::"g"(v))
 #define VDPStatus_u16(var) asm("move.w (0xc00004).l,%0":"=g"(var)::)
 #define EnableIRQLevel(n) asm("move.w %0,sr"::"g"((n<<8)|0x20))
-#define EnableVBlankIRQ() WriteVDPRegister(WRITE|REG(1)|0x64);
+#define EnableVBlankIRQ() WriteVDPRegister(WRITE|REG(1)|VRAM_8K|DISPLAY_ON|VBL_IRQ_ON|DMA_OFF|NTSC_28H|MODE5) //0x64);
+#define DisableVBlankIRQ() WriteVDPRegister(WRITE|REG(1)|VRAM_8K|DISPLAY_ON|VBL_IRQ_OFF|DMA_OFF|NTSC_28H|MODE5)
 
+/* 2 bytes per tile, we go in word */       
+#define CLEAR_BG(vram_base_addr) { SetVRAMWriteAddress(vram_base_addr); \ 
+    for(u16 y = 0; y < 32; y++) \
+        for(u16 x = 0; x < 64; x++) \
+            WRITE_DATAREG16(0); }
 
 #define WaitVBlank() asm("VB%=: move.w (0xc00004).l,%%d0\n\t" \
         "btst #3,%%d0\n\t" \
@@ -653,7 +673,7 @@ void PlaySong(void)
 	asm("move.w #0,(z80_bus_request).l");
 }
 
-u32 SFX[64];
+//extern u32 SFX[64];
 
 void PlaySFX(u32 adr, u32 sz)
 {
@@ -684,6 +704,10 @@ void PlaySFX(u32 adr, u32 sz)
 
 const char nullsong = 0x97;
 
+#define z80_base_ram 0xa00000 
+#define z80_bus_request 0xa11100
+#define z80_reset 0xa11200     
+
 void LoadSong(const u8* son)
 {
     if ((u32)son == (u32)0)
@@ -693,9 +717,7 @@ void LoadSong(const u8* son)
 	u32 stadr = (u32)son;
 	u8 bank = (u8)((stadr >> 15));
 	//stadr += 0x80;
-#define z80_base_ram 0xa00000 
-#define z80_bus_request 0xa11100
-#define z80_reset 0xa11200     
+
 	asm("\n\t\
 	nop \n\t\
 	move.w	#0x100,(z80_bus_request).l\n\t\

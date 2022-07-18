@@ -32,14 +32,14 @@ default:
 endif
 SRCDIR:=${PROJECT}
 EMUDIR:=
-
+LIBDIR:=$(shell pwd)
 LINKSCR=rom.ld
 ROMFILE=out.md
 
 # Link order should be sega.s, main.s, everything else
 main: DIRs
 	${CC} ${CFLAGS} -v \
-		-Ilib \
+		-I${LIBDIR}/lib \
 		-I${PROJECT}/src \
 		-I${PROJECT}/res\
 		-I${PROJECT}/res/maps\
@@ -47,9 +47,9 @@ main: DIRs
 		-o ${BUILDDIR}/main.s
 	${AS} ${ASFLAGS} -g -als=${OUTDIR}/listing.lst \
 		-o ${BUILDDIR}/main.o \
-		lib/sega.s \
+		${LIBDIR}/lib/sega.s \
 		${BUILDDIR}/main.s \
-		lib/68kmath.s  
+		${LIBDIR}/lib/68kmath.s  
 	${LD} -s -Tlib/${LINKSCR} -o ${OUTDIR}/_main.rom ${BUILDDIR}/main.o -Map=${BUILDDIR}/rom.map
 	${PYTHON} tools/padrom.py ${OUTDIR}/_main.rom ./$(ROMFILE)
 	rm -rf ${OUTDIR}/_main.rom 

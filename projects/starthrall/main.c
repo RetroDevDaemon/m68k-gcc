@@ -10,11 +10,22 @@
 // My own genesis stuff 
 #include "bentgen.h"
 
+void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 pal);
+void PROCESS_FLASH(void);
+int main(void);
+void (*ProcessInput)(void);
+int GetInput(void);
+void vdp_print(u32 vram_plane_base, u8 x, u8 y, char* str);
+void DO_DEBUG(void);
+void UpdateDebugText();
+
+// needed for other files:
 static u32 joyState1;
 static u32 last_joyState1;
 //static u16 joyState2;
 //static u16 last_joyState2;
 static bool VBL_DONE = false;
+
 struct _textsys \
 {
     u16 text_buffer[40*26]; // BUFFER IS SZ OF DISPLAY SCREEN. careful of buffered amount each frame
@@ -26,38 +37,22 @@ struct _textsys \
     u16 print_ptr;          // location within txt_buffer of next print chr
 } ScriptSys;
 
-static struct _counters \
-{ 
-    u8 sixtyFrameCounter;
-    u8 thirtyFrameCounter;
-    u8 twentyFrameCounter;
-    u8 tenFrameCounter;
-} Counters;
-
-u32 OST[64];
-u32 SFX[64];
-
-void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 pal);
-void PROCESS_FLASH(void);
-int main(void);
-void (*ProcessInput)(void);
-int GetInput(void);
-
-void vdp_print(u32 vram_plane_base, u8 x, u8 y, char* str);
 
 // Assets
-#include "gfx.h"
+#include "src/gfx.h"
 #include "music.h"
 //#include "pcmdata.h"
 //#include "vgmdata.h"
 // Game stuff
 #include "starthrall.h"
-#include "characterdata.h"
+#include "src/characterdata.h"
 #include "title.h"
 #include "intro.h"
-#include "worldmap.h"
+#include "src/worldmap.h"
 
-void DO_DEBUG(void);
+
+// DEBUG SHIT
+
 static struct _debugvars \
 { 
     s32 cycles;
@@ -72,6 +67,7 @@ static struct _debugvars \
     u8 zl[3];
     bool debug_text_enabled;
 } debugVars;
+
 void __attribute__((optimize("O3"))) UpdateDebugText()
 {
 	extern u8 zcyclesl;
@@ -87,6 +83,7 @@ void __attribute__((optimize("O3"))) UpdateDebugText()
 	vdp_print(VRAM_BG_A, 7, 5, (char*)debugVars.zl);
 	
 }
+
 void __attribute__((optimize("O3"))) DO_DEBUG(void)
 {
     // Debug Menu 
@@ -95,6 +92,18 @@ void __attribute__((optimize("O3"))) DO_DEBUG(void)
     while(*((u32*)0xc00004) & 0b1000)
         debugVars.vcycles++;
 }
+//
+
+static struct _counters \
+{ 
+    u8 sixtyFrameCounter;
+    u8 thirtyFrameCounter;
+    u8 twentyFrameCounter;
+    u8 tenFrameCounter;
+} Counters;
+
+u32 OST[64];
+u32 SFX[64];
 
 // Global Vars
 u8 fq;
@@ -232,13 +241,17 @@ int main(void)
     // Tile number 32 (start of ascii table) * 32 bytes per tile = 1024 = $400
 #define ASCIIBASETILE 32
     tileindex = VDPLoadTiles(ASCIIBASETILE, (u32*)&font_0, 96);
+    // load selector
 #define SELECTORTILE 128
     tileindex = VDPLoadTiles(128, (u32*)&led_green_0, 1);
+    // load title background bitmap
 #define TITLEBGTILE 129
     InitTitleScreen();
 
     // Enable VBlank IRQ on VDP 
     WriteVDPRegister(WRITE|REG(1)|0x64);
+
+    
 
 #define realFrameDelta 0.0167
 #define FrameDelta5 
@@ -348,6 +361,7 @@ extern u8 TEXT_PALETTE;
 
 bool asdf = false;
 const char hw[] = "Press Start\x00";
+
 // Called during VBlank
 void GAME_DRAW(void)
 {   
@@ -376,27 +390,29 @@ void GAME_DRAW(void)
     #define SPR_COUNT 1
         for(i = 0; i < SPR_COUNT * 2; i++) WRITE_DATAREG32(*spr++);
 
-        if(flashAnimPlaying || unflashAnimPlaying){
-            PROCESS_FLASH();
-            UpdateBGScroll();
-        }
-        else {
-            if (CUR_SCREEN_MODE == TITLE)
-            {
-                if(!asdf){
-                    vdp_print(VRAM_BG_A, 10, 20, (char*)&hw);
-                    asdf = true;
+        
+            if(flashAnimPlaying || unflashAnimPlaying){
+                PROCESS_FLASH();
+                UpdateBGScroll();
+            }
+            //else {
+                if (CUR_SCREEN_MODE == TITLE)
+                {
+                    if(!asdf){
+                        vdp_print(VRAM_BG_A, 10, 20, (char*)&hw);
+                        asdf = true;
+                    }
+                    
                 }
-                
-            }
-            else if (CUR_SCREEN_MODE == INTRO)
-            {
-                INTRO_DRAW();
-            }
-            UpdateBGScroll(); // Sets background position in VRAM
+                else if (CUR_SCREEN_MODE == INTRO)
+                {
+                    INTRO_DRAW();
+                }
+                UpdateBGScroll(); // Sets background position in VRAM
 
-            UpdatePrintBuffer(); // If script is printing, process it
-        }
+                UpdatePrintBuffer(); // If script is printing, process it
+            //}
+        
         
         i = 0u;
     }        

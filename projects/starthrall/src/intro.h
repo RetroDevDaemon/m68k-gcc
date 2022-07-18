@@ -159,6 +159,51 @@ void* intromaps[] = {
     (void*)&introimg6_map, (void*)&introimg7_map, (void*)&introimg8_map, (void*)&introimg9_map
 };
 
+void InitIntro()
+{
+    WaitVBlank();
+    
+    flashAnimPlaying = false;
+    unflashAnimPlaying = false;
+
+    curPaletteSet[3] = (u16*)&intropal;
+    LoadPalette(3, curPaletteSet[3]);
+    
+    CUR_SCREEN_MODE = INTRO;
+    //ProcessInput = NullInputHandler;
+    DisableVBlankIRQ();
+    
+    LoadSong(freefall);
+
+    tileindex = 129;
+    tileindex = VDPLoadTiles(tileindex, (u32*)&introimg0_0, 49);
+    TEXT_PALETTE = 0;
+    
+    
+    introLine = INTROLINE_BASE+2;
+    selectorpos.x = 250;
+    selectorpos.y = INTROSEL_BASEY+10;    
+    introTxtFadeIn = true;
+
+    CLEAR_BG(VRAM_BG_B);
+
+#define INTROIMGWIDTH 14
+
+    for(u16 y = 0; y < 14; y++){
+        SetVRAMWriteAddress(VRAM_BG_A + (64 * 2 * (5 + y) + (2 * 10)));
+        for(u16 x = 0; x < INTROIMGWIDTH; x++)
+            WRITE_DATAREG16((u16)((introimg0_map[(y * INTROIMGWIDTH) + x] + 129) | pal_no(3)));
+    }
+
+    EnableVBlankIRQ();
+
+    AddQueue(&Wait, secs(1));
+    AddQueue(&_introtxtfadein, 1);
+    AddQueue(&DrawIntroTxt, &introtxt);
+    AddQueue(&Wait, secs(2));
+    AddQ(&IntroTxtPart2);
+}
+/*
 void InitIntro(void)
 {
     WaitVBlank();
@@ -187,7 +232,10 @@ void InitIntro(void)
     selectorpos.x = 250;
     selectorpos.y = INTROSEL_BASEY+10;    
     introTxtFadeIn = true;
+    
     WaitVBlank();
+
+    
 #define INTROIMGWIDTH 14
     for(u16 y = 0; y < 14; y++){
         SetVRAMWriteAddress(VRAM_BG_A + (64 * 2 * (5 + y) + (2 * 10)));
@@ -199,8 +247,9 @@ void InitIntro(void)
     AddQueue(&DrawIntroTxt, &introtxt);
     AddQueue(&Wait, secs(2));
     AddQ(&IntroTxtPart2);
-
+    
 }
+*/
 
 void AdvanceIntroFrom(u8 i)
 {
@@ -315,6 +364,7 @@ void JOY_ContinueIntroText()
 
 void INTRO_DRAW()
 {
+    
     if(introTxtFadeIn)
         {
             // tick up the timer

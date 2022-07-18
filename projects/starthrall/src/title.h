@@ -9,7 +9,8 @@ extern Sprite* spr_selector;
 
 #include "maptest2.h"
 
-bool title_intro_done;
+bool title_intro_done = false;
+bool go_intro = false;
 //bool go_intro;
 
 void FillVRAM(u16 ti, u8 pal, u16* startaddr, u16 len);
@@ -37,7 +38,7 @@ int TitleInputHandler(void)
             flashStepTimer = 0;
             flashStep = 0;
             ticker = 0;
-            //go_intro = true;
+            go_intro = true;
             ProcessInput = NullInputHandler;
         }
     }
@@ -80,8 +81,6 @@ void InitTitleScreen(void)
 
 extern void InitIntro(void);
 
-bool go_intro = false;
-
 void TITLE_UPDATE(void)
 {
     int c;
@@ -94,44 +93,13 @@ void TITLE_UPDATE(void)
         }
         else {
             title_intro_done = true;
-            go_intro=true;
+            //go_intro=true;
         }
     }
-            
-}
-
-
-/*
-        else { 
-            if(!flashAnimPlaying){
-                vdp_print(VRAM_BG_A, 9, 21, str_pressStart);
-                
-                title_intro_done = true;
-            }
-        }
-    }
-    else
+    if((go_intro == true))
     {
-        if(go_intro)
-        {
-            if(unflashAnimPlaying){
-                FillVRAM((u16)' ', 0, (u16*)VRAM_BG_B, (64*32));
-                FillVRAM((u16)' ', 0, (u16*)VRAM_BG_A, (64*32));
-                InitIntro();
-                
-                go_intro = false;
-            }
-        }
-    }
-    if ((flashAnimPlaying) && (flashStep > 6)) { 
-        if ( NEXT_SCREEN_MODE == WORLDMAP)
-        {    
-            //InitWorldMapState();
-        }
-        else if ( NEXT_SCREEN_MODE == INTRO)
-        {    
-            //InitIntro();
-        }
+
+        InitIntro();
     }
 }
-*/
+
