@@ -7,18 +7,16 @@ u8 introLine = 0;
 u8 introScreen;
 
 
-//TODO: new print routine with opcodes 
 const char introtxt[] = { 
-"          It's the year 3199.\n\
-            Give or take."
+"          It's the year 3199.\n"
 };
 const char introtxt2[] = {
 "      For the last five centuries,\n\
      humankind has spread steadily\n\
       among the stars, thanks to\n\
-       replicative technology."
+       replicative technology.\x00"
 };
-const char* introtxt3[] = {
+const char introtxt3[] = {
 "       This means the bodies we\n\
       own are nothing more than\n\
             fabrications.\n\
@@ -26,73 +24,74 @@ const char* introtxt3[] = {
        Ordered arrangements made\n\
        of unordered atoms, drawn\n\
         to the specification of\n\
-             our DNA."
+             our DNA.\x00"
 };
-const char* introtxt4[] = {
-"       The alternative, of course,\x00",
-"        is to be physically bound\x00",
-"       by your own matter for the\x00",
-"     brief duration of its lifespan.\x00",
-" \x00",
-"       Needless to say, only the\x00",
-"      poor or stupid choose this.\x00"
+
+const char introtxt4[] = {
+"       The alternative, of course,\n\
+        is to be physically bound\n\
+       by your own matter for the\n\
+     brief duration of its lifespan.\n\
+\n\
+       Needless to say, only the\n\
+      poor or stupid choose this.\x00"
 };
-const char* introtxt5[] = {
-"                  Me?\x00",
-"\x00",
-"         I travel those stars.\x00",
-" \x00",
-"              I question.\x00",
-"                I seek.\x00"
+const char introtxt5[] = {
+"                  Me?\n\
+\n\
+         I travel those stars.\n\
+\n\
+              I question.\n\
+                I seek.\x00"
 };
-const char* introtxt6[] = {
-"            I can't explain\x00",
-"           why, but Im driven\x00",
-"          harder, further than\x00",
-"         the others of my kind.\x00"
+const char introtxt6[] = {
+"            I can't explain\n\
+           why, but Im driven\n\
+          harder, further than\n\
+         the others of my kind.\x00"
 };
-const char* introtxt7[] = {
+const char introtxt7[] = {
 "         What is it to be human?\x00"
 };
-const char* introtxt8[] = {
-"          What really happened\x00",
-"         to that little girl the\x00",
-"         first time she stepped\x00",
-"           into a teletranser?\x00"
+const char introtxt8[] = {
+"          What really happened\n\
+         to that little girl the\n\
+         first time she stepped\n\
+           into a teletranser?\x00"
 };
-const char* introtxt9[] = {
-"       When she was stripped down\x00",
-"         into ten billion pieces,\x00",
-"       reassembled again from simple\x00",
-"         data, light years away...\x00"
+const char introtxt9[] = {
+"       When she was stripped down\n\
+         into ten billion pieces,\n\
+       reassembled again from simple\n\
+         data, light years away...\x00"
 };
-const char* introtxt10[] = {
+const char introtxt10[] = {
 "           Who did she become?\x00"
 };
-const char* introtxt11[] = {
-"          My name is Phaesta.\x00",
-"         I'm what people call\x00",
-"            a 'scrapper'.\x00",
-"\x00",
-"           Despite the name,\x00",
-"            it's noble work.\x00"
+const char introtxt11[] = {
+"          My name is Phaesta.\n\
+         I'm what people call\n\
+            a 'scrapper'.\n\
+\n\
+           Despite the name,\n\
+            it's noble work.\x00"
 };
-const char* introtxt12[] = {
-"      I go to places other people\x00",
-"      can't. Or places they're too\x00",
-"        scared to. I do jobs for\x00",
-"       them -- I collect, I fight.\x00",
-"\x00",
-"              I explore.\x00"
+const char introtxt12[] = {
+"      I go to places other people\n\
+      can't. Or places they're too\n\
+        scared to. I do jobs for\n\
+       them -- I collect, I fight.\n\
+\n\
+              I explore.\x00"
 };
-const char* introtxt13[] = {
-"      The last thing I remember, \x00",
-"     I was entering the atmosphere\x00",
-"          of the planet Urs.\x00",
-"\x00",
-"       I must have hit some kind\x00",
-"        of electrical storm and\x00 ",
-"             blacked out...\x00"
+const char introtxt13[] = {
+"      The last thing I remember,\n\
+     I was entering the atmosphere\n\
+          of the planet Urs.\n\
+\n\
+       I must have hit some kind\n\
+        of electrical storm and\n\
+             blacked out...\x00"
 };
 
 extern struct _textsys ScriptSys;
@@ -103,8 +102,12 @@ void printscript(const char* str)
     u8* c = (u8*)str;
     while(*c != '\x00')
     {
+        // Increment text script buffer pointer and assign char with color 
         ScriptSys.text_buffer[ScriptSys.buffer_ptr++] = (u16)((*c++) | pal_no(TEXT_PALETTE));
-        if(ScriptSys.buffer_ptr > 1024) ScriptSys.buffer_ptr = 0;
+
+        // reset the buffer pointer if it might overflow 
+        if(ScriptSys.buffer_ptr == 1024) 
+            ScriptSys.buffer_ptr = 0;
     }
     
 }
@@ -119,8 +122,11 @@ void printscript(const char* str)
 
 void DrawIntroTxt(const char* txt)
 {
+    // Sets the upper left and lower right boundaries on screen in tile size:
     SetupScriptWin(0, introLine, 35, 23);
+    // one char per frame 
     ScriptSys.textspeed = 1;
+
     printscript(txt); // < actually adds to buffer
     
     introLine++;
@@ -128,7 +134,8 @@ void DrawIntroTxt(const char* txt)
 
 void IntroTxtPart2()
 {
-    spr_selector = AddSprite(&SPRITES[0], selectorpos.x, SPRSIZE(1,1), SPR_ATTR(128, 0, 0, PAL0, 0), selectorpos.y);
+    //if(!spr_selector)
+        
 }
 
 void _introtxtfadein(bool tf){
@@ -201,58 +208,14 @@ void InitIntro()
     AddQueue(&_introtxtfadein, 1);
     AddQueue(&DrawIntroTxt, &introtxt);
     AddQueue(&Wait, secs(2));
-    AddQ(&IntroTxtPart2);
+    AddQueue(&IntroTxtPart2, 0);
 }
-/*
-void InitIntro(void)
-{
-    WaitVBlank();
-    // TODO: FREE the title screen tiles
-    // 129 + 605
-    
-    tileindex = 129;
-    tileindex = VDPLoadTiles(tileindex, (u32*)&introimg0_0, 49);
-    RESET_BGA_SCROLL;
-    RESET_BGB_SCROLL;
-    
-    curPaletteSet[3] = (u16*)&intropal;
-    LoadPalette(3, curPaletteSet[3]); 
 
-    //LoadSong(&freefall);
-    
-    flashAnimPlaying = false;    
-    unflashAnimPlaying = true;
-    flashStep = 0;
-    flashStepTimer = 0;
-    TEXT_PALETTE = 0;
-    
-    CUR_SCREEN_MODE = INTRO;
-    
-    introLine = INTROLINE_BASE+2;
-    selectorpos.x = 250;
-    selectorpos.y = INTROSEL_BASEY+10;    
-    introTxtFadeIn = true;
-    
-    WaitVBlank();
-
-    
-#define INTROIMGWIDTH 14
-    for(u16 y = 0; y < 14; y++){
-        SetVRAMWriteAddress(VRAM_BG_A + (64 * 2 * (5 + y) + (2 * 10)));
-        for(u16 x = 0; x < INTROIMGWIDTH; x++)
-            WRITE_DATAREG16((u16)((introimg0_map[(y * INTROIMGWIDTH) + x] + 129) | pal_no(3)));
-    }
-    AddQueue(&Wait, secs(1));
-    AddQueue(&_introtxtfadein, 1);
-    AddQueue(&DrawIntroTxt, &introtxt);
-    AddQueue(&Wait, secs(2));
-    AddQ(&IntroTxtPart2);
-    
-}
-*/
 
 void AdvanceIntroFrom(u8 i)
 {
+    //WaitVBlank();
+    //VDPLoadTiles(128, (u32*)&led_green_0, 1);
     tileindex = 129; //TILE_USERINDEX;   
     VDPLoadTiles(tileindex, intromaps[i], introsizes[i]);
     for(u8 y = 0; y < 12; y++)
@@ -270,71 +233,73 @@ void DoIntro(u8 i)
     FillVRAM((u16)' ', 0, (u16*)VRAM_BG_A, (64*32));
     
     if(i <= 10) AdvanceIntroFrom(i-1);
+    
     AddQueue(&_introtxtfadein, 1);
+
     if(i == 1){
         introLine = INTROLINE_BASE;
         selectorpos.x += 10;
         selectorpos.y += 5;
 
-        for(u8 c = 0; c < 4; c++)
-            AddQueue(&DrawIntroTxt, (void*)introtxt2[c]);
+        //for(u8 c = 0; c < 4; c++)
+            AddQueue(&DrawIntroTxt, (void*)introtxt2);
     }
     else if (i == 2){
         introLine = INTROLINE_BASE-1;
         selectorpos.y = INTROSEL_BASEY+55;
-        for(u8 d = 0; d < 8; d++)
-            AddQueue(&DrawIntroTxt, (void*)introtxt3[d]);
+        //for(u8 d = 0; d < 8; d++)
+            AddQueue(&DrawIntroTxt, (void*)introtxt3);
     }
     else if (i == 3){
         introLine = INTROLINE_BASE-2;
         selectorpos.y = INTROSEL_BASEY+40;
-        for(u8 e = 0; e < 7; e++)
-            AddQueue(&DrawIntroTxt, (void*)introtxt4[e]);
+        //for(u8 e = 0; e < 7; e++)
+            AddQueue(&DrawIntroTxt, (void*)introtxt4);
     }
     else if (i == 4){
         introLine = INTROLINE_BASE-2;
         selectorpos.y = INTROSEL_BASEY+20;
-        for(u8 e = 0; e < 6; e++)
-            AddQueue(&DrawIntroTxt, (void*)introtxt5[e]);
+        //for(u8 e = 0; e < 6; e++)
+            AddQueue(&DrawIntroTxt, (void*)introtxt5);
     }else if (i == 5){
         introLine = INTROLINE_BASE;
         selectorpos.y = INTROSEL_BASEY+20;
-        for(u8 e = 0; e < 4; e++)
-            AddQueue(&DrawIntroTxt, (void*)introtxt6[e]);
+        //for(u8 e = 0; e < 4; e++)
+            AddQueue(&DrawIntroTxt, (void*)introtxt6);
     }else if (i == 6){
         introLine = INTROLINE_BASE+2;
         selectorpos.y = INTROSEL_BASEY+25;
-        AddQueue(&DrawIntroTxt, (void*)introtxt7[0]);
+        AddQueue(&DrawIntroTxt, (void*)introtxt7);
     }else if (i == 7){
         introLine = INTROLINE_BASE-1;
         selectorpos.y = INTROSEL_BASEY+30;
-        for(u8 e = 0; e < 4; e++)
-            AddQueue(&DrawIntroTxt, (void*)introtxt8[e]);
+        //for(u8 e = 0; e < 4; e++)
+            AddQueue(&DrawIntroTxt, (void*)introtxt8);
     }else if (i == 8){
         introLine = INTROLINE_BASE-1;
         selectorpos.y = INTROSEL_BASEY+30;
-        for(u8 e = 0; e < 4; e++)
-            AddQueue(&DrawIntroTxt, (void*)introtxt9[e]);
+        //for(u8 e = 0; e < 4; e++)
+            AddQueue(&DrawIntroTxt, (void*)introtxt9);
     }else if (i == 9){
         introLine = INTROLINE_BASE+2;
         selectorpos.y = INTROSEL_BASEY+15;
-        AddQueue(&DrawIntroTxt, (void*)introtxt10[0]);
+        AddQueue(&DrawIntroTxt, (void*)introtxt10);
     }else if (i == 10){
         introLine = INTROLINE_BASE-1;
         selectorpos.y = INTROSEL_BASEY+30;
-        for(u8 e = 0; e < 6; e++)
-            AddQueue(&DrawIntroTxt, (void*)introtxt11[e]);
+        //for(u8 e = 0; e < 6; e++)
+            AddQueue(&DrawIntroTxt, (void*)introtxt11);
     }else if (i == 11){
         introLine = INTROLINE_BASE-1;
         selectorpos.y = INTROSEL_BASEY+35;
-        for(u8 e = 0; e < 6; e++)
-            AddQueue(&DrawIntroTxt, (void*)introtxt12[e]);
+        //for(u8 e = 0; e < 6; e++)
+            AddQueue(&DrawIntroTxt, (void*)introtxt12);
     }else if (i == 12){
         introLine = INTROLINE_BASE-1;
         selectorpos.y = INTROSEL_BASEY+35;
         
-        for(u8 e = 0; e < 7; e++)
-            AddQueue(&DrawIntroTxt, (void*)introtxt13[e]);
+        //for(u8 e = 0; e < 7; e++)
+            AddQueue(&DrawIntroTxt, (void*)introtxt13);
     }else if (i == 13)
     {
         introTxtFadeIn = false;
@@ -345,7 +310,7 @@ void DoIntro(u8 i)
         return;
     }
     AddQueue(&Wait, secs(2));
-    AddQ(&IntroTxtPart2);
+    AddQueue(&IntroTxtPart2, 0);
     
 }
 
@@ -357,7 +322,10 @@ void JOY_ContinueIntroText()
         introTxtFadeIn = false;
         introTxtFadeOut = true;
         // fixme?
-        spr_selector->y_pos = 212;
+        spr_selector->y_pos = 212+128;
+        ScriptSys.buffer_ptr = 0;
+        ScriptSys.print_ptr = 0;
+        ProcessInput = NullInputHandler;
     }
 }
 

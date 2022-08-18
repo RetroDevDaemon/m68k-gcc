@@ -113,7 +113,7 @@ u16 bg_a_map[64*32];
 // enemies - 15
 // e. bullets - 35 (flicker = 70)
 
-void __attribute__((optimize("Os"))) stdcpy(u32* src, u32* dst, u32 siz)
+void __attribute__((optimize("Os"))) standardcopy(u32* src, u32* dst, u32 siz)
 {
     for(u32 cs = 0; cs < siz; cs++) *dst++ = *src++;
 }

@@ -223,7 +223,7 @@ char textLog[2500];
 const char playerNames[4][16] = {
     "Phaesta\x00       ", 
     "Midge\x00         ", 
-    "Ardra\x00         ",
+    "Edra\x00         ",
     "Butt\x00          "
 };
 

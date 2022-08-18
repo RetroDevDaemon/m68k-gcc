@@ -1,0 +1,71 @@
+CHARACTERS - 
+ Type
+   Either Human or Non-human.
+   Non-human can equip 'irregular parts'.
+
+ Parts
+   Core - Cannot be changed.
+   Torso - DEF and all stats
+   Head - DEF and INT
+   Arms - DEF and STR
+   Legs - DEF and DEX
+     All parts have three sub-levels:
+     SLD - Soldier 
+     RNG - Ranger  
+     HKR - Hacker  
+
+ Techniques
+   Techniques are learned by-level.
+   E.g.
+   Phaesta, Lv1 - Ruimi - 1 TP - Returns to the last used NurseBot station. 
+   Phaesta, Lv5 - Throw Spark - 3 TP - Utilizes a suit-based flamethrower to deal Photon damage.
+   
+   Edra, Lv1 - Hollow - 2 TP - Chance to instantly kill one enemy (does not work on fierce foes)
+   Edra, Lv5 - Biologic - 3 TP - Recovers an ally's HP.
+   
+   Midge, Lv1 - Targeting - 2 TP - Hit rate of all allies up 
+   Midge, Lv5 - Kelvinize - 3 TP - Cold damage to one enemy sector. 
+
+ Stats
+   STR 
+   DEX 
+   INT 
+
+
+SKILLS - 
+ Unlockable via SLD/RNG/HKR skill level.
+ E.g.
+            S R H 
+ Core   -   3 1 0
+ Torso  -   1 0 0 
+ Head   -   0 0 1
+ Arms   -   1 0 0 
+ Legs   -   0 1 0 
+            5 2 1
+
+Low-level skill list - 
+
+RNG 1 - Scout -  Reduces encounter rate.
+SLD 1 - Intimidate - Sometimes given chance to frighten off enemies.
+HKR 1 - Speed Hack - Chance to get a free first action in battle. 
+
+SLD 5 - Heavy Smash - Chance to deal extra damage with normal attack.
+RNG 5 - Spray - Chance to hit all enemies in a sector with normal attack.
+HKR 5 - Credit Hack - Chance to raise scrap obtained in battle.
+
+HKR 10 - Pocket Hack - Chance to steal scrap from NPCs when talking to them.
+SLD 10 - Fire Up - Chance to gain Bikill effect on battle start. 
+RNG 10 - Steel Jacket - Chance for next attack to bypass DEF. 
+
+SLD 15 - Strength Training 
+HKR 15 - Intelligence Training 
+RNG 15 - Dexterity Training 
+ - passively increase those stats 
+
+(goes up to about 30)
+
+All skills start at 0.00. 
+Only one skill per character can be learned at a time.
+A certain % of EXP earned is applied toward skills. 
+Once a skill reaches 1.00, it is 'learned', and no longer needs the SRH ranking to be used.
+A skill goes up to 9.99, and then becomes a star (for mastered).

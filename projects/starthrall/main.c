@@ -29,12 +29,14 @@ static bool VBL_DONE = false;
 struct _textsys \
 {
     u16 text_buffer[40*26]; // BUFFER IS SZ OF DISPLAY SCREEN. careful of buffered amount each frame
-    u8 startx, starty;      // keep track of where to reset
-    u8 txt_x, txt_y;           // Set to start position of text window and incremented each chr
+    // it is a u16 because it stores a full 16 bit tile data. 
+    u8 startx, starty;      // keep track of where to reset for the current window
+    u8 txt_x, txt_y;        // Set to start position of text window when hit x_ and y_bound 
     u8 x_bound, y_bound;    // Right- and bottom-boundaries
     u8 textspeed;           // characters per frame to display
-    u16 buffer_ptr;         // location within text_buffer of where to add next chr
-    u16 print_ptr;          // location within txt_buffer of next print chr
+    u16 buffer_ptr;         // location within text_buffer of where to insert next chr/code to buffer
+    u16 print_ptr;          // location within text_buffer of next code/chr to print 
+    bool buffer_wrap;
 } ScriptSys;
 
 
@@ -50,9 +52,9 @@ struct _textsys \
 #include "intro.h"
 #include "src/worldmap.h"
 
-
+//
 // DEBUG SHIT
-
+//
 static struct _debugvars \
 { 
     s32 cycles;
@@ -93,6 +95,8 @@ void __attribute__((optimize("O3"))) DO_DEBUG(void)
         debugVars.vcycles++;
 }
 //
+// end debug stuff 
+//
 
 static struct _counters \
 { 
@@ -102,8 +106,6 @@ static struct _counters \
     u8 tenFrameCounter;
 } Counters;
 
-u32 OST[64];
-u32 SFX[64];
 
 // Global Vars
 u8 fq;
@@ -112,6 +114,9 @@ u32 frameCounter;
 bool frameFlip;
 u16 vdpstat;
 u32 hcount;
+
+u32 OST[64];
+u32 SFX[64];
 
 bool REORDER_SPRITES = false;
 u8 sprites_destroyed = 0;
@@ -133,6 +138,8 @@ u16 blankpalette[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 void InitGameStuff(void)
 {
     u8 i;
+
+    spr_selector = 0;
 
     stdcpy((u32*)&party[0], (u32*)&pex, sizeof(struct Player));
     stdcpy((u32*)&party[1], (u32*)&pex2, sizeof(struct Player));
@@ -185,6 +192,34 @@ void DrawBGMap(u16 ti, u16* tiledefs, u16 width, u16 height, u16* startaddr, u8 
 
 void UpdatePrintBuffer(void)
 {
+    // TODO FIXME HERE!
+    SetVRAMWriteAddress(VRAM_BG_A + (2 * ScriptSys.txt_x) + (2 * ScriptSys.txt_y * 64));
+
+    if (ScriptSys.print_ptr < ScriptSys.buffer_ptr) 
+    //    || ((ScriptSys.buffer_wrap == true) && (ScriptSys.print_ptr < 1024)) )
+    {
+        u16 c = ScriptSys.text_buffer[ScriptSys.print_ptr++];
+        if((c > 0x1f) && (c < 0x7f))
+        {
+            WRITE_DATAREG16(c);
+            ScriptSys.txt_x++;
+        }
+        if((u8)c == '\n'){
+            ScriptSys.txt_y++;
+            ScriptSys.txt_x = ScriptSys.startx;
+        }
+            
+        if(ScriptSys.txt_x > ScriptSys.x_bound)
+        {
+            ScriptSys.txt_y++; 
+            ScriptSys.txt_x = ScriptSys.startx;
+        }
+    }
+    if((ScriptSys.buffer_wrap == true) && (ScriptSys.print_ptr >= 1024))
+    {
+        ScriptSys.buffer_wrap = false;
+        ScriptSys.print_ptr = 0;
+    }
     // boundaries defined in global ScriptSys
 
     // needed opcodes:
@@ -192,15 +227,6 @@ void UpdatePrintBuffer(void)
     // CHANGE TEXT COLOR 
     // LINE BREAK
     // PAUSE FOR N FRAMES
-    // SET txt_x, txt_y (bg/vram loc)
-    /*
-        u16 text_buffer[40*26]; 
-        u8 txt_x, txt_y;
-        u8 x_bound, y_bound;
-        u8 textspeed;    
-        u16 buffer_ptr;  
-        ScriptSys;
-    */
     // write speed x chars directly to vram (set vram addr each char/frame its ok)
     // increase the print_ptr and print chr*textspeed until print ptr == buffer_ptr 
     // if txt_x > x_bound reset
@@ -233,7 +259,9 @@ int main(void)
     ResetPalettes(); //for(u8 p_i = 0; p_i < 4; p_i++) LoadPalette(p_i, curPaletteSet[p_i]);
 
     InitGameStuff();
-    
+    ScriptSys.buffer_wrap = false;
+    ScriptSys.print_ptr = 0;
+
     // INIT TITLE SCREEN
 /// INITIALIZE VRAM GRAPHICS ///
     // 0-400h is empty for now
@@ -316,8 +344,10 @@ int main(void)
                 byToHex(debugVars.vcycles & 0xff, (u8*)&debugVars.vcl);
                 byToHex(debugVars.cycles >> 8, (u8*)&debugVars.ch);
                 byToHex(debugVars.cycles & 0xff, (u8*)&debugVars.cl);
-                byToHex(zcyclesh, (u8*)&debugVars.zh);
-                byToHex(zcyclesl, (u8*)&debugVars.zl);           
+                //byToHex(zcyclesh, (u8*)&debugVars.zh);
+                //byToHex(zcyclesl, (u8*)&debugVars.zl);           
+                byToHex(SPRITES[0].y_pos & 0xff, (u8*)&debugVars.zh);
+                byToHex(SPRITES[0].y_pos >> 8, (u8*)&debugVars.zl);           
             }
 
             if (CUR_SCREEN_MODE == BATTLE){
@@ -360,11 +390,13 @@ extern u8 TEXT_PALETTE;
 
 
 bool asdf = false;
-const char hw[] = "Press Start\x00";
+const char str_pressStart[] = "PRESS START\x00";
 
 // Called during VBlank
 void GAME_DRAW(void)
 {   
+    DisableVBlankIRQ();
+
     int i;
     //u16 ch;
 
@@ -384,34 +416,41 @@ void GAME_DRAW(void)
         
         // Sprite shit
         // TODO: Convert this to DMA
+        
+        SPRITES[0].x_pos = 128 + selectorpos.x;
+        SPRITES[0].y_pos = 128 + selectorpos.y;
+
         u32* spr = (u32*)&SPRITES[0];
         SetVRAMWriteAddress(VRAM_SAT);
         // sprite count = 1
-    #define SPR_COUNT 1
-        for(i = 0; i < SPR_COUNT * 2; i++) WRITE_DATAREG32(*spr++);
+    #define SPR_COUNT 4
+        for(i = 0; i < SPR_COUNT * 2; i++){
+            WRITE_DATAREG32(*spr++);
+        }
+        
 
         
-            if(flashAnimPlaying || unflashAnimPlaying){
-                PROCESS_FLASH();
-                UpdateBGScroll();
+        if(flashAnimPlaying || unflashAnimPlaying){
+            PROCESS_FLASH();
+            UpdateBGScroll();
+        }
+        //else {
+        if (CUR_SCREEN_MODE == TITLE)
+        {
+            if(!asdf){
+                vdp_print(VRAM_BG_A, 10, 20, (char*)&str_pressStart);
+                asdf = true;
             }
-            //else {
-                if (CUR_SCREEN_MODE == TITLE)
-                {
-                    if(!asdf){
-                        vdp_print(VRAM_BG_A, 10, 20, (char*)&hw);
-                        asdf = true;
-                    }
-                    
-                }
-                else if (CUR_SCREEN_MODE == INTRO)
-                {
-                    INTRO_DRAW();
-                }
-                UpdateBGScroll(); // Sets background position in VRAM
+            
+        }
+        else if (CUR_SCREEN_MODE == INTRO)
+        {
+            INTRO_DRAW();
+        }
+        UpdateBGScroll(); // Sets background position in VRAM
 
-                UpdatePrintBuffer(); // If script is printing, process it
-            //}
+        UpdatePrintBuffer(); // If script is printing, process it
+        //}
         
         
         i = 0u;
@@ -420,6 +459,7 @@ void GAME_DRAW(void)
     PlaySong();
 
     VBL_DONE = true;
+    EnableVBlankIRQ();
     // end draw
 }
 

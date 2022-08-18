@@ -1,6 +1,6 @@
 extern u32 last_joyState1, joyState1;
 extern void (*ProcessInput)(void);
-const char str_pressStart[] = "PRESS START";
+
 extern void NullInputHandler(void);
 extern Sprite SPRITES[80];
 extern Sprite* spr_selector;
@@ -66,7 +66,9 @@ void InitTitleScreen(void)
     curPaletteSet[3] = (u16*)&titlePalette;
     LoadPalette(3, curPaletteSet[3]);    
     
+    spr_selector = AddSprite(&SPRITES[0], 300, SPRSIZE(1,1), SPR_ATTR(SELECTORTILE, 0, 0, PAL1, 0), 200);
     // Make map
+    tileindex = 129;
     tileindex = VDPLoadTiles(tileindex, (u32*)&title_test_0, 605);
     
     // title_bg_tile_index = 129
@@ -75,7 +77,8 @@ void InitTitleScreen(void)
     timer_3 = 0;
     // sprite engine (already on)
     // set joy handler
-    ProcessInput = TitleInputHandler;
+    //ProcessInput = TitleInputHandler;
+    ProcessInput = NullInputHandler;
     
 }
 
@@ -94,6 +97,7 @@ void TITLE_UPDATE(void)
         else {
             title_intro_done = true;
             //go_intro=true;
+            ProcessInput = TitleInputHandler;
         }
     }
     if((go_intro == true))
